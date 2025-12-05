@@ -1,11 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>001_pop-forward</title>
+
+    <!-- 共通のCSS読み込み -->
+    <link rel="stylesheet" href="/components/common/css/reset.css" />
+    <link rel="stylesheet" href="/components/common/css/base.css" />
+
+    <!-- 個別のCSS読み込み -->
+    <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
-    <h1>Pop Forward Animation</h1>
+    <main>
+      <div class="inner">
+        <h1 class="title">画面奥から手前にポップに飛び出すアニメーション</h1>
+        <div class="content__wrapper">
+          <!-- ここから -->
+          <div class="pop-forward-card">
+            <div class="deco-01 fade-in-and-floating-animation delay-1800">
+              <img
+                src="./assets/img/deco-01.png"
+                alt=""
+                width="1234"
+                height="485" />
+            </div>
+            <div class="deco-02 fade-in-animation delay-1000">
+              <img
+                src="./assets/img/deco-02.png"
+                alt=""
+                width="372"
+                height="177" />
+            </div>
+            <div class="deco-03 fade-in-animation delay-1000">
+              <img
+                src="./assets/img/deco-03.png"
+                alt=""
+                width="371"
+                height="177" />
+            </div>
+            <div class="deco-04 fade-in-animation delay-1400">
+              <img
+                src="./assets/img/deco-04.png"
+                alt=""
+                width="252"
+                height="399" />
+            </div>
+            <div class="deco-05 fade-in-animation delay-1400">
+              <img
+                src="./assets/img/deco-05.png"
+                alt=""
+                width="252"
+                height="399" />
+            </div>
+            <div class="deco-06 pop-forward-animation delay-200">
+              <img
+                src="./assets/img/deco-06.png"
+                alt=""
+                width="390"
+                height="389" />
+            </div>
+            <div class="deco-07 pop-forward-animation delay-300">
+              <img
+                src="./assets/img/deco-07.png"
+                alt=""
+                width="327"
+                height="465" />
+            </div>
+            <div class="deco-08 pop-forward-animation delay-400">
+              <img
+                src="./assets/img/deco-08.png"
+                alt=""
+                width="331"
+                height="410" />
+            </div>
+            <div class="deco-09 pop-forward-animation delay-200">
+              <img
+                src="./assets/img/deco-09.png"
+                alt=""
+                width="772"
+                height="108" />
+            </div>
+            <div class="deco-10 pop-forward-animation delay-100">
+              <img
+                src="./assets/img/deco-10.png"
+                alt=""
+                width="768"
+                height="344" />
+            </div>
+          </div>
+          <!-- ここまで -->
+        </div>
+      </div>
+    </main>
+    <script src="./assets/js/script.js" defer></script>
   </body>
 </html>

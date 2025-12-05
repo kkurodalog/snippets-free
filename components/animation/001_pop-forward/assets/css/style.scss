@@ -1,0 +1,226 @@
+.content__wrapper {
+}
+
+// ------------------------------------------------------
+// Pop Forward Styles
+// ------------------------------------------------------
+
+.pop-forward-card {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: url(../img/bg.png) no-repeat center / cover;
+  position: relative;
+  perspective: 1200px;
+}
+
+.deco-01 {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  aspect-ratio: 1234 / 485;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-02 {
+  position: absolute;
+  top: 4%;
+  left: 3%;
+  width: 27%;
+  aspect-ratio: 372 / 177;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-03 {
+  position: absolute;
+  top: 4%;
+  right: 3%;
+  width: 27%;
+  aspect-ratio: 371 / 177;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-04 {
+  position: absolute;
+  top: 3.2%;
+  left: 10%;
+  width: 19%;
+  aspect-ratio: 252 / 399;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-05 {
+  position: absolute;
+  top: 3.2%;
+  right: 10%;
+  width: 19%;
+  aspect-ratio: 252 / 399;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-06 {
+  position: absolute;
+  top: 7%;
+  left: 36%;
+  width: 28%;
+  aspect-ratio: 1 / 1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-07 {
+  position: absolute;
+  bottom: 6%;
+  left: 4%;
+  width: 24%;
+  aspect-ratio: 327 / 465;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-08 {
+  position: absolute;
+  bottom: 6%;
+  right: 4%;
+  width: 24%;
+  aspect-ratio: 331 / 410;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-09 {
+  position: absolute;
+  bottom: 8%;
+  left: 21.5%;
+  width: 57%;
+  aspect-ratio: 772 / 108;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.deco-10 {
+  position: absolute;
+  bottom: 18%;
+  left: 22%;
+  width: 56%;
+  aspect-ratio: 768 / 344;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+// ------------------------------------------------------
+// Animation Keyframes
+// ------------------------------------------------------
+.pop-forward-animation {
+  animation: pop-forward 0.5s cubic-bezier(0.65, 1.39, 1, 1) forwards;
+  opacity: 0;
+
+  &.delay-100 {
+    animation-delay: 0.1s;
+  }
+  &.delay-200 {
+    animation-delay: 0.2s;
+  }
+  &.delay-300 {
+    animation-delay: 0.3s;
+  }
+  &.delay-400 {
+    animation-delay: 0.4s;
+  }
+}
+
+.fade-in-animation {
+  animation: fade-in 0.5s ease forwards;
+  opacity: 0;
+
+  &.delay-1000 {
+    animation-delay: 1s;
+  }
+  &.delay-1400 {
+    animation-delay: 1.4s;
+  }
+}
+
+.fade-in-and-floating-animation {
+  animation: fade-in 0.5s ease forwards, floating 3s ease-in-out infinite;
+  opacity: 0;
+
+  &.delay-1800 {
+    animation-delay: 1.8s;
+  }
+}
+
+@keyframes pop-forward {
+  0% {
+    opacity: 0;
+    transform: translateZ(-2000px) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes floating {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(20px);
+  }
+}
