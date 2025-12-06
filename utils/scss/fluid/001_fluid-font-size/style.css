@@ -3,7 +3,23 @@ html {
 }
 @media screen and (min-width: 768px) {
   html {
-    font-size: min(1.25vw, 16px);
+    font-size: 1.25vw;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 20px 0;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: 20px;
+}
+@media screen and (min-width: 768px) {
+  .inner {
+    padding-inline: 40px;
   }
 }
 
@@ -29,8 +45,8 @@ html {
           align-items: center;
   width: 10rem;
   height: 3rem;
-  background-color: grey;
-  border: 1px solid grey;
+  background-color: blue;
+  border: 1px solid blue;
   border-radius: 3px;
   cursor: pointer;
   text-decoration: none;
@@ -52,8 +68,8 @@ html {
           align-items: center;
   width: 20rem;
   height: 3rem;
-  background-color: grey;
-  border: 1px solid grey;
+  background-color: blue;
+  border: 1px solid blue;
   border-radius: 3px;
   cursor: pointer;
   text-decoration: none;
@@ -75,8 +91,8 @@ html {
           align-items: center;
   width: 20rem;
   height: 3rem;
-  background-color: grey;
-  border: 1px solid grey;
+  background-color: blue;
+  border: 1px solid blue;
   border-radius: 3px;
   cursor: pointer;
   text-decoration: none;
@@ -129,8 +145,8 @@ html {
           align-items: center;
   width: 6.25rem;
   height: 2.5rem;
-  background-color: grey;
-  border: 1px solid grey;
+  background-color: blue;
+  border: 1px solid blue;
   border-radius: 3px;
   cursor: pointer;
   text-decoration: none;
