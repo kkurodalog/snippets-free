@@ -1,0 +1,173 @@
+@use "sass:map";
+
+// --------------------------------
+// 変数
+// --------------------------------
+$fz-base: 16px; // ベースフォントサイズ
+$sp-width: 375px; // スマートフォン
+$tab-width: 768px; // タブレット
+$pc-width: 1280px; // パソコン
+
+// --------------------------------
+// ブレークポイント
+// --------------------------------
+$breakpoints: (
+  // 375px以上
+  sp: "screen and (min-width: #{$sp-width})",
+  // 768px以上
+  tab: "screen and (min-width: #{$tab-width})",
+  // 1280px以上
+  pc: "screen and (min-width: #{$pc-width})"
+);
+
+// --------------------------------
+// メディアクエリー
+// --------------------------------
+@mixin mq($breakpoint: tab) {
+  @if not map.has-key($breakpoints, $breakpoint) {
+    @error "指定されたbreakpoint「#{$breakpoint}」は定義されていません。";
+  }
+  @media #{map.get($breakpoints, $breakpoint)} {
+    @content;
+  }
+}
+
+// --------------------------------
+// 関数
+// --------------------------------
+@function p2v($px, $width) {
+  @return calc($px / $width * 100vw);
+}
+
+@function min-p2v($px, $width) {
+  @return min($px, calc($px / $width * 100vw));
+}
+
+@function max-p2v($px, $width) {
+  @return max($px, calc($px / $width * 100vw));
+}
+
+@function p2r($px) {
+  @return calc($px / $fz-base) * 1rem;
+}
+
+// --------------------------------
+// グローバルスタイル
+// --------------------------------
+html {
+  // font-size: min(calc($fz-base / $sp-width * 100vw), $fz-base);
+  font-size: calc($fz-base / $sp-width * 100vw);
+
+  @include mq(tab) {
+    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
+  }
+}
+
+// --------------------------------
+// 個別スタイル
+// --------------------------------
+.btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 10rem;
+  height: 3rem;
+  background-color: grey;
+  border: 1px solid grey;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+
+  span {
+    font-size: 0.75rem;
+    color: white;
+  }
+}
+
+.btn2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20rem;
+  height: 3rem;
+  background-color: grey;
+  border: 1px solid grey;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+
+  span {
+    font-size: 0.75rem;
+    color: white;
+  }
+}
+
+.btn3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20rem;
+  height: 3rem;
+  background-color: grey;
+  border: 1px solid grey;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+
+  span {
+    font-size: 0.75rem;
+    color: white;
+  }
+}
+
+.p2v {
+  font-size: p2v(16px, $sp-width);
+
+  @include mq(tab) {
+    font-size: p2v(16px, $pc-width);
+  }
+}
+
+.min-p2v {
+  font-size: min-p2v(16px, $sp-width);
+
+  @include mq(tab) {
+    font-size: min-p2v(16px, $pc-width);
+  }
+}
+
+.max-p2v {
+  font-size: max-p2v(16px, $sp-width);
+
+  @include mq(tab) {
+    font-size: max-p2v(16px, $pc-width);
+  }
+}
+
+.p2r {
+  font-size: p2r(16px);
+}
+
+.btn4 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: p2r(100px);
+  height: p2r(40px);
+  background-color: grey;
+  border: 1px solid grey;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+
+  span {
+    font-size: p2r(12px);
+    color: white;
+  }
+}
