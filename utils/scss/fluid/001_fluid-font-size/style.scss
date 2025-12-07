@@ -55,12 +55,12 @@ $breakpoints: (
 // グローバルスタイル
 // --------------------------------
 // 基本スタイル
-html {
-  font-size: calc($fz-base / $sp-width * 100vw);
-  @include mq(tab) {
-    font-size: calc($fz-base / $pc-width * 100vw);
-  }
-}
+// html {
+//   font-size: calc($fz-base / $sp-width * 100vw);
+//   @include mq(tab) {
+//     font-size: calc($fz-base / $pc-width * 100vw);
+//   }
+// }
 
 // minバージョンのスタイル
 // html {
@@ -71,12 +71,12 @@ html {
 // }
 
 // ハイブリッドバージョンのスタイル
-// html {
-//   font-size: calc($fz-base / $sp-width * 100vw);
-//   @include mq(tab) {
-//     font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
-//   }
-// }
+html {
+  font-size: calc($fz-base / $sp-width * 100vw);
+  @include mq(tab) {
+    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
+  }
+}
 
 // --------------------------------
 // 個別スタイル
