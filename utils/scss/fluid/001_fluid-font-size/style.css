@@ -3,7 +3,7 @@ html {
 }
 @media screen and (min-width: 768px) {
   html {
-    font-size: 1.25vw;
+    font-size: min(1.25vw, 16px);
   }
 }
 
