@@ -1,0 +1,107 @@
+@use "sass:map";
+
+// --------------------------------
+// 変数
+// --------------------------------
+$fz-base: 16px; // ベースフォントサイズ
+$line-height-base: 1.5; // ベースラインハイト
+$bp-width: 768px; // ブレイクポイント
+$sp-width: 375px; // スマートフォン幅
+$pc-width: 1280px; // パソコン幅
+
+// --------------------------------
+// 関数
+// --------------------------------
+@function p2v($px, $width) {
+  @return calc($px / $width * 100vw);
+}
+
+@function min-p2v($px, $width) {
+  @return min($px, calc($px / $width * 100vw));
+}
+
+@function max-p2v($px, $width) {
+  @return max($px, calc($px / $width * 100vw));
+}
+
+@function p2r($px) {
+  @return calc($px / $fz-base) * 1em;
+}
+
+// --------------------------------
+// グローバルスタイル
+// --------------------------------
+body {
+  font-size: calc($fz-base / $sp-width * 100vw);
+  line-height: $line-height-base;
+  @media screen and (min-width: $bp-width) {
+    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
+  }
+}
+
+// --------------------------------
+// 個別スタイル
+// --------------------------------
+body {
+  margin: 0;
+  padding: 20px 0;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: p2r(20px);
+  @media screen and (min-width: $bp-width) {
+    padding-inline: p2r(40px);
+  }
+}
+
+.btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2em;
+}
+
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 10em;
+  height: 3em;
+  background-color: blue;
+  border: 1px solid blue;
+  border-radius: 3px;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-decoration: none;
+
+  span {
+    font-size: 0.75em;
+    color: white;
+  }
+}
+
+.p2v {
+  font-size: p2v(16px, $sp-width);
+  @media screen and (min-width: $bp-width) {
+    font-size: p2v(16px, $pc-width);
+  }
+}
+
+.min-p2v {
+  font-size: min-p2v(16px, $sp-width);
+  @media screen and (min-width: $bp-width) {
+    font-size: min-p2v(16px, $pc-width);
+  }
+}
+
+.max-p2v {
+  font-size: max-p2v(16px, $sp-width);
+  @media screen and (min-width: $bp-width) {
+    font-size: max-p2v(16px, $pc-width);
+  }
+}
+
+.p2r {
+  font-size: p2r(16px);
+}
