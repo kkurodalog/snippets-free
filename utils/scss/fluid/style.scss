@@ -10,6 +10,17 @@ $sp-width: 375px; // スマートフォン幅
 $pc-width: 1280px; // パソコン幅
 
 // --------------------------------
+// グローバルスタイル
+// --------------------------------
+body {
+  font-size: calc($fz-base / $sp-width * 100vw);
+  line-height: $line-height-base;
+  @media screen and (min-width: $bp-width) {
+    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
+  }
+}
+
+// --------------------------------
 // 関数
 // --------------------------------
 @function p2v($px, $width) {
@@ -29,24 +40,8 @@ $pc-width: 1280px; // パソコン幅
 }
 
 // --------------------------------
-// グローバルスタイル
-// --------------------------------
-body {
-  font-size: calc($fz-base / $sp-width * 100vw);
-  line-height: $line-height-base;
-  @media screen and (min-width: $bp-width) {
-    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
-  }
-}
-
-// --------------------------------
 // 個別スタイル
 // --------------------------------
-body {
-  margin: 0;
-  padding: 20px 0;
-}
-
 .inner {
   max-width: 1200px;
   margin: 0 auto;
