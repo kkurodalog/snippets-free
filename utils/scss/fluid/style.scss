@@ -3,8 +3,7 @@
 // --------------------------------
 // 変数
 // --------------------------------
-$fz-base: 16px; // ベースフォントサイズ
-$line-height-base: 1.5; // ベースラインハイト
+$line-height-base: 1.6; // ベースラインハイト
 $bp-width: 768px; // ブレイクポイント
 $sp-width: 375px; // スマートフォン幅
 $pc-width: 1280px; // パソコン幅
@@ -13,10 +12,10 @@ $pc-width: 1280px; // パソコン幅
 // グローバルスタイル
 // --------------------------------
 body {
-  font-size: calc($fz-base / $sp-width * 100vw);
+  font-size: calc(100vw * (100% / #{$sp-width}));
   line-height: $line-height-base;
   @media screen and (min-width: $bp-width) {
-    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
+    font-size: min(calc(100vw * (100% / #{$pc-width})), 100%);
   }
 }
 
@@ -35,7 +34,7 @@ body {
   @return max($px, calc($px / $width * 100vw));
 }
 
-@function p2r($px) {
+@function p2r($px, $fz-base: 16px) {
   @return calc($px / $fz-base) * 1em;
 }
 
@@ -45,9 +44,9 @@ body {
 .inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding-inline: p2r(20px);
+  padding-inline: 1em;
   @media screen and (min-width: $bp-width) {
-    padding-inline: p2r(40px);
+    padding-inline: 2.5em;
   }
 }
 
