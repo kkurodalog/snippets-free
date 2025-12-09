@@ -20,18 +20,6 @@ body {
 // --------------------------------
 // 関数
 // --------------------------------
-@function p2v($px, $width) {
-  @return #{math.div($px, $width) * 100vw};
-}
-
-@function min-p2v($px, $width) {
-  @return min(#{$px}, #{math.div($px, $width) * 100vw});
-}
-
-@function max-p2v($px, $width) {
-  @return max(#{$px}, #{math.div($px, $width) * 100vw});
-}
-
 @function p2e($px, $fz-base: 16px) {
   @return #{math.div($px, $fz-base) * 1em};
 }
@@ -73,27 +61,14 @@ body {
   }
 }
 
-.p2v {
-  font-size: p2v(16px, $sp-width);
-  @media screen and (min-width: $breakpoint) {
-    font-size: p2v(16px, $pc-width);
-  }
-}
-
-.min-p2v {
-  font-size: min-p2v(16px, $sp-width);
-  @media screen and (min-width: $breakpoint) {
-    font-size: min-p2v(16px, $pc-width);
-  }
-}
-
-.max-p2v {
-  font-size: max-p2v(16px, $sp-width);
-  @media screen and (min-width: $breakpoint) {
-    font-size: max-p2v(16px, $pc-width);
-  }
-}
-
-.p2e {
+.p2e-example1 {
   font-size: p2e(16px);
+}
+
+.p2e-example2 {
+  font-size: p2e(24px);
+}
+
+.p2e-example3 {
+  font-size: p2e(32px);
 }

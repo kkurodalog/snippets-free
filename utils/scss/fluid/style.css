@@ -53,33 +53,14 @@ body {
   color: white;
 }
 
-.p2v {
-  font-size: 4.2666666667vw;
-}
-@media screen and (min-width: 768px) {
-  .p2v {
-    font-size: 1.25vw;
-  }
-}
-
-.min-p2v {
-  font-size: min(16px, 4.2666666667vw);
-}
-@media screen and (min-width: 768px) {
-  .min-p2v {
-    font-size: min(16px, 1.25vw);
-  }
-}
-
-.max-p2v {
-  font-size: max(16px, 4.2666666667vw);
-}
-@media screen and (min-width: 768px) {
-  .max-p2v {
-    font-size: max(16px, 1.25vw);
-  }
-}
-
-.p2e {
+.p2e-example1 {
   font-size: 1em;
+}
+
+.p2e-example2 {
+  font-size: 1.5em;
+}
+
+.p2e-example3 {
+  font-size: 2em;
 }
