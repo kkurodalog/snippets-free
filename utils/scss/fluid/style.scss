@@ -1,10 +1,9 @@
-@use "sass:map";
+@use "sass:math";
 
 // --------------------------------
 // 変数
 // --------------------------------
-$line-height-base: 1.6; // ベースラインハイト
-$bp-width: 768px; // ブレイクポイント
+$breakpoint: 768px; // ブレイクポイント
 $sp-width: 375px; // スマートフォン幅
 $pc-width: 1280px; // パソコン幅
 
@@ -13,8 +12,7 @@ $pc-width: 1280px; // パソコン幅
 // --------------------------------
 body {
   font-size: calc(100vw * (100% / #{$sp-width}));
-  line-height: $line-height-base;
-  @media screen and (min-width: $bp-width) {
+  @media screen and (min-width: $breakpoint) {
     font-size: min(calc(100vw * (100% / #{$pc-width})), 100%);
   }
 }
@@ -23,19 +21,19 @@ body {
 // 関数
 // --------------------------------
 @function p2v($px, $width) {
-  @return calc($px / $width * 100vw);
+  @return #{math.div($px, $width) * 100vw};
 }
 
 @function min-p2v($px, $width) {
-  @return min($px, calc($px / $width * 100vw));
+  @return min(#{$px}, #{math.div($px, $width) * 100vw});
 }
 
 @function max-p2v($px, $width) {
-  @return max($px, calc($px / $width * 100vw));
+  @return max(#{$px}, #{math.div($px, $width) * 100vw});
 }
 
-@function p2r($px, $fz-base: 16px) {
-  @return calc($px / $fz-base) * 1em;
+@function p2e($px, $fz-base: 16px) {
+  @return #{math.div($px, $fz-base) * 1em};
 }
 
 // --------------------------------
@@ -45,7 +43,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding-inline: 1em;
-  @media screen and (min-width: $bp-width) {
+  @media screen and (min-width: $breakpoint) {
     padding-inline: 2.5em;
   }
 }
@@ -77,25 +75,25 @@ body {
 
 .p2v {
   font-size: p2v(16px, $sp-width);
-  @media screen and (min-width: $bp-width) {
+  @media screen and (min-width: $breakpoint) {
     font-size: p2v(16px, $pc-width);
   }
 }
 
 .min-p2v {
   font-size: min-p2v(16px, $sp-width);
-  @media screen and (min-width: $bp-width) {
+  @media screen and (min-width: $breakpoint) {
     font-size: min-p2v(16px, $pc-width);
   }
 }
 
 .max-p2v {
   font-size: max-p2v(16px, $sp-width);
-  @media screen and (min-width: $bp-width) {
+  @media screen and (min-width: $breakpoint) {
     font-size: max-p2v(16px, $pc-width);
   }
 }
 
-.p2r {
-  font-size: p2r(16px);
+.p2e {
+  font-size: p2e(16px);
 }
