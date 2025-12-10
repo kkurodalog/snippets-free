@@ -1,3 +1,7 @@
+.container {
+  margin-block: 40px;
+}
+
 .inner {
   max-width: 1240px;
   margin-inline: auto;
@@ -11,25 +15,12 @@
 
 .title {
   font-size: 24px;
+  line-height: 1.6;
   font-weight: bold;
   text-align: center;
-  padding-block: 20px;
-  margin-bottom: 20px;
-  position: relative;
-}
-.title::after {
-  position: absolute;
-  content: "";
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: #ccc;
 }
 @media (min-width: 768px) {
   .title {
     font-size: 32px;
-    padding-block: 40px;
-    margin-bottom: 40px;
   }
 }

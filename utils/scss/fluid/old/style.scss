@@ -4,31 +4,17 @@
 // 変数
 // --------------------------------
 $fz-base: 16px; // ベースフォントサイズ
+$breakpoint: 768px; // ブレイクポイント
 $sp-width: 375px; // スマートフォン
-$tab-width: 768px; // タブレット
 $pc-width: 1280px; // パソコン
 
 // --------------------------------
-// ブレークポイント
+// グローバルスタイル
 // --------------------------------
-$breakpoints: (
-  // 375px以上
-  sp: "screen and (min-width: #{$sp-width})",
-  // 768px以上
-  tab: "screen and (min-width: #{$tab-width})",
-  // 1280px以上
-  pc: "screen and (min-width: #{$pc-width})"
-);
-
-// --------------------------------
-// メディアクエリー
-// --------------------------------
-@mixin mq($breakpoint: tab) {
-  @if not map.has-key($breakpoints, $breakpoint) {
-    @error "指定されたbreakpoint「#{$breakpoint}」は定義されていません。";
-  }
-  @media #{map.get($breakpoints, $breakpoint)} {
-    @content;
+html {
+  font-size: calc($fz-base / $sp-width * 100vw);
+  @media screen and (min-width: $breakpoint) {
+    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
   }
 }
 
@@ -52,33 +38,6 @@ $breakpoints: (
 }
 
 // --------------------------------
-// グローバルスタイル
-// --------------------------------
-// 基本スタイル
-// html {
-//   font-size: calc($fz-base / $sp-width * 100vw);
-//   @include mq(tab) {
-//     font-size: calc($fz-base / $pc-width * 100vw);
-//   }
-// }
-
-// minバージョンのスタイル
-// html {
-//   font-size: min(calc($fz-base / $sp-width * 100vw), $fz-base);
-//   @include mq(tab) {
-//     font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
-//   }
-// }
-
-// ハイブリッドバージョンのスタイル
-html {
-  font-size: calc($fz-base / $sp-width * 100vw);
-  @include mq(tab) {
-    font-size: min(calc($fz-base / $pc-width * 100vw), $fz-base);
-  }
-}
-
-// --------------------------------
 // 個別スタイル
 // --------------------------------
 body {
@@ -90,7 +49,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding-inline: 20px;
-  @include mq(tab) {
+  @media screen and (min-width: $breakpoint) {
     padding-inline: 40px;
   }
 }
@@ -158,7 +117,7 @@ body {
 .p2v {
   font-size: p2v(16px, $sp-width);
 
-  @include mq(tab) {
+  @media screen and (min-width: $breakpoint) {
     font-size: p2v(16px, $pc-width);
   }
 }
@@ -166,7 +125,7 @@ body {
 .min-p2v {
   font-size: min-p2v(16px, $sp-width);
 
-  @include mq(tab) {
+  @media screen and (min-width: $breakpoint) {
     font-size: min-p2v(16px, $pc-width);
   }
 }
@@ -174,7 +133,7 @@ body {
 .max-p2v {
   font-size: max-p2v(16px, $sp-width);
 
-  @include mq(tab) {
+  @media screen and (min-width: $breakpoint) {
     font-size: max-p2v(16px, $pc-width);
   }
 }

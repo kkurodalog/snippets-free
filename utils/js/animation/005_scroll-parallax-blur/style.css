@@ -1,0 +1,10 @@
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: 1em;
+}
+@media screen and (min-width: 768px) {
+  .inner {
+    padding-inline: 2.5em;
+  }
+}
