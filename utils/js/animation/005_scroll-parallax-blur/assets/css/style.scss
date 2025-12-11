@@ -8,23 +8,25 @@ $sp-width: 375px; // スマートフォン幅
 $pc-width: 1280px; // パソコン幅
 
 // --------------------------------
+// リセットスタイル
+// --------------------------------
+
+// --------------------------------
 // 個別スタイル
 // --------------------------------
+.container {
+  contain: paint;
+}
+
 .inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-inline: 1em;
-  @media screen and (min-width: $breakpoint) {
-    padding-inline: 2.5em;
-  }
 }
 
 .first-section {
+  position: sticky;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   height: 100vh;
   background: url("../img/bg.jpg") no-repeat center/cover;
-  position: sticky;
   top: 0;
 
   .first-section__blur-filter {
@@ -40,34 +42,38 @@ $pc-width: 1280px; // パソコン幅
   margin-left: calc(50% - 50vw);
   height: 100vh;
 
-  .second-section__title {
+  .second-section__text1 {
     position: absolute;
     top: 35%;
-    left: 50%;
+    left: 0;
+    right: 0;
+    text-align: center;
     opacity: 0;
-    transform: translateX(-50%) translateY(20%);
-    font-size: 2em;
+    transform: translateX(0) translateY(20%);
+    font-size: 2.5em;
     color: #fff;
 
     &.fade-in-up {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translateX(0) translateY(0);
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
   }
 
-  .second-section__subtitle {
+  .second-section__text2 {
     position: absolute;
     top: 45%;
-    left: 50%;
+    left: 0;
+    right: 0;
+    text-align: center;
     opacity: 0;
-    transform: translateX(-50%) translateY(20%);
-    font-size: 1em;
+    transform: translateX(0) translateY(20%);
+    font-size: 1.5em;
     color: #fff;
 
     &.fade-in-up {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translateX(0) translateY(0);
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
   }
