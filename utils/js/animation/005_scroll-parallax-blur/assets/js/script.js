@@ -30,7 +30,7 @@ const intersectionObserver = new IntersectionObserver(
     });
   },
   {
-    rootMargin: "-40% 0px",
+    rootMargin: "-45% 0px",
   }
 );
 const inViewItems = document.querySelectorAll(".js-in-view");
