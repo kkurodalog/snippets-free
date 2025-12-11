@@ -3,14 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>005_scroll-parallax-blur</title>
-    <link rel="stylesheet" href="./style.css" />
+    <title>005_scroll-blur-filter</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
-  <body style="margin: 0; padding: 2em 0">
+  <body style="margin: 0; padding: 0">
     <main>
       <div class="inner">
-        
+        <section class="first-section">
+          <div class="first-section__blur-filter"></div>
+        </section>
+        <section class="second-section">
+          <hgroup>
+            <h1 class="second-section__title js-in-view">
+              背景をぼかすスクロールアクション
+            </h1>
+            <p class="second-section__subtitle js-in-view">
+              Scroll blur filter
+            </p>
+          </hgroup>
+        </section>
       </div>
     </main>
+    <script src="./assets/js/script.js" defer></script>
   </body>
 </html>
