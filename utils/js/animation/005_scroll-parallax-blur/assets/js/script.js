@@ -11,8 +11,8 @@ window.addEventListener("scroll", () => {
   // スクロール進行度を計算（0〜1の範囲）
   const scrollProgress = Math.min(scrollY / viewportHeight, 1);
 
-  // ブラーの強度を計算（0px〜15px）
-  const blurAmount = scrollProgress * 15;
+  // ブラーの強度を計算（0px〜20px）
+  const blurAmount = scrollProgress * 20;
 
   // スタイルを適用
   blurFilter.style.backdropFilter = `blur(${blurAmount}px)`;
