@@ -1,0 +1,55 @@
+utils/
+├─ motion/                # 動き・時間・振る舞い（JS / CSS 両対応）
+│  ├─ scroll/
+│  │  ├─ 001_scroll-fade-in/
+│  │  ├─ 002_scroll-fade-up/
+│  │  ├─ 003_scroll-velocity-shift/
+│  │  └─ 004_scroll-sticky/
+│  ├─ hover/
+│  │  ├─ 001_hover-scale/
+│  │  └─ 002_hover-underline/
+│  ├─ state/
+│  │  ├─ 001_open-close/
+│  │  └─ 002_active-toggle/
+│  └─ timing/
+│     ├─ easing/
+│     └─ duration/
+│
+├─ style/                 # 見た目の制御（CSS / SCSS）
+│  ├─ layout/
+│  │  ├─ fluid/
+│  │  ├─ grid/
+│  │  └─ container/
+│  ├─ typography/
+│  │  ├─ fluid-font-size/
+│  │  ├─ line-height/
+│  │  └─ text-balance/
+│  ├─ color/
+│  │  ├─ theme/
+│  │  └─ tokens/
+│  └─ effects/
+│     ├─ blur/
+│     └─ filter/
+│
+├─ logic/                 # JSロジック・アルゴリズム系
+│  ├─ dom/
+│  │  ├─ observer/
+│  │  └─ toggle/
+│  ├─ event/
+│  │  ├─ throttle/
+│  │  └─ debounce/
+│  └─ math/
+│     └─ lerp/
+│
+├─ helpers/               # 1ファイル完結の補助系
+│  ├─ js/
+│  │  └─ is-touch-device.js
+│  └─ scss/
+│     └─ clearfix.scss
+│
+├─ config/                # 設定・トークン
+│  ├─ breakpoints/
+│  ├─ z-index/
+│  └─ spacing/
+│
+└─ README.md              # utils全体の思想
