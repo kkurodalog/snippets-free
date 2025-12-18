@@ -37,7 +37,6 @@
 // FV スニペット ここから
 // ------------------------------------------------------
 .dot-filter-section {
-  position: relative;
   width: 100vw;
   height: 100vh;
   margin-left: calc(50% - 50vw);
@@ -59,7 +58,6 @@
     );
     background-size: 6px 6px;
     background-color: rgb(0 0 0 / 30%);
-    opacity: 1;
   }
 }
 
