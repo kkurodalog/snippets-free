@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>001_hamburger-basic</title>
+    <title>002_hamburger-slidein-top</title>
     <link rel="stylesheet" href="../../common/css/reset.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
@@ -20,15 +20,15 @@
           type="button"
           aria-label="メニューを開く"
           aria-expanded="false"
-          aria-controls="c-nav"
+          aria-controls="c-slidedown-nav"
         >
           <span class="c-hamburger__line"></span>
           <span class="c-hamburger__line"></span>
           <span class="c-hamburger__line"></span>
         </button>
 
-        <!-- ナビゲーション -->
-        <nav class="c-nav" id="c-nav" aria-label="グローバルナビゲーション" aria-hidden="true">
+        <!-- ナビゲーション（PC: 横並び表示） -->
+        <nav class="c-nav" aria-label="グローバルナビゲーション">
           <ul class="c-nav__list">
             <li class="c-nav__item"><a href="#" class="c-nav__link">TOP</a></li>
             <li class="c-nav__item"><a href="#" class="c-nav__link">ABOUT</a></li>
@@ -40,18 +40,34 @@
       </div>
     </header>
 
+    <!-- スライドダウンナビゲーション（モバイル: ヘッダー背面から下にスライドして表示） -->
+    <nav
+      class="c-slidedown-nav"
+      id="c-slidedown-nav"
+      aria-label="スライドダウンナビゲーション"
+      aria-hidden="true"
+    >
+      <ul class="c-slidedown-nav__list">
+        <li class="c-slidedown-nav__item"><a href="#" class="c-slidedown-nav__link">TOP</a></li>
+        <li class="c-slidedown-nav__item"><a href="#" class="c-slidedown-nav__link">ABOUT</a></li>
+        <li class="c-slidedown-nav__item"><a href="#" class="c-slidedown-nav__link">WORKS</a></li>
+        <li class="c-slidedown-nav__item"><a href="#" class="c-slidedown-nav__link">BLOG</a></li>
+        <li class="c-slidedown-nav__item"><a href="#" class="c-slidedown-nav__link">CONTACT</a></li>
+      </ul>
+    </nav>
+
     <main class="l-container">
       <section class="l-inner">
-        <h1 class="p-snippet-title">001_hamburger-basic</h1>
+        <h1 class="p-snippet-title">002_hamburger-slidein-top</h1>
         <div class="p-snippet-content">
-          <p>ハンバーガーボタンをクリックしてナビゲーションをトグル表示します。<br>768px以上でハンバーガー非表示・通常ナビ表示に切り替わります。</p>
+          <p>ハンバーガーボタンをクリックするとヘッダー背面からナビゲーションがスライドダウンします。<br>768px以上でハンバーガー非表示・通常ナビ表示に切り替わります。</p>
         </div>
       </section>
 
       <section class="l-inner">
         <h2 class="p-snippet-title">セクション 1</h2>
         <div class="p-snippet-content">
-          <p>スクロールしてヘッダーの動作を確認してください。ハンバーガーボタンをクリックすると、ナビゲーションメニューがトグル表示されます。</p>
+          <p>スクロールしてヘッダーの動作を確認してください。ハンバーガーボタンをクリックすると、ヘッダー背面からナビゲーションがスライドダウンします。</p>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
         </div>
       </section>
