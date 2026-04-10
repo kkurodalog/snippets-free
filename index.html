@@ -3,63 +3,319 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>snippets free</title>
+    <title>Snippets Free — フロントエンドスニペット集</title>
+    <style>
+      /* ========================================
+       * Reset & Base
+       * ======================================== */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN",
+          "Hiragino Sans", Meiryo, sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ========================================
+       * Header
+       * ======================================== */
+      .header {
+        background-color: #fff;
+        border-bottom: 1px solid #e9ecef;
+        padding: 40px 20px;
+        text-align: center;
+      }
+
+      .header__title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: #1a1a1a;
+      }
+
+      .header__description {
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
+
+      /* ========================================
+       * Main
+       * ======================================== */
+      .main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+      }
+
+      /* ========================================
+       * Section（カテゴリ）
+       * ======================================== */
+      .section {
+        margin-bottom: 48px;
+      }
+
+      .section__title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #495057;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 16px;
+      }
+
+      /* ========================================
+       * Card Grid
+       * ======================================== */
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 12px;
+      }
+
+      /* ========================================
+       * Card
+       * ======================================== */
+      .card {
+        display: block;
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px 16px;
+        text-decoration: none;
+        color: #333;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      .card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+      }
+
+      .card:focus-visible {
+        outline: 2px solid #4a90d9;
+        outline-offset: 2px;
+      }
+
+      .card__number {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #fff;
+        background-color: #6c757d;
+        border-radius: 4px;
+        padding: 2px 8px;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+      }
+
+      .card__name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        word-break: break-all;
+      }
+
+      /* ========================================
+       * Footer
+       * ======================================== */
+      .footer {
+        text-align: center;
+        padding: 24px 20px;
+        font-size: 0.8rem;
+        color: #adb5bd;
+        border-top: 1px solid #e9ecef;
+        background-color: #fff;
+      }
+
+      .footer a {
+        color: #6c757d;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* ========================================
+       * Responsive
+       * ======================================== */
+      @media (max-width: 480px) {
+        .header {
+          padding: 32px 16px;
+        }
+
+        .header__title {
+          font-size: 1.4rem;
+        }
+
+        .main {
+          padding: 24px 16px 60px;
+        }
+
+        .card-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
 
   <body>
-    <h1>snippets free</h1>
-    <hr />
-    <h2>components</h2>
-    <h3>animation</h3>
-    <a
-      style="display: block"
-      href="./components/animation/001_pop-forward/"
-      class="button"
-      >001_pop-forward</a
-    >
-    <h3>effect</h3>
-    <a
-      style="display: block"
-      href="./components/effect/001_dot-filter-image/"
-      class="button"
-      >001_dot-filter-image</a
-    >
-    <a
-      style="display: block"
-      href="./components/effect/002_dot-filter-movie/"
-      class="button"
-      >002_dot-filter-movie</a
-    >
-    <hr />
-    <h2>frameworks</h2>
-    <hr />
-    <h2>js-helpers</h2>
-    <hr />
-    <h2>snippet-json</h2>
-    <hr />
-    <h2>utils</h2>
-    <h3>motion</h3>
-    <h4>Scroll</h4>
-    <a
-      style="display: block; width: fit-content"
-      href="./utils/motion/scroll/004_scroll-velocity-shift/"
-      class="button"
-      >004_scroll-velocity-shift</a
-    >
-    <a
-      style="display: block; width: fit-content"
-      href="./utils/motion/scroll/005_scroll-blur-filter/"
-      class="button"
-      >005_scroll-blur-filter</a
-    >
-    <h3>style</h3>
-    <h4>fluid</h4>
-    <a
-      style="display: block; width: fit-content"
-      href="./utils/style/fluid/"
-      class="button"
-      >001_fluid-font-size</a
-    >
-    <hr />
+    <!-- ========== Header ========== -->
+    <header class="header">
+      <h1 class="header__title">Snippets Free</h1>
+      <p class="header__description">
+        フロントエンド実装で使えるスニペット集
+      </p>
+    </header>
+
+    <!-- ========== Main ========== -->
+    <main class="main">
+      <!-- components/animation -->
+      <section class="section">
+        <h2 class="section__title">components / animation</h2>
+        <div class="card-grid">
+          <a
+            class="card"
+            href="./components/animation/001_pop-forward/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">001</span>
+            <p class="card__name">pop-forward</p>
+          </a>
+          <a
+            class="card"
+            href="./components/animation/002_bounce/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">002</span>
+            <p class="card__name">bounce</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- components/effect -->
+      <section class="section">
+        <h2 class="section__title">components / effect</h2>
+        <div class="card-grid">
+          <a
+            class="card"
+            href="./components/effect/001_dot-filter-image/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">001</span>
+            <p class="card__name">dot-filter-image</p>
+          </a>
+          <a
+            class="card"
+            href="./components/effect/002_dot-filter-movie/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">002</span>
+            <p class="card__name">dot-filter-movie</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- components/navigation -->
+      <section class="section">
+        <h2 class="section__title">components / navigation</h2>
+        <div class="card-grid">
+          <a
+            class="card"
+            href="./components/navigation/001_hamburger-basic/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">001</span>
+            <p class="card__name">hamburger-basic</p>
+          </a>
+          <a
+            class="card"
+            href="./components/navigation/002_hamburger-overlay/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">002</span>
+            <p class="card__name">hamburger-overlay</p>
+          </a>
+          <a
+            class="card"
+            href="./components/navigation/003_hamburger-fullscreen/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">003</span>
+            <p class="card__name">hamburger-fullscreen</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- utils/motion/scroll -->
+      <section class="section">
+        <h2 class="section__title">utils / motion / scroll</h2>
+        <div class="card-grid">
+          <a
+            class="card"
+            href="./utils/motion/scroll/004_scroll-velocity-shift/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">004</span>
+            <p class="card__name">scroll-velocity-shift</p>
+          </a>
+          <a
+            class="card"
+            href="./utils/motion/scroll/005_scroll-blur-filter/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">005</span>
+            <p class="card__name">scroll-blur-filter</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- utils/style/fluid -->
+      <section class="section">
+        <h2 class="section__title">utils / style / fluid</h2>
+        <div class="card-grid">
+          <a
+            class="card"
+            href="./utils/style/fluid/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="card__number">001</span>
+            <p class="card__name">fluid-font-size</p>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- ========== Footer ========== -->
+    <footer class="footer">
+      <p>
+        <a
+          href="https://github.com/kkuroda"
+          target="_blank"
+          rel="noopener noreferrer"
+          >GitHub</a
+        >
+      </p>
+    </footer>
   </body>
 </html>
