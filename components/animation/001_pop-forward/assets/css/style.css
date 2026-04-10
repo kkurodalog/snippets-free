@@ -30,8 +30,7 @@
   aspect-ratio: 4/3;
   background: url(../img/bg.png) no-repeat center/cover;
   position: relative;
-  -webkit-perspective: 1200px;
-          perspective: 1200px;
+  perspective: 1200px;
 }
 
 .deco-01 {
@@ -175,82 +174,49 @@
 }
 
 .pop-forward-animation {
-  -webkit-animation: pop-forward 0.5s cubic-bezier(0.65, 1.39, 1, 1) forwards;
-          animation: pop-forward 0.5s cubic-bezier(0.65, 1.39, 1, 1) forwards;
+  animation: pop-forward 0.5s cubic-bezier(0.65, 1.39, 1, 1) forwards;
   opacity: 0;
 }
 .pop-forward-animation.delay-100 {
-  -webkit-animation-delay: 0.1s;
-          animation-delay: 0.1s;
+  animation-delay: 0.1s;
 }
 .pop-forward-animation.delay-200 {
-  -webkit-animation-delay: 0.2s;
-          animation-delay: 0.2s;
+  animation-delay: 0.2s;
 }
 .pop-forward-animation.delay-300 {
-  -webkit-animation-delay: 0.3s;
-          animation-delay: 0.3s;
+  animation-delay: 0.3s;
 }
 .pop-forward-animation.delay-400 {
-  -webkit-animation-delay: 0.4s;
-          animation-delay: 0.4s;
+  animation-delay: 0.4s;
 }
 
 .fade-in-animation {
-  -webkit-animation: fade-in 0.5s ease forwards;
-          animation: fade-in 0.5s ease forwards;
+  animation: fade-in 0.5s ease forwards;
   opacity: 0;
 }
 .fade-in-animation.delay-1000 {
-  -webkit-animation-delay: 1s;
-          animation-delay: 1s;
+  animation-delay: 1s;
 }
 .fade-in-animation.delay-1400 {
-  -webkit-animation-delay: 1.4s;
-          animation-delay: 1.4s;
+  animation-delay: 1.4s;
 }
 
 .fade-in-and-floating-animation {
-  -webkit-animation: fade-in 0.5s ease forwards, floating 3s ease-in-out infinite;
-          animation: fade-in 0.5s ease forwards, floating 3s ease-in-out infinite;
+  animation: fade-in 0.5s ease forwards, floating 3s ease-in-out infinite;
   opacity: 0;
 }
 .fade-in-and-floating-animation.delay-1800 {
-  -webkit-animation-delay: 1.8s;
-          animation-delay: 1.8s;
-}
-
-@-webkit-keyframes pop-forward {
-  0% {
-    opacity: 0;
-    -webkit-transform: translateZ(-2000px) scale(0.5);
-            transform: translateZ(-2000px) scale(0.5);
-  }
-  100% {
-    opacity: 1;
-    -webkit-transform: translateZ(0) scale(1);
-            transform: translateZ(0) scale(1);
-  }
+  animation-delay: 1.8s;
 }
 
 @keyframes pop-forward {
   0% {
     opacity: 0;
-    -webkit-transform: translateZ(-2000px) scale(0.5);
-            transform: translateZ(-2000px) scale(0.5);
+    transform: translateZ(-2000px) scale(0.5);
   }
   100% {
     opacity: 1;
-    -webkit-transform: translateZ(0) scale(1);
-            transform: translateZ(0) scale(1);
-  }
-}
-@-webkit-keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
+    transform: translateZ(0) scale(1);
   }
 }
 @keyframes fade-in {
@@ -261,23 +227,11 @@
     opacity: 1;
   }
 }
-@-webkit-keyframes floating {
-  0%, 100% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0);
-  }
-  50% {
-    -webkit-transform: translateY(20px);
-            transform: translateY(20px);
-  }
-}
 @keyframes floating {
   0%, 100% {
-    -webkit-transform: translateY(0);
-            transform: translateY(0);
+    transform: translateY(0);
   }
   50% {
-    -webkit-transform: translateY(20px);
-            transform: translateY(20px);
+    transform: translateY(20px);
   }
-}
+}/*# sourceMappingURL=style.css.map */

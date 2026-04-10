@@ -212,7 +212,9 @@
 }
 
 .fade-in-and-floating-animation {
-  animation: fade-in 0.5s ease forwards, floating 3s ease-in-out infinite;
+  animation:
+    fade-in 0.5s ease forwards,
+    floating 3s ease-in-out infinite;
   opacity: 0;
 
   &.delay-1800 {

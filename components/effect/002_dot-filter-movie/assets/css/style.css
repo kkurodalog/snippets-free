@@ -17,9 +17,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
-  width: -webkit-fit-content;
+  transform: translate(-50%, -50%);
   width: -moz-fit-content;
   width: fit-content;
   color: #fff;
@@ -33,17 +31,12 @@
 }
 
 .content__wrapper {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  justify-content: center;
   margin-bottom: 8px;
 }
 
 .dot-filter-section {
-  position: relative;
   width: 100vw;
   height: 100vh;
   margin-left: calc(50% - 50vw);
@@ -62,7 +55,6 @@
   background-image: radial-gradient(rgba(0, 0, 0, 0.2) 1.2px, transparent 1.2px);
   background-size: 6px 6px;
   background-color: rgba(0, 0, 0, 0.3);
-  opacity: 1;
 }
 
 .dot-filter {
@@ -84,4 +76,4 @@
   background-size: 6px 6px;
   background-color: rgba(0, 0, 0, 0.3);
   opacity: 1;
-}
+}/*# sourceMappingURL=style.css.map */

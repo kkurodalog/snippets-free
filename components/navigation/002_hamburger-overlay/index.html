@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>002_hamburger-overlay</title>
+    <link rel="stylesheet" href="../../common/css/reset.css" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <!-- スニペットここから -->
+    <header class="c-header">
+      <div class="c-header__inner">
+        <!-- ロゴ -->
+        <a href="#" class="c-header__logo">LOGO</a>
+
+        <!-- ハンバーガーボタン（モバイルのみ表示） -->
+        <button
+          class="c-hamburger"
+          type="button"
+          aria-label="メニューを開く"
+          aria-expanded="false"
+          aria-controls="c-drawer"
+        >
+          <span class="c-hamburger__line"></span>
+          <span class="c-hamburger__line"></span>
+          <span class="c-hamburger__line"></span>
+        </button>
+
+        <!-- ナビゲーション（PC: 横並び表示） -->
+        <nav class="c-nav" aria-label="グローバルナビゲーション">
+          <ul class="c-nav__list">
+            <li class="c-nav__item"><a href="#" class="c-nav__link">TOP</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">ABOUT</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">WORKS</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">BLOG</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">CONTACT</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- オーバーレイ（モバイル: ドロワー開放時に背景を暗くする） -->
+    <div class="c-overlay" aria-hidden="true"></div>
+
+    <!-- ドロワー（モバイル: 右からスライドインするナビゲーション） -->
+    <nav
+      class="c-drawer"
+      id="c-drawer"
+      aria-label="ドロワーナビゲーション"
+      aria-hidden="true"
+    >
+      <!-- ドロワー閉じるボタン -->
+      <button
+        class="c-drawer__close"
+        type="button"
+        aria-label="メニューを閉じる"
+      >
+        <span class="c-drawer__close-icon" aria-hidden="true"></span>
+      </button>
+
+      <ul class="c-drawer__list">
+        <li class="c-drawer__item"><a href="#" class="c-drawer__link">TOP</a></li>
+        <li class="c-drawer__item"><a href="#" class="c-drawer__link">ABOUT</a></li>
+        <li class="c-drawer__item"><a href="#" class="c-drawer__link">WORKS</a></li>
+        <li class="c-drawer__item"><a href="#" class="c-drawer__link">BLOG</a></li>
+        <li class="c-drawer__item"><a href="#" class="c-drawer__link">CONTACT</a></li>
+      </ul>
+    </nav>
+
+    <main class="l-container">
+      <div class="l-inner">
+        <h1 class="p-snippet-title">ドロワー型ハンバーガーメニュー（オーバーレイ付き）</h1>
+        <hr />
+        <div class="p-snippet-content">
+          <p>ハンバーガーボタンをクリックすると右からドロワーが開きます。<br>背景にオーバーレイが表示され、クリックで閉じることもできます。<br>768px以上でハンバーガー非表示・通常ナビ表示に切り替わります。</p>
+        </div>
+      </div>
+    </main>
+    <!-- スニペットここまで -->
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>

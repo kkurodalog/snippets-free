@@ -39,22 +39,16 @@
 .card {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  align-items: center;
   gap: 64px;
 }
 
 .card.is-reverse .card__picture {
-  -webkit-box-ordinal-group: 3;
-      -ms-flex-order: 2;
-          order: 2;
+  order: 2;
 }
 
 .card.is-reverse .card__content {
-  -webkit-box-ordinal-group: 2;
-      -ms-flex-order: 1;
-          order: 1;
+  order: 1;
 }
 
 .card__title {
@@ -78,8 +72,7 @@
 .card__picture {
   aspect-ratio: 16/9;
   border-radius: 8px;
-  -webkit-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   background: #fff;
   overflow: hidden;
   position: relative;
@@ -91,8 +84,7 @@
   height: auto;
   -o-object-fit: cover;
      object-fit: cover;
-  -webkit-animation: parallax-image ease-in-out both;
-          animation: parallax-image ease-in-out both;
+  animation: parallax-image ease-in-out both;
   animation-timeline: --section;
   animation-range: entry 0% exit 100%;
   position: absolute;
@@ -100,24 +92,11 @@
   margin: auto;
 }
 
-@-webkit-keyframes parallax-image {
-  from {
-    -webkit-transform: translateY(50px);
-            transform: translateY(50px);
-  }
-  to {
-    -webkit-transform: translateY(-50px);
-            transform: translateY(-50px);
-  }
-}
-
 @keyframes parallax-image {
   from {
-    -webkit-transform: translateY(50px);
-            transform: translateY(50px);
+    transform: translateY(50px);
   }
   to {
-    -webkit-transform: translateY(-50px);
-            transform: translateY(-50px);
+    transform: translateY(-50px);
   }
-}
+}/*# sourceMappingURL=style.css.map */
