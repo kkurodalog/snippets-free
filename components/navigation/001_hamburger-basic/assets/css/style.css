@@ -4,6 +4,9 @@
 :root {
   --header-height-sp: 60px;
   --header-height-pc: 72px;
+
+  /* ===== z-index 階層管理 ===== */
+  --z-header: 20; /* ヘッダー背景 */
 }
 
 /* ================================================
@@ -51,7 +54,7 @@
 .c-header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-header);
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);

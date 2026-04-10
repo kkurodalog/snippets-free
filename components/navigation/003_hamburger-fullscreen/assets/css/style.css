@@ -4,14 +4,14 @@
 :root {
   --header-height-sp: 60px;
   --header-height-pc: 72px;
-  --drawer-width: 280px;
-  --overlay-color: rgba(0, 0, 0, 0.5);
-  --drawer-transition: 0.3s ease;
+  --fullscreen-bg: #1a1a1a;
+  --fullscreen-transition: 0.4s ease;
+  --fullscreen-item-delay: 0.06s;
 
   /* ===== z-index 階層管理 ===== */
-  --z-header:  20; /* ヘッダー背景 */
-  --z-overlay: 30; /* オーバーレイ（半透明背景） */
-  --z-drawer:  40; /* ドロワー */
+  /* 003ではヘッダーをフルスクリーンメニュー上に配置するため --z-drawer を適用 */
+  --z-overlay: 30; /* フルスクリーンナビ（オーバーレイとして機能） */
+  --z-drawer:  40; /* ヘッダー（メニューより上に表示） */
 }
 
 /* ================================================
@@ -59,10 +59,22 @@
 .c-header {
   position: sticky;
   top: 0;
-  z-index: var(--z-header);
+  z-index: var(--z-drawer); /* フルスクリーンメニューより上に表示し、ハンバーガーボタンを常にクリック可能にする */
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* フルスクリーンメニュー展開時: ヘッダー背景を透明にして×ボタン（白）を見せる */
+.c-header.is-menu-open {
+  background-color: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+.c-header.is-menu-open .c-header__logo {
+  color: #fff;
 }
 
 .c-header__inner {
@@ -116,6 +128,9 @@
   gap: 5px;
   width: 44px;
   height: 44px;
+
+  /* ヘッダー自体がメニューより上にいるのでボタン個別のz-indexは不要 */
+  position: relative;
 }
 
 @media (min-width: 768px) {
@@ -135,7 +150,13 @@
   transform-origin: center;
   transition:
     transform 0.3s ease,
-    opacity 0.3s ease;
+    opacity 0.3s ease,
+    background-color 0.3s ease;
+}
+
+/* メニューオープン時: 線の色を白に変更（フルスクリーン背景に対応） */
+.c-hamburger.is-active .c-hamburger__line {
+  background-color: #fff;
 }
 
 /* ×（バツ）アニメーション */
@@ -205,153 +226,106 @@
 }
 
 /* ================================================
-   c-overlay: オーバーレイ（ドロワー開放時の背景暗幕）
+   c-fullscreen-nav: フルスクリーンナビゲーション
    ================================================ */
-.c-overlay {
+.c-fullscreen-nav {
   /* 初期状態: 非表示 */
   position: fixed;
   inset: 0;
   z-index: var(--z-overlay);
-  background-color: var(--overlay-color);
+  background-color: var(--fullscreen-bg);
+
+  /* 中央配置 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* フェードイン/アウト制御 */
   opacity: 0;
   visibility: hidden;
-  pointer-events: none; /* 非表示状態はクリック無効 */
   transition:
-    opacity var(--drawer-transition),
-    visibility var(--drawer-transition);
+    opacity var(--fullscreen-transition),
+    visibility var(--fullscreen-transition);
 }
 
-/* is-visible クラスで表示 */
-.c-overlay.is-visible {
+/* is-open クラスでフルスクリーン表示 */
+.c-fullscreen-nav.is-open {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto; /* 表示中のみクリック有効 */
-}
-
-/* ================================================
-   c-drawer: ドロワーナビゲーション（右スライドイン）
-   ================================================ */
-.c-drawer {
-  /* 初期状態: 画面右外に待機 */
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: var(--z-drawer);
-  width: var(--drawer-width);
-  height: 100%;
-  background-color: #fff;
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
-  transform: translateX(100%);
-  transition: transform var(--drawer-transition);
-
-  /* ドロワー内スクロール対応 */
-  overflow-y: auto;
-}
-
-/* is-open クラスでスライドイン */
-.c-drawer.is-open {
-  transform: translateX(0);
 }
 
 @media (min-width: 768px) {
   /* PCでは非表示 */
-  .c-drawer {
+  .c-fullscreen-nav {
     display: none;
   }
 }
 
 /* ================================================
-   c-drawer__close: ドロワー内の閉じるボタン
+   c-fullscreen-nav__list / item / link: メニューリスト
    ================================================ */
-.c-drawer__close {
-  /* ボタンリセット */
-  appearance: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-
-  /* ドロワー右上に配置 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin-inline-start: auto;
-  margin-block: 8px; /* ドロワー上端からの縦余白: タッチターゲット確保のため最小 8px */
-  margin-inline-end: 12px; /* ドロワー右端からの余白: ドロワー内パディングと視覚的に揃える値 */
-}
-
-/* ×アイコン（疑似要素で描画） */
-.c-drawer__close-icon {
-  position: relative;
-  display: block;
-  width: 20px;
-  height: 20px;
-}
-
-.c-drawer__close-icon::before,
-.c-drawer__close-icon::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #333;
-  border-radius: 2px;
-  transform-origin: center;
-}
-
-.c-drawer__close-icon::before {
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.c-drawer__close-icon::after {
-  transform: translateY(-50%) rotate(-45deg);
-}
-
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
-@media (any-hover: hover) and (pointer: fine) {
-  .c-drawer__close:hover .c-drawer__close-icon::before,
-  .c-drawer__close:hover .c-drawer__close-icon::after {
-    background-color: #0066cc;
-  }
-}
-
-/* ================================================
-   c-drawer__list / item / link: ドロワーメニューリスト
-   ================================================ */
-.c-drawer__list {
+.c-fullscreen-nav__list {
   list-style: none;
   margin: 0;
   padding: 0;
-  padding-block-start: 8px; /* 閉じるボタン下部とリスト上端の間隔: 視覚的な余白として 8px */
+  text-align: center;
 }
 
-.c-drawer__item {
-  border-bottom: 1px solid #f0f0f0;
+.c-fullscreen-nav__item {
+  /* 各リンクのフェードイン + スライドアップアニメーション */
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity var(--fullscreen-transition),
+    transform var(--fullscreen-transition);
 }
 
-.c-drawer__item:last-child {
-  border-bottom: none;
+/* is-open 時に各アイテムを順番にアニメーション表示 */
+.c-fullscreen-nav.is-open .c-fullscreen-nav__item {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.c-drawer__link {
+/* 各アイテムに遅延を付けてスタッガードアニメーションにする */
+.c-fullscreen-nav.is-open .c-fullscreen-nav__item:nth-child(1) {
+  transition-delay: calc(var(--fullscreen-item-delay) * 1);
+}
+
+.c-fullscreen-nav.is-open .c-fullscreen-nav__item:nth-child(2) {
+  transition-delay: calc(var(--fullscreen-item-delay) * 2);
+}
+
+.c-fullscreen-nav.is-open .c-fullscreen-nav__item:nth-child(3) {
+  transition-delay: calc(var(--fullscreen-item-delay) * 3);
+}
+
+.c-fullscreen-nav.is-open .c-fullscreen-nav__item:nth-child(4) {
+  transition-delay: calc(var(--fullscreen-item-delay) * 4);
+}
+
+.c-fullscreen-nav.is-open .c-fullscreen-nav__item:nth-child(5) {
+  transition-delay: calc(var(--fullscreen-item-delay) * 5);
+}
+
+/* 閉じるときは遅延なしで即座にフェードアウト */
+.c-fullscreen-nav__item {
+  transition-delay: 0s;
+}
+
+.c-fullscreen-nav__link {
   display: block;
-  padding: 16px 24px;
-  color: #333;
+  padding: 16px 32px;
+  color: #fff;
   text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  transition: color 0.2s ease;
 }
 
 /* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
-  .c-drawer__link:hover {
-    color: #0066cc;
-    background-color: #f5f8ff;
+  .c-fullscreen-nav__link:hover {
+    color: #6eb5ff;
   }
 }
