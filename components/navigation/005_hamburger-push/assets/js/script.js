@@ -1,14 +1,14 @@
 /**
- * 004_hamburger-push
- * プッシュ型ハンバーガーメニュー（コンテンツ右から押し込み型）
+ * 005_hamburger-push
+ * プッシュ型ハンバーガーメニュー（コンテンツ左から押し込み型）
  *
  * 機能:
- * - ハンバーガーボタンクリックで左からナビパネルをスライドイン
- * - 同時にページコンテンツ全体（header + main）を右に押し出す
+ * - ハンバーガーボタンクリックで右からナビパネルをスライドイン
+ * - 同時にページコンテンツ全体（header + main）を左に押し出す
  * - オーバーレイ（背景暗転）なし — 押し出されたコンテンツ自体がナビの外側として見える
  * - ボタンに is-active、ナビに is-open、ラッパーに is-pushed クラスを付与/除去
  * - aria-expanded / aria-hidden 属性を連動更新（アクセシビリティ対応）
- * - 押し出されたコンテンツ部分をクリックでメニューを閉じる
+ * - 押し出されたコンテンツ部分（c-push-cover）のクリックで閉じる
  * - Escape キーで閉じる（フォーカスをハンバーガーボタンに戻す）
  * - スクロールロック（メニュー開放中は body のスクロールを止める）
  * - フォーカストラップ（ナビ内にフォーカスを閉じ込める）
@@ -22,9 +22,10 @@
   const hamburger = document.querySelector(".c-hamburger");
   const pushNav = document.querySelector(".c-push-nav");
   const pushWrapper = document.querySelector(".c-push-wrapper");
+  const pushCover = document.querySelector(".c-push-cover");
 
   // 要素が存在しない場合は処理しない
-  if (!hamburger || !pushNav || !pushWrapper) return;
+  if (!hamburger || !pushNav || !pushWrapper || !pushCover) return;
 
   // フォーカス可能な要素のセレクター
   const FOCUSABLE_SELECTOR =
@@ -120,16 +121,13 @@
   // ハンバーガーボタンのクリックイベント
   hamburger.addEventListener("click", toggleMenu);
 
-  // 押し出されたコンテンツ部分をクリックで閉じる
-  pushWrapper.addEventListener("click", function (e) {
+  // 押し出されたコンテンツ部分（カバー要素）をクリックで閉じる
+  // wrapper 全体ではなく専用カバー要素にリスナーを張ることで、
+  // wrapper 内のインタラクティブ要素との誤動作を回避する
+  pushCover.addEventListener("click", function () {
     if (!pushNav.classList.contains("is-open")) return;
-
-    // クリック対象がハンバーガーボタンの内側でなければ閉じる
-    // （ハンバーガーボタン自体のクリックは toggleMenu で処理するため除外）
-    if (!hamburger.contains(e.target)) {
-      closeMenu();
-      hamburger.focus();
-    }
+    closeMenu();
+    hamburger.focus();
   });
 
   // キーボード操作（Escape / Tab）を1つのリスナーで統合管理

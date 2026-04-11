@@ -3,74 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>004_hamburger-push</title>
+    <title>005_hamburger-push</title>
     <link rel="stylesheet" href="../../common/css/reset.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <!-- スニペットここから -->
 
-    <!-- Push Nav（モバイル: 左からスライドインするナビゲーション） -->
-    <nav
-      class="c-push-nav"
-      id="c-push-nav"
-      aria-label="プッシュナビゲーション"
-      aria-hidden="true"
-    >
-      <ul class="c-push-nav__list">
-        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">TOP</a></li>
-        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">ABOUT</a></li>
-        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">WORKS</a></li>
-        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">BLOG</a></li>
-        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">CONTACT</a></li>
-      </ul>
-    </nav>
+    <!-- ヘッダー（c-push-wrapper の外に配置し、push 時も動かない固定ヘッダーとして独立させる） -->
+    <header class="c-header">
+      <div class="c-header__inner">
+        <!-- ロゴ -->
+        <a href="#" class="c-header__logo">LOGO</a>
 
-    <!-- ページコンテンツラッパー（push時に右にスライドする） -->
+        <!-- ハンバーガーボタン（モバイルのみ表示） -->
+        <button
+          class="c-hamburger"
+          type="button"
+          aria-label="メニューを開く"
+          aria-expanded="false"
+          aria-controls="c-push-nav"
+        >
+          <span class="c-hamburger__line"></span>
+          <span class="c-hamburger__line"></span>
+          <span class="c-hamburger__line"></span>
+        </button>
+
+        <!-- ナビゲーション（PC: 横並び表示） -->
+        <nav class="c-nav" aria-label="グローバルナビゲーション">
+          <ul class="c-nav__list">
+            <li class="c-nav__item"><a href="#" class="c-nav__link">TOP</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">ABOUT</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">WORKS</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">BLOG</a></li>
+            <li class="c-nav__item"><a href="#" class="c-nav__link">CONTACT</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ページコンテンツラッパー（push時に左にスライドする要素。main のみ内包する） -->
     <div class="c-push-wrapper" id="c-push-wrapper">
-      <header class="c-header">
-        <div class="c-header__inner">
-          <!-- ロゴ -->
-          <a href="#" class="c-header__logo">LOGO</a>
-
-          <!-- ハンバーガーボタン（モバイルのみ表示） -->
-          <button
-            class="c-hamburger"
-            type="button"
-            aria-label="メニューを開く"
-            aria-expanded="false"
-            aria-controls="c-push-nav"
-          >
-            <span class="c-hamburger__line"></span>
-            <span class="c-hamburger__line"></span>
-            <span class="c-hamburger__line"></span>
-          </button>
-
-          <!-- ナビゲーション（PC: 横並び表示） -->
-          <nav class="c-nav" aria-label="グローバルナビゲーション">
-            <ul class="c-nav__list">
-              <li class="c-nav__item"><a href="#" class="c-nav__link">TOP</a></li>
-              <li class="c-nav__item"><a href="#" class="c-nav__link">ABOUT</a></li>
-              <li class="c-nav__item"><a href="#" class="c-nav__link">WORKS</a></li>
-              <li class="c-nav__item"><a href="#" class="c-nav__link">BLOG</a></li>
-              <li class="c-nav__item"><a href="#" class="c-nav__link">CONTACT</a></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <!-- カバー要素（is-pushed 時のみ前面に出てクリックで閉じる用。wrapper 内インタラクティブ要素の誤爆を防ぐ） -->
+      <div class="c-push-cover" aria-hidden="true"></div>
 
       <main class="l-container">
         <section class="l-inner">
-          <h1 class="p-snippet-title">004_hamburger-push</h1>
+          <h1 class="p-snippet-title">005_hamburger-push</h1>
           <div class="p-snippet-content">
-            <p>ハンバーガーボタンをクリックすると左からナビゲーションパネルが出現し、ページコンテンツ全体が右に押し出されます。<br>押し出されたコンテンツ部分をクリックするとメニューが閉じます。<br>768px以上でハンバーガー非表示・通常ナビ表示に切り替わります。</p>
+            <p>ハンバーガーボタンをクリックすると右からナビゲーションパネルが出現し、ページコンテンツ全体が左に押し出されます。<br>押し出されたコンテンツ部分をクリックするとメニューが閉じます。<br>768px以上でハンバーガー非表示・通常ナビ表示に切り替わります。</p>
           </div>
         </section>
 
         <section class="l-inner">
           <h2 class="p-snippet-title">セクション 1</h2>
           <div class="p-snippet-content">
-            <p>スクロールしてヘッダーの動作を確認してください。ハンバーガーボタンをクリックすると、左からナビゲーションパネルがスライドインし、コンテンツ全体が右に押し出されます。</p>
+            <p>スクロールしてヘッダーの動作を確認してください。ハンバーガーボタンをクリックすると、右からナビゲーションパネルがスライドインし、コンテンツ全体が左に押し出されます。</p>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
           </div>
         </section>
@@ -108,6 +96,22 @@
         </section>
       </main>
     </div>
+
+    <!-- Push Nav（モバイル: 右からスライドインするナビゲーション） -->
+    <nav
+      class="c-push-nav"
+      id="c-push-nav"
+      aria-label="プッシュナビゲーション"
+      aria-hidden="true"
+    >
+      <ul class="c-push-nav__list">
+        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">TOP</a></li>
+        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">ABOUT</a></li>
+        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">WORKS</a></li>
+        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">BLOG</a></li>
+        <li class="c-push-nav__item"><a href="#" class="c-push-nav__link">CONTACT</a></li>
+      </ul>
+    </nav>
     <!-- スニペットここまで -->
 
     <script src="./assets/js/script.js" defer></script>

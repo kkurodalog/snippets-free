@@ -52,19 +52,22 @@
 }
 
 /* ================================================
-   c-push-nav: プッシュナビゲーション（左からスライドイン）
+   c-push-nav: プッシュナビゲーション（右からスライドイン）
    ================================================ */
 .c-push-nav {
-  /* 初期状態: 画面左外に待機（固定配置） */
+  /* 初期状態: 画面右外に待機（固定配置） */
   position: fixed;
   top: 0;
-  left: 0;
+  right: 0;
   z-index: var(--z-drawer);
   width: var(--push-nav-width);
   height: 100%;
   background-color: #2c2c2c;
-  transform: translateX(-100%);
+  transform: translateX(100%);
   transition: transform var(--push-transition);
+
+  /* パネル境界を明確化するための影（画面外側から差し込む光の逆側に落とす） */
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.24);
 
   /* ナビ内スクロール対応 */
   overflow-y: auto;
@@ -120,17 +123,25 @@
 
 /* ================================================
    c-push-wrapper: ページコンテンツラッパー
-   push時に右にスライドする要素（header + main を包む）
+   push時に左にスライドする要素（main のみを包む）
+   固定ヘッダー分の padding-top を確保し、ヘッダーは wrapper の外側で独立して固定表示される
    ================================================ */
 .c-push-wrapper {
   position: relative;
   min-height: 100vh;
+  padding-top: var(--header-height-sp); /* 固定ヘッダーの高さ分の余白 */
   transition: transform var(--push-transition);
 }
 
-/* is-pushed クラスでコンテンツを右に押し出す */
+@media (min-width: 768px) {
+  .c-push-wrapper {
+    padding-top: var(--header-height-pc);
+  }
+}
+
+/* is-pushed クラスでコンテンツを左に押し出す */
 .c-push-wrapper.is-pushed {
-  transform: translateX(var(--push-nav-width));
+  transform: translateX(calc(-1 * var(--push-nav-width)));
 }
 
 @media (min-width: 768px) {
@@ -141,11 +152,44 @@
 }
 
 /* ================================================
-   c-header: ヘッダー全体
+   c-push-cover: プッシュ時の全面カバー
+   is-pushed 状態のときのみ前面に重ね、クリックでメニューを閉じるための透明レイヤー。
+   wrapper 全体に click を張ると内部のインタラクティブ要素が誤動作するため、
+   専用のカバー要素として分離する。
+   ================================================ */
+.c-push-cover {
+  /* 通常時は非表示かつ干渉しない */
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* is-pushed 時のみ全面カバーを有効化 */
+.c-push-wrapper.is-pushed .c-push-cover {
+  display: block;
+  pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+  /* PCではpush動作しないためカバー不要 */
+  .c-push-cover {
+    display: none !important;
+  }
+}
+
+/* ================================================
+   c-header: ヘッダー全体（固定配置）
+   c-push-wrapper の外側に配置することで、wrapper の transform の影響を受けず、
+   push 時もビューポート上部に常に固定される。
    ================================================ */
 .c-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: var(--z-header);
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;

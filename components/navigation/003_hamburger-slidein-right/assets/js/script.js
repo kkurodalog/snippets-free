@@ -1,5 +1,5 @@
 /**
- * 002-2_hamburger-slidein-right
+ * 003_hamburger-slidein-right
  * 右スライドイン型ハンバーガーメニュー（全画面）
  *
  * 機能:
@@ -19,6 +19,7 @@
   // 要素取得
   const hamburger = document.querySelector(".c-hamburger");
   const slideinNav = document.querySelector(".c-slidein-nav");
+  const headerLogo = document.querySelector(".c-header__logo");
 
   // 要素が存在しない場合は処理しない
   if (!hamburger || !slideinNav) return;
@@ -96,16 +97,19 @@
 
   /**
    * フォーカストラップ
-   * ハンバーガーボタン＋スライドインナビ内のフォーカス可能要素の間でフォーカスをループさせる
+   * ヘッダーロゴ＋ハンバーガーボタン＋スライドインナビ内のフォーカス可能要素の間でフォーカスをループさせる
+   * ヘッダーがナビより前面に出ている（--z-floating借用）ため、ロゴもフォーカス可能範囲に含める
    * @param {KeyboardEvent} e
    */
   function trapFocus(e) {
     if (e.key !== "Tab") return;
     if (!slideinNav.classList.contains("is-open")) return;
 
-    // ハンバーガーボタン + スライドインナビ内のフォーカス可能要素を結合
+    // ヘッダーロゴ + ハンバーガーボタン + スライドインナビ内のフォーカス可能要素を結合
     const navFocusable = Array.from(slideinNav.querySelectorAll(FOCUSABLE_SELECTOR));
-    const focusableElements = [hamburger, ...navFocusable];
+    const focusableElements = headerLogo
+      ? [headerLogo, hamburger, ...navFocusable]
+      : [hamburger, ...navFocusable];
     if (focusableElements.length === 0) return;
 
     const firstElement = focusableElements[0];

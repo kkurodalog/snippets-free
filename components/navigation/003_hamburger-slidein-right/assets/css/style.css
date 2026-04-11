@@ -8,7 +8,7 @@
 
   /* ===== z-index 階層管理 ===== */
   --z-drawer:    40; /* フルスクリーンナビ（右スライドイン） */
-  --z-header:    50; /* ヘッダー背景（ナビより前面に配置し、ロゴ・ハンバーガーを常に表示） */
+  --z-floating:  50; /* フローティング要素（ヘッダー借用用） */
 }
 
 /* ================================================
@@ -56,7 +56,8 @@
 .c-header {
   position: sticky;
   top: 0;
-  z-index: var(--z-header);
+  /* ナビ展開時もヘッダーを前面に保つため、通常の --z-header(20) ではなく --z-floating(50) を借用 */
+  z-index: var(--z-floating);
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
