@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>001_js-toggle</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <!-- スニペットここから -->
+    <main class="l-main">
+      <section class="p-section">
+        <h1 class="p-section__title">001_js-toggle</h1>
+        <p class="p-section__text">
+          バニラJSで <code>aria-expanded</code> を切り替えるアコーディオンの基本実装です。
+          ヘッダーをクリックまたは Enter / Space キーで本文を開閉できます。
+          複数項目を同時に開けるベース実装です。
+        </p>
+
+        <!-- アコーディオン本体 -->
+        <div class="c-accordion" data-accordion>
+          <!-- 項目 1 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-panel-1"
+                id="c-accordion-header-1"
+              >
+                <span class="c-accordion__title">アコーディオンとは何か？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-panel-1"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  アコーディオンUIとは、見出し（ヘッダー）をクリックすると本文（パネル）が折りたたみ式で開閉するUIパターンです。
+                  限られた画面領域に多くの情報を整理して配置できるため、FAQ・サイドメニュー・スマートフォン向けナビゲーション等で広く使われています。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 2 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-panel-2"
+                id="c-accordion-header-2"
+              >
+                <span class="c-accordion__title">なぜ <code>&lt;button&gt;</code> 要素を使うのか？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-panel-2"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  <code>&lt;button&gt;</code> はクリックイベントだけでなく Enter / Space キーでの操作・タブキーでのフォーカス移動・スクリーンリーダーへのボタン通知をブラウザがネイティブに処理してくれるためです。
+                </p>
+                <p>
+                  <code>&lt;div&gt;</code> に <code>role="button"</code> を付与する方法もありますが、キーボード操作・フォーカス制御・支援技術対応をすべて自前で再現する必要があり、抜け漏れが起きやすくなります。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 3 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-panel-3"
+                id="c-accordion-header-3"
+              >
+                <span class="c-accordion__title"><code>aria-expanded</code> と <code>aria-controls</code> の役割は？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-panel-3"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  <code>aria-expanded</code> はボタンが制御する領域が「現在開いているか閉じているか」をスクリーンリーダーに伝える属性です。
+                  <code>true</code> / <code>false</code> をJSで切り替えます。
+                </p>
+                <p>
+                  <code>aria-controls</code> はボタンがどの要素を制御しているかを <code>id</code> で関連付ける属性です。
+                  本文側の <code>id</code> と一致させることで、支援技術がボタンとパネルの関係を認識できます。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 4 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-panel-4"
+                id="c-accordion-header-4"
+              >
+                <span class="c-accordion__title">複数同時に開ける？1つずつしか開けない？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-panel-4"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  このスニペット（001 js-toggle）は <strong>複数同時に開けるベース実装</strong> です。
+                  各項目は他の項目の状態に影響されず、それぞれ独立して開閉します。
+                </p>
+                <p>
+                  「1つだけ開いて他は閉じる」排他制御や「複数同時に開ける」明示的なパターンは、それぞれ別スニペットとして用意しています。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- スニペットここまで -->
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>
