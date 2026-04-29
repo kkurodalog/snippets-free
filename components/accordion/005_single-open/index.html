@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>005_single-open</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <main class="l-main">
+      <section class="p-section">
+        <h1 class="p-section__title">005_single-open</h1>
+        <p class="p-section__text">
+          排他制御型のアコーディオンです。ある項目を開くと、それ以外の項目は自動的に閉じられ、<strong>常に最大1つの項目だけが開いている状態</strong>を保ちます。
+          開いている項目をもう一度クリックすれば閉じられるため、全項目が閉じている状態も許容します。
+          実装は snippet 001 / 004 と同じ <code>aria-expanded</code> + <code>hidden</code> パターンを継承し、JavaScript側で「他項目を全クローズしてから対象項目をトグル」する制御を加えています。
+        </p>
+
+        <!-- スニペットここから -->
+        <div class="c-accordion" data-accordion id="c-accordion-single-open">
+          <!-- 項目 1 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-single-panel-1"
+                id="c-accordion-single-header-1"
+              >
+                <span class="c-accordion__title">なぜ「1つだけ開く」設計を選ぶのか？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-single-panel-1"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  排他制御型は「読ませたい順序がある」「画面領域を1項目分しか確保できない」場面に向きます。
+                  たとえばモバイルのFAQ・サイドメニュー・ステップ式のチュートリアル等、ユーザーの注意を1箇所に集中させたい設計に有効です。
+                </p>
+                <p>
+                  逆に、複数項目を見比べたい・並行して情報を参照したい用途では複数同時オープン型（snippet 004 multi-open）の方が向きます。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 2 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-single-panel-2"
+                id="c-accordion-single-header-2"
+              >
+                <span class="c-accordion__title">「全部閉じている状態」も許容する？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-single-panel-2"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  はい。本スニペットは「常に1つは開いた状態を維持する」厳格モードではなく、開いている項目をもう一度クリックすれば閉じられる設計です。
+                  ユーザーが「読み終わったので畳みたい」「全項目を閉じてリスト全体を俯瞰したい」というニーズにも応えるためです。
+                </p>
+                <p>
+                  常に1つは開いた状態を維持する設計（厳格モード：開いている項目を再クリックしても閉じない）も実装可能ですが、ユーザーが任意のタイミングで畳めない不自由さを生むため、本スニペットでは採用していません。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 3 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-single-panel-3"
+                id="c-accordion-single-header-3"
+              >
+                <span class="c-accordion__title">他項目を閉じる挙動はスクリーンリーダーに通知しなくていい？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-single-panel-3"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  各項目の <code>aria-expanded</code> をJSで切り替えることで、支援技術には個別項目の状態変化が通知されます。
+                  WAI-ARIA Authoring Practices の Accordion パターンも、排他制御に関する追加通知（<code>aria-live</code> 等）を要求していません。
+                </p>
+                <p>
+                  そのため本スニペットでは snippet 004 の一括操作のような <code>role="status"</code> + <code>aria-live="polite"</code> 領域は設けず、個別 <code>aria-expanded</code> の切替だけでアクセシビリティ要件を満たす設計にしています。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 4 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-single-panel-4"
+                id="c-accordion-single-header-4"
+              >
+                <span class="c-accordion__title">snippet 004 multi-open との使い分けは？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-single-panel-4"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  どちらが正解という話ではなく、コンテンツとの相性で選びます。
+                  項目同士が独立していて並行参照したいなら 004 multi-open、ユーザーの注意を1箇所に集中させたいなら 005 single-open が向きます。
+                </p>
+                <p>
+                  実装としては <code>aria-expanded</code> + <code>hidden</code> を真実の源とする骨格は共通で、違いは「他項目を閉じるか／閉じないか」のJS側の制御方針だけです。
+                  そのため2つを切り替えてもCSS・HTML構造を作り直す必要はありません。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- スニペットここまで -->
+      </section>
+    </main>
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>
