@@ -1,0 +1,310 @@
+/* ================================================
+   カスタムプロパティ
+   snippet 001 と同じトークンセットを継承し、
+   一括コントロール用に --accordion-color-bulk-* を追加。
+   命名規則は snippet 001 (--accordion-color-{役割}) を踏襲。
+   ================================================ */
+:root {
+  --accordion-color-text:        #2b2b2b;
+  --accordion-color-text-muted:  #555;
+  --accordion-color-border:      #e0e0e0;
+  --accordion-color-bg:          #ffffff;
+  --accordion-color-bg-hover:    #f5f7fa;
+  --accordion-color-bg-active:   #eef3fa;
+  --accordion-color-accent:      #0066cc;
+  --accordion-color-focus-ring:  #0066cc;
+
+  /* 一括コントロール用トークン（004 で追加） */
+  --accordion-color-bulk-bg:        #f5f7fa;
+  --accordion-color-bulk-bg-hover:  #e8edf3;
+  --accordion-color-bulk-text:      #2b2b2b;
+  --accordion-color-bulk-disabled:  #aaa;
+
+  --accordion-radius:            8px;
+  --accordion-header-padding-y:  16px;
+  --accordion-header-padding-x:  20px;
+  --accordion-body-padding-y:    16px;
+  --accordion-body-padding-x:    20px;
+
+  --accordion-transition:        0.2s ease;
+}
+
+/* ================================================
+   ベースリセット（デモページ用）
+   ================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    "Hiragino Sans", "Noto Sans JP", sans-serif;
+  color: var(--accordion-color-text);
+  background-color: #fafafa;
+  line-height: 1.7;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  background-color: #eef0f3;
+  border-radius: 4px;
+}
+
+/* ================================================
+   l-main / p-section: デモページのレイアウト
+   ================================================ */
+.l-main {
+  max-width: 720px;
+  margin-inline: auto;
+  padding: 40px 20px;
+}
+
+.p-section__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.p-section__text {
+  margin: 0 0 24px;
+  color: var(--accordion-color-text-muted);
+}
+
+@media (min-width: 768px) {
+  .p-section__title {
+    font-size: 28px;
+  }
+}
+
+/* ================================================
+   c-accordion__bulk-controls: 一括操作ボタンのラッパー
+   c-accordion の外側に置くため、c-accordion 本体より
+   先に記述してマージンで間隔を取る。
+   ================================================ */
+.c-accordion__bulk-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+/* ================================================
+   c-accordion__bulk-button: 「すべて開く / すべて閉じる」ボタン
+   c-accordion__header と同じトーンで揃えつつ、
+   位置・形状で副次的なコントロールであることを示す。
+   ================================================ */
+.c-accordion__bulk-button {
+  /* ボタンリセット */
+  appearance: none;
+  border: 1px solid var(--accordion-color-border);
+  font: inherit;
+  cursor: pointer;
+
+  /* レイアウト */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px; /* タップ領域確保 */
+  padding: 8px 16px;
+  border-radius: var(--accordion-radius);
+
+  /* テキスト */
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accordion-color-bulk-text);
+
+  /* 背景 */
+  background-color: var(--accordion-color-bulk-bg);
+
+  /* 状態遷移 */
+  transition:
+    background-color var(--accordion-transition),
+    color var(--accordion-transition),
+    border-color var(--accordion-transition);
+}
+
+@media (any-hover: hover) and (pointer: fine) {
+  .c-accordion__bulk-button:hover:not(:disabled) {
+    background-color: var(--accordion-color-bulk-bg-hover);
+  }
+}
+
+.c-accordion__bulk-button:focus-visible {
+  outline: 2px solid var(--accordion-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.c-accordion__bulk-button:disabled {
+  cursor: not-allowed;
+  color: var(--accordion-color-bulk-disabled);
+  border-color: var(--accordion-color-border);
+  background-color: var(--accordion-color-bg);
+}
+
+/* ================================================
+   c-accordion__sr-status: スクリーンリーダー専用ステータス領域
+   一括操作後の状態通知を視覚的には隠した上で
+   aria-live で読み上げさせる sr-only パターン。
+   display:none ではフォーカス・読み上げが行われないため、
+   位置を取らずクリップする方式を採用する。
+   ================================================ */
+.c-accordion__sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ================================================
+   c-accordion: アコーディオン本体（snippet 001 と同一）
+   ================================================ */
+.c-accordion {
+  border: 1px solid var(--accordion-color-border);
+  border-radius: var(--accordion-radius);
+  background-color: var(--accordion-color-bg);
+  overflow: hidden; /* 角丸を子要素にも適用するため */
+}
+
+.c-accordion__item + .c-accordion__item {
+  border-top: 1px solid var(--accordion-color-border);
+}
+
+/* ================================================
+   c-accordion__heading: 見出し要素のリセット
+   ================================================ */
+.c-accordion__heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* ================================================
+   c-accordion__header: 開閉ボタン（クリック対象）
+   ================================================ */
+.c-accordion__header {
+  /* ボタンリセット */
+  appearance: none;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  /* レイアウト */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--accordion-header-padding-y) var(--accordion-header-padding-x);
+
+  /* テキスト */
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+
+  /* 状態遷移 */
+  background-color: var(--accordion-color-bg);
+  transition:
+    background-color var(--accordion-transition),
+    color var(--accordion-transition);
+}
+
+@media (any-hover: hover) and (pointer: fine) {
+  .c-accordion__header:hover {
+    background-color: var(--accordion-color-bg-hover);
+  }
+}
+
+.c-accordion__header:focus-visible {
+  outline: 2px solid var(--accordion-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.c-accordion__header[aria-expanded="true"] {
+  background-color: var(--accordion-color-bg-active);
+  color: var(--accordion-color-accent);
+}
+
+/* ================================================
+   c-accordion__title: ヘッダー内のタイトルテキスト
+   ================================================ */
+.c-accordion__title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ================================================
+   c-accordion__icon: 開閉インジケータ（▼）
+   ================================================ */
+.c-accordion__icon {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transform-origin: center;
+  transition: transform var(--accordion-transition);
+}
+
+.c-accordion__header[aria-expanded="true"] .c-accordion__icon {
+  transform: rotate(-135deg);
+}
+
+/* ================================================
+   c-accordion__body: 本文パネル
+   ================================================ */
+.c-accordion__body {
+  background-color: var(--accordion-color-bg);
+}
+
+/* ================================================
+   c-accordion__content: 本文の内側ラッパー
+   ================================================ */
+.c-accordion__content {
+  padding: var(--accordion-body-padding-y) var(--accordion-body-padding-x);
+  color: var(--accordion-color-text);
+  border-top: 1px solid var(--accordion-color-border);
+}
+
+.c-accordion__content > :first-child {
+  margin-top: 0;
+}
+
+.c-accordion__content > :last-child {
+  margin-bottom: 0;
+}
+
+.c-accordion__content p {
+  margin: 0 0 12px;
+}
+
+.c-accordion__content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ================================================
+   prefers-reduced-motion: 動きを減らす設定への配慮
+   snippet 001 と同じ範囲を維持し、追加した
+   __bulk-button の transition もここで無効化する。
+   ================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .c-accordion__header,
+  .c-accordion__icon,
+  .c-accordion__bulk-button {
+    transition: none;
+  }
+}
