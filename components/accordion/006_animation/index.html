@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>006_animation</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <main class="l-main">
+      <section class="p-section">
+        <h1 class="p-section__title">006_animation</h1>
+        <p class="p-section__text">
+          高さアニメーション付きのアコーディオンです。<code>grid-template-rows: 0fr → 1fr</code> を使い、
+          パネルの開閉時に <strong>200ms ease-out</strong> でなめらかに高さがトランジションします。
+          骨格は snippet 001 / 004 / 005 と同じ <code>aria-expanded</code> + <code>hidden</code> パターンを継承し、
+          開く時は「<code>hidden</code>除去 → <code>aria-expanded="true"</code> → 高さアニメ開始」、
+          閉じる時は「<code>aria-expanded="false"</code> → 高さアニメ → 完了後に<code>hidden</code>付与」という順序で
+          支援技術と視覚表現を一致させています。
+        </p>
+
+        <!-- スニペットここから -->
+        <div class="c-accordion" data-accordion id="c-accordion-animation">
+          <!-- 項目 1 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-animation-panel-1"
+                id="c-accordion-animation-header-1"
+              >
+                <span class="c-accordion__title">なぜ <code>grid-template-rows: 0fr → 1fr</code> を使うのか？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-animation-panel-1"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  <code>height: auto</code> はトランジション対象になりませんが、
+                  <code>grid-template-rows</code> の <code>0fr → 1fr</code> はモダンブラウザでアニメーション可能です。
+                  外側 <code>__body</code> をグリッドコンテナにし、内側 <code>__content</code> に <code>min-height: 0</code> と
+                  <code>overflow: hidden</code> を当てることで、コンテンツの実寸を計測せずに「閉じきった状態」と「中身ぴったりの高さ」を行き来できます。
+                </p>
+                <p>
+                  <code>max-height</code> ハック（仮の最大値を指定する手法）と違って、コンテンツが何行になっても
+                  正確に「ちょうどの高さ」へアニメーションする点が利点です。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 2 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-animation-panel-2"
+                id="c-accordion-animation-header-2"
+              >
+                <span class="c-accordion__title">開閉時の <code>hidden</code> 属性はいつ付け外しする？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-animation-panel-2"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  <strong>開く時は即時に<code>hidden</code>を外し</strong>、その直後に <code>aria-expanded="true"</code> を立ててから
+                  高さアニメーションを開始します。<code>hidden</code> が付いたままだと CSS の高さアニメーション対象が描画されないためです。
+                </p>
+                <p>
+                  <strong>閉じる時は逆に<code>hidden</code>を遅延付与</strong>します。<code>aria-expanded="false"</code> を即座に切り替えてから高さアニメーションを再生し、
+                  完了（<code>transitionend</code>）の通知を受けてから <code>hidden</code> を付けます。
+                  アニメ中に <code>hidden</code> を付けると支援技術が「途中で消えた」状態になり、視覚と読み上げが乖離してしまうためです。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 3 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-animation-panel-3"
+                id="c-accordion-animation-header-3"
+              >
+                <span class="c-accordion__title"><code>prefers-reduced-motion</code> への配慮は？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-animation-panel-3"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  OS の「視差効果を減らす」設定が有効な場合、<code>transition: none</code> を当てて
+                  高さアニメーションを無効化します。前庭機能障害等で動きの強い演出が苦手なユーザーへの配慮です。
+                </p>
+                <p>
+                  この時 JS 側は <code>transitionend</code> が発火しないため、閉じる時の <code>hidden</code> 付与を
+                  即時パスへ切り替えています（<code>transition</code> の <code>duration</code> が 0 のときは
+                  視覚的な遷移がないので「アニメ中の不一致」も発生しません）。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 項目 4 -->
+          <div class="c-accordion__item">
+            <h2 class="c-accordion__heading">
+              <button
+                type="button"
+                class="c-accordion__header"
+                aria-expanded="false"
+                aria-controls="c-accordion-animation-panel-4"
+                id="c-accordion-animation-header-4"
+              >
+                <span class="c-accordion__title">snippet 001 / 004 / 005 との違いは？</span>
+                <span class="c-accordion__icon" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div
+              class="c-accordion__body"
+              id="c-accordion-animation-panel-4"
+              hidden
+            >
+              <div class="c-accordion__content">
+                <p>
+                  HTML 構造・FLOCSS 命名（<code>c-accordion</code> / <code>__header</code> / <code>__icon</code> / <code>__body</code> / <code>__content</code>）・
+                  JS シグネチャ（<code>setItemState(header, open)</code> / <code>collectHeaders(root)</code> / <code>bindAccordion(root)</code>）は
+                  すべて 001 / 004 / 005 と同一です。
+                </p>
+                <p>
+                  違いは <strong>CSS の <code>__body</code> に <code>display: grid</code> + <code>grid-template-rows: 0fr/1fr</code> のアニメーションを当てた点</strong>と、
+                  <strong>JS の <code>setItemState</code> 内で <code>hidden</code> 付与のタイミングを <code>transitionend</code> に遅延させた点</strong>の2つだけです。
+                  個別開閉の挙動は 001 と同等（複数同時に開ける）になります。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- スニペットここまで -->
+      </section>
+    </main>
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>

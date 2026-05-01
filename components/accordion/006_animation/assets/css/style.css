@@ -1,0 +1,281 @@
+/* ================================================
+   カスタムプロパティ
+   snippet 001 / 004 / 005 と同一のトークンセットを継承する。
+   006 では高さアニメーションのために --accordion-anim-duration /
+   --accordion-anim-easing を新規追加する（既存トークンの値は改変しない）。
+   命名規則は --accordion-{役割}-{プロパティ} を維持。
+   ================================================ */
+:root {
+  --accordion-color-text:        #2b2b2b;
+  --accordion-color-text-muted:  #555;
+  --accordion-color-border:      #e0e0e0;
+  --accordion-color-bg:          #ffffff;
+  --accordion-color-bg-hover:    #f5f7fa;
+  --accordion-color-bg-active:   #eef3fa;
+  --accordion-color-accent:      #0066cc;
+  --accordion-color-focus-ring:  #0066cc;
+
+  --accordion-radius:            8px;
+  --accordion-header-padding-y:  16px;
+  --accordion-header-padding-x:  20px;
+  --accordion-body-padding-y:    16px;
+  --accordion-body-padding-x:    20px;
+
+  --accordion-transition:        0.2s ease;
+
+  /* 高さアニメーション用トークン（006 で追加）
+     アイコン回転と高さアニメーションを 200ms ease-out で統一する。 */
+  --accordion-anim-duration:     200ms;
+  --accordion-anim-easing:       ease-out;
+}
+
+/* ================================================
+   ベースリセット（デモページ用）
+   ================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    "Hiragino Sans", "Noto Sans JP", sans-serif;
+  color: var(--accordion-color-text);
+  background-color: #fafafa;
+  line-height: 1.7;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  background-color: #eef0f3;
+  border-radius: 4px;
+}
+
+/* ================================================
+   l-main / p-section: デモページのレイアウト
+   ================================================ */
+.l-main {
+  max-width: 720px;
+  margin-inline: auto;
+  padding: 40px 20px;
+}
+
+.p-section__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.p-section__text {
+  margin: 0 0 24px;
+  color: var(--accordion-color-text-muted);
+}
+
+@media (min-width: 768px) {
+  .p-section__title {
+    font-size: 28px;
+  }
+}
+
+/* ================================================
+   c-accordion: アコーディオン本体
+   ================================================ */
+.c-accordion {
+  border: 1px solid var(--accordion-color-border);
+  border-radius: var(--accordion-radius);
+  background-color: var(--accordion-color-bg);
+  overflow: hidden; /* 角丸を子要素にも適用するため */
+}
+
+/* 項目間の区切り線 */
+.c-accordion__item + .c-accordion__item {
+  border-top: 1px solid var(--accordion-color-border);
+}
+
+/* ================================================
+   c-accordion__heading: 見出し要素のリセット
+   <h2> をボタンのラッパーに使うため、見出しのデフォルト
+   余白・サイズを打ち消す。
+   ================================================ */
+.c-accordion__heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* ================================================
+   c-accordion__header: 開閉ボタン（クリック対象）
+   ================================================ */
+.c-accordion__header {
+  /* ボタンリセット */
+  appearance: none;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  /* レイアウト */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 44px; /* タップ領域の最低保証（モバイルアクセシビリティ）。
+                       padding を変更してもこの最低高さは崩れない。 */
+  padding: var(--accordion-header-padding-y) var(--accordion-header-padding-x);
+
+  /* テキスト */
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+
+  /* 状態遷移 */
+  background-color: var(--accordion-color-bg);
+  transition:
+    background-color var(--accordion-transition),
+    color var(--accordion-transition);
+}
+
+/* マウス系デバイスかつホバー操作が可能な場合のみ適用 */
+@media (any-hover: hover) and (pointer: fine) {
+  .c-accordion__header:hover {
+    background-color: var(--accordion-color-bg-hover);
+  }
+}
+
+/* キーボードフォーカス時のフォーカスリング
+   outline を消さず、視認性の高いリングで上書きする。
+   outline-offset は正値（外側）にして、開いた項目の背景色
+   （--accordion-color-bg-active）に埋没しないようにする。 */
+.c-accordion__header:focus-visible {
+  outline: 2px solid var(--accordion-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* 開いている項目のヘッダーは背景色を変えて視認性を上げる */
+.c-accordion__header[aria-expanded="true"] {
+  background-color: var(--accordion-color-bg-active);
+  color: var(--accordion-color-accent);
+}
+
+/* ================================================
+   c-accordion__title: ヘッダー内のタイトルテキスト
+   ================================================ */
+.c-accordion__title {
+  flex: 1;
+  min-width: 0; /* テキストが長い場合に折り返せるようにする */
+}
+
+/* ================================================
+   c-accordion__icon: 開閉インジケータ（▼）
+   CSSのみでシェブロンを描画。aria-expanded の値に応じて
+   回転させることで開閉状態を視覚的に伝える。
+   006 では高さアニメと回転速度を統一するため、
+   --accordion-anim-duration / --accordion-anim-easing を使う。
+   ================================================ */
+.c-accordion__icon {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);            /* 閉じている状態: ▼ */
+  transform-origin: center;
+  transition: transform var(--accordion-anim-duration) var(--accordion-anim-easing);
+}
+
+.c-accordion__header[aria-expanded="true"] .c-accordion__icon {
+  transform: rotate(-135deg);          /* 開いている状態: ▲ */
+}
+
+/* ================================================
+   c-accordion__body: 本文パネル（アニメーション対象の外側）
+   - display: grid + grid-template-rows: 0fr で「閉じきった高さ0」を表現。
+   - aria-expanded="true" になったヘッダー直後の __body は 1fr に切替え、
+     コンテンツの実寸ぴったりまで伸びる（max-height ハックと違い実寸計測不要）。
+   - transition は grid-template-rows のみに絞る。
+     ほかのプロパティで transitionend が多重発火するのを防ぐため。
+   - hidden 属性が付いている間は display:none 相当で完全に描画から外れる。
+     開く時は JS が即時 hidden を外してから 0fr → 1fr のアニメーションを開始する。
+   ================================================ */
+.c-accordion__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  background-color: var(--accordion-color-bg);
+  transition: grid-template-rows var(--accordion-anim-duration) var(--accordion-anim-easing);
+}
+
+/* 開いている項目（=配下の __header に aria-expanded="true" を持つ __item）の __body
+   :has() で「開状態の __header を子孫に持つ __item」を起点に __body を選択する。
+   __header は __heading(h2) の子で __body と直接の兄弟関係にないため、
+   隣接兄弟セレクタ（+）ではなく :has() を使う必要がある。
+   :has() 対応: Chrome 105+ / Safari 15.4+ / Firefox 121+（grid-template-rows 0fr の対応より広い） */
+.c-accordion__item:has(.c-accordion__header[aria-expanded="true"]) > .c-accordion__body {
+  grid-template-rows: 1fr;
+}
+
+/* ================================================
+   c-accordion__content: 本文の余白を持つ内側ラッパー
+   snippet 006（animation）で grid-template-rows アニメーションを
+   実装するため、外側の __body をコンテナ、内側の __content を
+   コンテンツとして分離する2層構造を活用する。
+   - min-height: 0   → grid 子要素のデフォルト最小高さ制約（auto）を解除し、
+                       0fr が物理的に「高さ0」になるようにする。
+   - overflow: hidden → 0fr へ折り畳む過程で内容物が枠外にはみ出さないようにする。
+   ================================================ */
+.c-accordion__content {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 var(--accordion-body-padding-x);
+  color: var(--accordion-color-text);
+  border-top: 0 solid var(--accordion-color-border);
+  transition:
+    padding-block var(--accordion-anim-duration) var(--accordion-anim-easing),
+    border-top-width var(--accordion-anim-duration) var(--accordion-anim-easing);
+}
+
+/* 開いた状態では padding-block と border-top を復活させる
+   閉じた状態の padding を 0 にしておくことで、見た目の高さが
+   完全に 0 まで折り畳まれる（縦余白だけ残るのを防ぐ）。 */
+.c-accordion__item:has(.c-accordion__header[aria-expanded="true"]) > .c-accordion__body .c-accordion__content {
+  padding-block: var(--accordion-body-padding-y);
+  border-top-width: 1px;
+}
+
+.c-accordion__content > :first-child {
+  margin-top: 0;
+}
+
+.c-accordion__content > :last-child {
+  margin-bottom: 0;
+}
+
+.c-accordion__content p {
+  margin: 0 0 12px;
+}
+
+.c-accordion__content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ================================================
+   prefers-reduced-motion: 動きを減らす設定への配慮
+   前庭機能障害等で OS の「視差効果を減らす」を有効に
+   しているユーザーに対し、transition を無効化する。
+   006 で追加した __body / __content の高さ・余白アニメーションも
+   合わせて対象に含める（チェックリスト §7-6 1項目目）。
+   ================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .c-accordion__header,
+  .c-accordion__icon,
+  .c-accordion__body,
+  .c-accordion__content {
+    transition: none;
+  }
+}
