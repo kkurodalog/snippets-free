@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>001_fade-in</title>
+
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで、画面描画前に
+      切り替わり、初期状態のチラつき（FOUC）を防ぐ。
+      JS 無効環境・このスクリプトが届かない環境では no-js のままになり、
+      CSS 側で要素を最初から表示状態にする（コンテンツ消失を防ぐ）。
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <main class="l-main">
+      <section class="p-section">
+        <h1 class="p-section__title">001_fade-in</h1>
+        <p class="p-section__text">
+          Intersection Observer で、要素がビューポートに入ったタイミングを検知し、
+          <code>opacity</code> と <code>transform: translateY()</code> を組み合わせて
+          下からふわっと出現させる基本実装です。各要素は一度表示したら監視を解除します。
+          OS の「視差効果を減らす」設定が有効な場合は、アニメーションを無効化して即時表示します。
+        </p>
+
+        <!-- スニペットここから -->
+        <!--
+          data-fade-in: 監視対象であることを示すフック属性。
+          data-fade-direction: 出現方向（up / down / left / right）。
+            省略時は up（下から上）。CSS 側で初期 translate の向きを切り替える。
+          data-fade-delay: 出現の遅延（ms）。子要素を時間差で出したいときに使う。
+        -->
+        <div class="c-fade">
+          <div class="c-fade__item" data-fade-in>
+            <h2 class="c-fade__heading">スクロールで出現するカード</h2>
+            <p class="c-fade__text">
+              ビューポートに 15% 入った時点で <code>.is-visible</code> が付与され、
+              透明＋少し下にずれた状態から、本来の位置へフェードインします。
+            </p>
+          </div>
+
+          <div class="c-fade__item" data-fade-in data-fade-delay="120">
+            <h2 class="c-fade__heading">少し遅れて出現するカード</h2>
+            <p class="c-fade__text">
+              <code>data-fade-delay</code> を指定すると、表示開始を遅らせて
+              連続感のある演出にできます（時間差表示の応用は別パターンで扱います）。
+            </p>
+          </div>
+
+          <div class="c-fade__item" data-fade-in data-fade-direction="left">
+            <h2 class="c-fade__heading">左からスライドインするカード</h2>
+            <p class="c-fade__text">
+              <code>data-fade-direction="left"</code> で、左方向からの
+              スライドインに切り替わります。方向は属性だけで指定でき、JS の変更は不要です。
+            </p>
+          </div>
+
+          <div class="c-fade__item" data-fade-in data-fade-direction="right">
+            <h2 class="c-fade__heading">右からスライドインするカード</h2>
+            <p class="c-fade__text">
+              出現方向を要素ごとに変えても、監視ロジックは共通のままです。
+              レイアウトやデザインに合わせて方向だけを差し替えられます。
+            </p>
+          </div>
+
+          <div class="c-fade__item" data-fade-in>
+            <h2 class="c-fade__heading">下までスクロールして確認するカード</h2>
+            <p class="c-fade__text">
+              一度表示された要素は監視を解除するため、上下に何度スクロールしても
+              再アニメーションはしません（ワンショット表示）。
+            </p>
+          </div>
+        </div>
+        <!-- スニペットここまで -->
+      </section>
+    </main>
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>
