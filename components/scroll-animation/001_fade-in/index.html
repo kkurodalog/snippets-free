@@ -26,15 +26,16 @@
         <p class="p-section__text">
           Intersection Observer で、要素がビューポートに入ったタイミングを検知し、
           <code>opacity</code> と <code>transform: translateY()</code> を組み合わせて
-          下からふわっと出現させる基本実装です。各要素は一度表示したら監視を解除します。
+          ふわっと出現させる基本実装です。各要素は一度表示したら監視を解除します。
           OS の「視差効果を減らす」設定が有効な場合は、アニメーションを無効化して即時表示します。
         </p>
 
         <!-- スニペットここから -->
         <!--
           data-fade-in: 監視対象であることを示すフック属性。
-          data-fade-direction: 出現方向（up / down / left / right）。
+          data-fade-direction: 出現方向（up / down / left / right / none）。
             省略時は up（下から上）。CSS 側で初期 translate の向きを切り替える。
+            none は transform を使わず opacity だけで出現する「純フェード」。
           data-fade-delay: 出現の遅延（ms）。子要素を時間差で出したいときに使う。
         -->
         <div class="c-fade">
@@ -46,12 +47,30 @@
             </p>
           </div>
 
-          <div class="c-fade__item" data-fade-in data-fade-delay="120">
-            <h2 class="c-fade__heading">少し遅れて出現するカード</h2>
-            <p class="c-fade__text">
-              <code>data-fade-delay</code> を指定すると、表示開始を遅らせて
-              連続感のある演出にできます（時間差表示の応用は別パターンで扱います）。
-            </p>
+          <div class="c-fade__row">
+            <div class="c-fade__item" data-fade-in>
+              <h2 class="c-fade__heading">通常通り表示されるカード</h2>
+              <p class="c-fade__text">
+                遅延なし。3 枚とも同じ上方向のフェードインなので、
+                <code>data-fade-delay</code> による出現タイミングの差だけを見比べられます。
+              </p>
+            </div>
+
+            <div class="c-fade__item" data-fade-in data-fade-delay="150">
+              <h2 class="c-fade__heading">少し遅れて表示されるカード</h2>
+              <p class="c-fade__text">
+                <code>data-fade-delay="150"</code> で、表示開始を 150ms 遅らせています。
+                隣のカードよりわずかに後から出現します。
+              </p>
+            </div>
+
+            <div class="c-fade__item" data-fade-in data-fade-delay="300">
+              <h2 class="c-fade__heading">さらに遅れて表示されるカード</h2>
+              <p class="c-fade__text">
+                <code>data-fade-delay="300"</code> でさらに遅延。属性に数値を振り分けるだけで、
+                連続感のある演出にできます（連番遅延を自動で配る応用は別パターンで扱います）。
+              </p>
+            </div>
           </div>
 
           <div class="c-fade__item" data-fade-in data-fade-direction="left">
@@ -70,11 +89,12 @@
             </p>
           </div>
 
-          <div class="c-fade__item" data-fade-in>
-            <h2 class="c-fade__heading">下までスクロールして確認するカード</h2>
+          <div class="c-fade__item" data-fade-in data-fade-direction="none">
+            <h2 class="c-fade__heading">動きなしで純粋にフェードするカード</h2>
             <p class="c-fade__text">
-              一度表示された要素は監視を解除するため、上下に何度スクロールしても
-              再アニメーションはしません（ワンショット表示）。
+              <code>data-fade-direction="none"</code> は <code>transform</code> を使わず、
+              <code>opacity</code> だけでふわっと現れる純フェードです。位置の移動を伴いません。
+              一度表示したら監視を解除するため、上下に何度スクロールしても再アニメーションはしません（ワンショット表示）。
             </p>
           </div>
         </div>

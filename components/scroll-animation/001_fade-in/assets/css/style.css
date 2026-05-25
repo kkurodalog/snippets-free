@@ -103,6 +103,24 @@ code {
   border-radius: var(--fade-radius);
 }
 
+/* ================================================
+   c-fade__row: カードを横一列に並べるラッパー
+   モバイル幅では縦積み、768px 以上で 3 列に切り替える。
+   遅延差（data-fade-delay）の効果を「同じ方向・同じ位置関係」で
+   見比べられるよう、行内のカードは出現方向を揃える前提で使う。
+   ================================================ */
+.c-fade__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .c-fade__row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .c-fade__heading {
   margin: 0 0 8px;
   font-size: 18px;
@@ -146,6 +164,15 @@ code {
 
 .js .c-fade__item[data-fade-direction="right"] {
   transform: translateX(var(--fade-distance));
+}
+
+/* 純フェード（動きなし）: transform を一切当てず、opacity だけで出現させる。
+   初期状態は opacity: 0 のみ。translate を打ち消すのではなく最初から付与
+   しないため、transition も opacity だけにして無駄な合成を避ける。 */
+.js .c-fade__item[data-fade-direction="none"] {
+  transform: none;
+  transition: opacity var(--fade-duration) var(--fade-easing);
+  will-change: opacity;
 }
 
 /* ビューポート進入後に付与される最終状態
