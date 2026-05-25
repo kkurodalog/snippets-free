@@ -148,8 +148,9 @@ code {
   transition:
     opacity var(--fade-duration) var(--fade-easing),
     transform var(--fade-duration) var(--fade-easing);
-  /* 出現開始まで操作対象にしない（不可視要素のクリックを防ぐ）
-     ただしレイアウトは確保したままにする。 */
+  /* 不可視の間はクリック/フォーカス対象にしない（透明な要素の誤操作を防ぐ）。
+     レイアウトは確保したまま、表示後に pointer-events を auto へ戻す。 */
+  pointer-events: none;
   will-change: opacity, transform;
 }
 
@@ -185,6 +186,8 @@ code {
 .js .c-fade__item.is-visible {
   opacity: 1;
   transform: translate(0, 0);
+  /* 表示されたら操作可能に戻す。 */
+  pointer-events: auto;
   will-change: auto;
 }
 
@@ -201,6 +204,9 @@ code {
     opacity: 1;
     transform: none;
     transition: none;
+    /* 即時表示されるため、表示と同時に操作可能にする
+       （可視なのに操作不可になる不整合を防ぐ）。 */
+    pointer-events: auto;
     will-change: auto;
   }
 }
