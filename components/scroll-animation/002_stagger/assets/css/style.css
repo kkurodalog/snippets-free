@@ -196,18 +196,24 @@ code {
 
 /* 出現方向の切り替え（初期位置のずらし方向だけを変える）
    親グループ・子要素のどちらに付いても効くよう、属性セレクタで分岐する。
-   親に付けた場合は子へ継承的に適用したいので、子孫セレクタ側も用意する。 */
-.js [data-fade-direction="down"],
+   親に付けた場合は子へ継承的に適用したいので、子孫セレクタ側を用意する。
+
+   要素「自身」に方向を付けるパターンは、出現対象（data-fade-in）であるとき
+   だけ効かせる（[data-fade-in][data-fade-direction]）。素の属性セレクタだと、
+   方向を「親コンテナ」に付けた場合にその親自身までマッチしてしまう。親は
+   出現対象ではない（is-visible が付かない）ため translate が戻されず、
+   コンテナごと固定でずれる。data-fade-in でガードすることでこれを防ぐ。 */
+.js [data-fade-in][data-fade-direction="down"],
 .js [data-fade-direction="down"] [data-fade-in] {
   transform: translateY(calc(var(--fade-distance) * -1));
 }
 
-.js [data-fade-direction="left"],
+.js [data-fade-in][data-fade-direction="left"],
 .js [data-fade-direction="left"] [data-fade-in] {
   transform: translateX(calc(var(--fade-distance) * -1));
 }
 
-.js [data-fade-direction="right"],
+.js [data-fade-in][data-fade-direction="right"],
 .js [data-fade-direction="right"] [data-fade-in] {
   transform: translateX(var(--fade-distance));
 }
@@ -215,8 +221,10 @@ code {
 /* 純フェード（動きなし）: transform を一切当てず、opacity だけで出現させる。
    初期状態は opacity: 0 のみ。translate を打ち消すのではなく最初から付与
    しないため、transition も opacity だけにして無駄な合成を避ける。
-   親に付けた場合も配下の出現対象すべてに効くようにする。 */
-.js [data-fade-direction="none"],
+   親に付けた場合も配下の出現対象すべてに効くようにする。
+   方向系と同様、要素自身に付くパターンは出現対象のときだけに絞り、
+   非対象の親コンテナに余計な transition が当たらないようにする。 */
+.js [data-fade-in][data-fade-direction="none"],
 .js [data-fade-direction="none"] [data-fade-in] {
   transform: none;
   transition: opacity var(--fade-duration) var(--fade-easing);
