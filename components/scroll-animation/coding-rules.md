@@ -18,9 +18,14 @@ scroll-animation シリーズ（001 fade-in / 002 stagger / 003 以降）共通�
 - **IO 非対応フォールバックは遅延を付けず一括表示**（stagger 文脈）。順次遅延の無理な再現はしない。
 - **数値属性の検証は `Number.isFinite(x) && x >= 0`。** `Number()||0` より厳密。NaN・負値は既定へフォールバック、空文字は 0 として許容。
 
+## scroll-driven CSS（animation-timeline）系（003 から）
+
+- **【重要】scroll-driven CSS（animation-timeline）と JS フォールバックの二重駆動防止は、`@supports`／`@supports not` の対称分岐＋JS側 `CSS.supports('animation-timeline','scroll()')` 判定（真なら早期 return）で行う。** CSS で動く環境では JS はリスナーを張らないことで、CSS と JS が同時にバーを動かす二重駆動を構造的に排除する。判定キー（`animation-timeline: scroll()`）を CSS の `@supports` と JS の `CSS.supports` で完全一致させること（003 で確立）。
+- **情報提示UI（progress-bar 等）の reduced-motion は「即時最終状態」を踏襲しない。** 出現演出（001/002）は reduce 時に最終状態固定でよいが、読了率バーを満タン固定/非表示にすると誤情報になる。スクロール操作に直結する追従は維持し、補間 transition だけを切る（003 で確立）。
+
 ## 共通の前提（001 から踏襲）
 
 - 初期隠蔽は `.js` スコープ限定（PE）。`no-js`→`js` は head 内インラインで先行書換（FOUC 防止）。
-- `prefers-reduced-motion: reduce` で即時最終状態表示（opacity:1 / transform:none / transition:none / pointer-events:auto / will-change:auto）。
+- `prefers-reduced-motion: reduce` で即時最終状態表示（opacity:1 / transform:none / transition:none / pointer-events:auto / will-change:auto）。**ただし情報提示UI（progress-bar 等）は上記「scroll-driven CSS 系」の例外規定に従う。**
 - 不可視中は `pointer-events: none`、reveal 後 `.is-visible` で `auto` に戻す。
 - 状態は `.is-visible` を単一の真実の源とし、見た目切替は CSS に集約する。

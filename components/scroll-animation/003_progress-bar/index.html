@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>003_progress-bar</title>
+
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで、画面描画前に切り替わる。
+
+      ただし、このスクロール進捗バーは 001/002 の出現演出と性質が異なる。
+      出現演出（fade-in / stagger）は「JS が要素を表示状態にしないと
+      コンテンツが隠れたまま」になるため、JS 前提を no-js / js で厳密に
+      切り分ける必要があった。
+      一方この進捗バーは、対応ブラウザでは CSS の animation-timeline: scroll()
+      だけでスクロールに連動して動くため、JS は「非対応ブラウザ向けの保険」
+      にすぎない。よって no-js / js を進捗バーの表示可否には使わない。
+      （no-js / js クラス自体は同シリーズの作法に揃えて付与しておく。）
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <!-- スニペットここから -->
+    <!--
+      スクロール進捗バー本体。
+      ページ最上部に position: fixed で固定し、ページの読了率
+      （スクロール進捗 0%→100%）に連動して左から右へ伸びる。
+
+      data-scroll-progress: 進捗バーであることを示すフック属性。
+        出現演出（data-fade-in）とは別系統の独立した属性にしているため、
+        同じページに出現演出を同居させても互いに干渉しない。
+
+      role="progressbar" / aria-* : 読了率を支援技術へ伝えるためのロール。
+        値（aria-valuenow）の更新は JS フォールバック時のみ行う
+        （CSS だけで動く対応ブラウザでは視覚的な進捗が主目的で、
+        スクロール位置自体はブラウザ/支援技術が把握しているため、
+        値の常時更新は必須ではない）。
+    -->
+    <div
+      class="c-progress"
+      data-scroll-progress
+      role="progressbar"
+      aria-label="ページの読了率"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+    >
+      <span class="c-progress__bar"></span>
+    </div>
+    <!-- スニペットここまで -->
+
+    <main class="l-main">
+      <section class="p-section">
+        <h1 class="p-section__title">003_progress-bar</h1>
+
+        <!-- デモ専用クローム: 進捗の動きを最初から見直すための再読み込みボタン（スニペット範囲外） -->
+        <button
+          type="button"
+          class="p-section__reload"
+          onclick="location.reload()"
+        >
+          ページを再読み込み
+        </button>
+
+        <p class="p-section__text">
+          ページ最上部に固定したバーが、<strong>読み進めた割合（読了率）</strong>に
+          連動して左から右へ伸びる実装です。対応ブラウザでは
+          <code>animation-timeline: scroll()</code> によって
+          <strong>JS なし・CSS だけ</strong>でスクロール進捗に連動します。
+          この機能に未対応のブラウザでは、<code>scroll</code> イベントと
+          <code>requestAnimationFrame</code> を使った軽量な JS が同じ進捗を計算して
+          バーを更新します（フォールバック）。
+          OS の「視差効果を減らす」設定が有効な場合は、進捗に追従する動きを止めます。
+          下方向にスクロールして、バーが伸びていく様子を確認してください。
+        </p>
+
+        <!-- スクロール量を確保するためのダミーコンテンツ（デモ用）。
+             縦に十分長いセクションを並べ、読了率の変化を体感できるようにする。 -->
+        <div class="p-dummy">
+          <section class="p-dummy__block">
+            <h2 class="p-dummy__heading">セクション 1</h2>
+            <p class="p-dummy__text">
+              ここからスクロールを始めると、上部のバーが少しずつ右へ伸び始めます。
+              進捗率はページ全体に対する現在のスクロール位置の割合です。
+            </p>
+          </section>
+          <section class="p-dummy__block">
+            <h2 class="p-dummy__heading">セクション 2</h2>
+            <p class="p-dummy__text">
+              対応ブラウザでは、このバーの動きは CSS の
+              <code>animation-timeline: scroll()</code> がスクロール位置を
+              タイムラインとして扱うことで実現しています。JS は一切関与しません。
+            </p>
+          </section>
+          <section class="p-dummy__block">
+            <h2 class="p-dummy__heading">セクション 3</h2>
+            <p class="p-dummy__text">
+              未対応ブラウザでは、<code>scroll</code> イベントを
+              <code>requestAnimationFrame</code> でフレーム同期に間引きしながら、
+              読了率を計算してバーの幅（実際は <code>scaleX</code>）を更新します。
+            </p>
+          </section>
+          <section class="p-dummy__block">
+            <h2 class="p-dummy__heading">セクション 4</h2>
+            <p class="p-dummy__text">
+              CSS とJS は二重に動かないよう、JS 側で
+              <code>CSS.supports('animation-timeline', 'scroll()')</code> を判定し、
+              CSS で動く環境では JS はリスナーを張りません。
+            </p>
+          </section>
+          <section class="p-dummy__block">
+            <h2 class="p-dummy__heading">セクション 5</h2>
+            <p class="p-dummy__text">
+              ページの最下部に近づくにつれてバーは右端へ達し、読了率はおよそ
+              100% になります。短いページでは進捗の変化が分かりにくいため、
+              このデモでは縦に長いダミーコンテンツを置いています。
+            </p>
+          </section>
+          <section class="p-dummy__block">
+            <h2 class="p-dummy__heading">セクション 6</h2>
+            <p class="p-dummy__text">
+              最後まで読み終えると、バーは画面幅いっぱいまで伸びきります。
+              ここがページの終端です。
+            </p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>

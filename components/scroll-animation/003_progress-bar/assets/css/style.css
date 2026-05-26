@@ -1,0 +1,234 @@
+/* ================================================
+   カスタムプロパティ
+   進捗バー専用のトークン名（--progress-*）でまとめる。
+   出現演出系（--fade-*）とは別系統のため、同じページに
+   両方を同居させてもトークンが衝突しない。
+   ================================================ */
+:root {
+  --progress-color-text:        #2b2b2b;
+  --progress-color-text-muted:  #555;
+  --progress-color-border:      #e0e0e0;
+  --progress-color-bg:          #ffffff;
+  --progress-color-accent:      #f26b7a;
+
+  --progress-radius:            8px;
+
+  /* 進捗バーのトークン
+     --progress-height:   バーの高さ（太さ）
+     --progress-track-bg: バーの下地（トラック）の色
+     --progress-easing:   JS フォールバック時に、進捗更新を
+                          わずかに滑らかにするイージング。
+                          CSS の animation-timeline 経路では使わない。 */
+  --progress-height:            4px;
+  --progress-track-bg:          rgba(242, 107, 122, 0.18);
+  --progress-easing:            linear;
+}
+
+/* ================================================
+   ベースリセット（デモページ用）
+   ================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    "Hiragino Sans", "Noto Sans JP", sans-serif;
+  color: var(--progress-color-text);
+  background-color: #fafafa;
+  line-height: 1.7;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  background-color: #eef0f3;
+  border-radius: 4px;
+}
+
+/* ================================================
+   スクロール進捗バー本体
+   ================================================ */
+
+/* バーのコンテナ: ページ最上部に固定するトラック。
+   フックは data-scroll-progress（出現演出 data-fade-in とは別系統）。
+   見た目（位置・色）はこのコンテナとして指定し、JS や対応有無に
+   依存させない。バーの「伸び」だけを子要素 __bar が担当する。 */
+.c-progress {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 1000;
+  height: var(--progress-height);
+  background-color: var(--progress-track-bg);
+  /* バーがトラックからはみ出さないように。 */
+  overflow: hidden;
+}
+
+/* 伸び縮みするバー本体。
+   左端を起点に scaleX で 0 → 1 に伸ばすことで読了率を表現する。
+   width ではなく transform: scaleX を使うのは、レイアウトの
+   再計算を伴わず合成だけで完結し、スクロール追従が軽いため。 */
+.c-progress__bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: var(--progress-color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  /* will-change は scaleX のみを対象にして、追従中の合成を最適化する。 */
+  will-change: transform;
+}
+
+/* ------------------------------------------------
+   第一実装: CSS だけでスクロール進捗に連動させる
+   （animation-timeline: scroll()）
+   対応ブラウザ（Chrome / Edge 系）では、JS を一切使わずに
+   バーがスクロール位置に連動する。
+   scroll() は最も近いスクロールコンテナ（ここではルート＝
+   ページ全体）の縦スクロール進捗を 0%→100% のタイムラインとして
+   割り当てる。grow キーフレームを 0%→100% に貼ることで、
+   スクロール進捗がそのまま scaleX(0)→scaleX(1) に対応する。
+   ------------------------------------------------ */
+@keyframes c-progress-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .c-progress__bar {
+    animation: c-progress-grow linear;
+    /* ルート（ページ全体）の縦スクロール進捗をタイムラインに使う。 */
+    animation-timeline: scroll(root block);
+    /* スクロールタイムラインでは duration はタイムラインの全長に
+       マッピングされるため秒数は意味を持たないが、ショートハンドの
+       省略時挙動のばらつきを避けるため明示しておく。 */
+    animation-duration: auto;
+  }
+}
+
+/* ------------------------------------------------
+   JS フォールバック: animation-timeline 非対応ブラウザ向け
+   （Safari / Firefox 等）
+   非対応環境では上の @supports ブロックが無効化され、バーは
+   scaleX(0) のまま静止する。JS が読了率を計算して
+   --progress-value（0〜1）を更新し、それを scaleX に反映する。
+   transition でわずかに補間し、scroll イベントの離散更新でも
+   滑らかに見せる（reduced-motion 時はこの transition を切る）。
+   ------------------------------------------------ */
+@supports not (animation-timeline: scroll()) {
+  .c-progress__bar {
+    transform: scaleX(var(--progress-value, 0));
+    transition: transform 0.1s var(--progress-easing);
+  }
+}
+
+/* ================================================
+   prefers-reduced-motion: 動きを減らす設定への配慮
+   進捗バーは「どこまで読んだか」を示す情報提示の役割を持つため、
+   非表示にも常時最終状態（満タン固定）にもしない（誤情報になる）。
+   ユーザーのスクロール操作に直接連動する追従そのものは残しつつ、
+   付随する補間（transition）だけを切って、滑走するような余計な
+   動きを出さないようにする。
+   - CSS 経路（animation-timeline）: スクロール位置に直結した連動で
+     あり自動再生される動きではないため、追従自体は維持する。
+   - JS 経路: 進捗の補間 transition を none にし、各更新を即時反映する。
+   ================================================ */
+@media (prefers-reduced-motion: reduce) {
+  @supports not (animation-timeline: scroll()) {
+    .c-progress__bar {
+      transition: none;
+    }
+  }
+}
+
+/* ================================================
+   l-main / p-section: デモページのレイアウト
+   ================================================ */
+.l-main {
+  max-width: 720px;
+  margin-inline: auto;
+  padding: 40px 20px;
+}
+
+.p-section__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.p-section__text {
+  margin: 0 0 24px;
+  color: var(--progress-color-text-muted);
+}
+
+/* デモ専用クローム: 進捗の動きを最初から見直すための再読み込みボタン。
+   スニペット本体ではなくデモページの利便機能。 */
+.p-section__reload {
+  display: inline-block;
+  margin: 0 0 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--progress-color-bg);
+  background-color: var(--progress-color-accent);
+  border: 1px solid var(--progress-color-accent);
+  border-radius: var(--progress-radius);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.p-section__reload:hover {
+  opacity: 0.85;
+}
+
+.p-section__reload:focus-visible {
+  outline: 2px solid var(--progress-color-accent);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .p-section__title {
+    font-size: 28px;
+  }
+}
+
+/* ================================================
+   p-dummy: スクロール量を確保するデモ用ダミーコンテンツ
+   読了率の変化を体感できるよう、ビューポートより十分に長く
+   なる縦長のセクションを並べる。スニペット本体ではない。
+   ================================================ */
+.p-dummy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.p-dummy__block {
+  /* 各ブロックを縦に長く取り、ページ全体のスクロール量を確保する。 */
+  min-height: 80vh;
+  padding: 24px;
+  background-color: var(--progress-color-bg);
+  border: 1px solid var(--progress-color-border);
+  border-left: 4px solid var(--progress-color-accent);
+  border-radius: var(--progress-radius);
+}
+
+.p-dummy__heading {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.p-dummy__text {
+  margin: 0;
+  color: var(--progress-color-text-muted);
+}
