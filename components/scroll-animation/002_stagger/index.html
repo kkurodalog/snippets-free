@@ -23,6 +23,16 @@
     <main class="l-main">
       <section class="p-section">
         <h1 class="p-section__title">002_stagger</h1>
+
+        <!-- デモ専用クローム: 出現演出を見直すための再読み込みボタン（スニペット範囲外） -->
+        <button
+          type="button"
+          class="p-section__reload"
+          onclick="location.reload()"
+        >
+          ページを再読み込み
+        </button>
+
         <p class="p-section__text">
           フェードインの応用で、グループ内の子要素を <strong>少しずつ遅らせて順番に</strong>
           出現させる実装です。各要素に遅延値を手書きする代わりに、

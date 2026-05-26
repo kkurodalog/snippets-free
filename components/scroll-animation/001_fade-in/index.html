@@ -23,6 +23,16 @@
     <main class="l-main">
       <section class="p-section">
         <h1 class="p-section__title">001_fade-in</h1>
+
+        <!-- デモ専用クローム: 出現演出を見直すための再読み込みボタン（スニペット範囲外） -->
+        <button
+          type="button"
+          class="p-section__reload"
+          onclick="location.reload()"
+        >
+          ページを再読み込み
+        </button>
+
         <p class="p-section__text">
           Intersection Observer で、要素がビューポートに入ったタイミングを検知し、
           <code>opacity</code> と <code>transform: translateY()</code> を組み合わせて
