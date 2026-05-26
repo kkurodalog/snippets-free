@@ -1,0 +1,265 @@
+/* ================================================
+   カスタムプロパティ
+   出現演出系スニペットで共通のトークン名
+   （--fade-distance / --fade-duration / --fade-easing）
+   を踏襲し、距離・時間・イージングを一元管理する。
+   順次表示の「遅延差」は HTML 側の属性で渡すため、
+   ここでは演出そのものの値だけを持つ。
+   ================================================ */
+:root {
+  --fade-color-text:        #2b2b2b;
+  --fade-color-text-muted:  #555;
+  --fade-color-border:      #e0e0e0;
+  --fade-color-bg:          #ffffff;
+  --fade-color-accent:      #1fbfa8;
+
+  --fade-radius:            8px;
+  --fade-card-padding-y:    20px;
+  --fade-card-padding-x:    20px;
+
+  /* 出現演出のトークン
+     --fade-distance: 初期位置のずらし量（スライド距離）
+     --fade-duration: フェード/スライドの所要時間
+     --fade-easing:   減速して止まる自然なイージング */
+  --fade-distance:          24px;
+  --fade-duration:          0.6s;
+  --fade-easing:            cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ================================================
+   ベースリセット（デモページ用）
+   ================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    "Hiragino Sans", "Noto Sans JP", sans-serif;
+  color: var(--fade-color-text);
+  background-color: #fafafa;
+  line-height: 1.7;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  background-color: #eef0f3;
+  border-radius: 4px;
+}
+
+/* ================================================
+   l-main / p-section: デモページのレイアウト
+   ================================================ */
+.l-main {
+  max-width: 720px;
+  margin-inline: auto;
+  padding: 40px 20px;
+}
+
+.p-section__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.p-section__text {
+  margin: 0 0 24px;
+  color: var(--fade-color-text-muted);
+}
+
+@media (min-width: 768px) {
+  .p-section__title {
+    font-size: 28px;
+  }
+}
+
+/* ================================================
+   c-stagger: 順次表示するグループを縦に並べる
+   ビューポートより縦に長くなる余白を確保し、
+   各グループの出現タイミングを確認できるようにする。
+   ================================================ */
+.c-stagger {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  /* スクロールで出現する様子を確認できるよう、
+     ビューポートより縦に長くなる余白を確保する。 */
+  padding-bottom: 60vh;
+}
+
+.c-stagger__group-title {
+  margin: 32px 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fade-color-text);
+}
+
+.c-stagger__group-title:first-child {
+  margin-top: 0;
+}
+
+/* リスト型グループ（縦積み） */
+.c-stagger__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* グリッド型グループ（モバイル1列 → 768px以上で2列） */
+.c-stagger__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .c-stagger__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ================================================
+   出現演出の対象（カード・リスト項目）
+   ================================================ */
+.c-stagger__item,
+.c-stagger__card {
+  padding: var(--fade-card-padding-y) var(--fade-card-padding-x);
+  background-color: var(--fade-color-bg);
+  border: 1px solid var(--fade-color-border);
+  border-left: 4px solid var(--fade-color-accent);
+  border-radius: var(--fade-radius);
+}
+
+.c-stagger__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.c-stagger__num {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fade-color-bg);
+  background-color: var(--fade-color-accent);
+  border-radius: 50%;
+}
+
+.c-stagger__card-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.c-stagger__text {
+  margin: 0;
+  color: var(--fade-color-text-muted);
+}
+
+/* ================================================
+   出現演出の本体
+   プログレッシブエンハンスメント:
+   - JS が動く環境では html.js が付与される。
+     このときだけ初期状態を「透明＋ずらした位置」にし、
+     .is-visible が付くまで隠す。
+   - JS 無効・このスクリプトが届かない環境では html.no-js の
+     ままになり、下記ルールが効かないため、要素は最初から
+     通常表示される（コンテンツが消えない）。
+   出現対象は子の data-fade-in 属性で識別する。順次表示の
+   遅延は JS が各要素に直接付与するため CSS には現れない。
+   ================================================ */
+.js [data-fade-in] {
+  opacity: 0;
+  transform: translateY(var(--fade-distance));
+  transition:
+    opacity var(--fade-duration) var(--fade-easing),
+    transform var(--fade-duration) var(--fade-easing);
+  /* 不可視の間はクリック/フォーカス対象にしない（透明な要素の誤操作を防ぐ）。
+     レイアウトは確保したまま、表示後に pointer-events を auto へ戻す。 */
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* 出現方向の切り替え（初期位置のずらし方向だけを変える）
+   親グループ・子要素のどちらに付いても効くよう、属性セレクタで分岐する。
+   親に付けた場合は子へ継承的に適用したいので、子孫セレクタ側も用意する。 */
+.js [data-fade-direction="down"],
+.js [data-fade-direction="down"] [data-fade-in] {
+  transform: translateY(calc(var(--fade-distance) * -1));
+}
+
+.js [data-fade-direction="left"],
+.js [data-fade-direction="left"] [data-fade-in] {
+  transform: translateX(calc(var(--fade-distance) * -1));
+}
+
+.js [data-fade-direction="right"],
+.js [data-fade-direction="right"] [data-fade-in] {
+  transform: translateX(var(--fade-distance));
+}
+
+/* 純フェード（動きなし）: transform を一切当てず、opacity だけで出現させる。
+   初期状態は opacity: 0 のみ。translate を打ち消すのではなく最初から付与
+   しないため、transition も opacity だけにして無駄な合成を避ける。
+   親に付けた場合も配下の出現対象すべてに効くようにする。 */
+.js [data-fade-direction="none"],
+.js [data-fade-direction="none"] [data-fade-in] {
+  transform: none;
+  transition: opacity var(--fade-duration) var(--fade-easing);
+  will-change: opacity;
+}
+
+/* ビューポート進入後に付与される最終状態
+   どの方向指定でも translate を 0 に戻し、本来の位置へ。
+   will-change はワンショット表示の都合上、出現後はもう不要になる。
+   CSS 側の最終状態で auto に戻すことで、表示後も合成レイヤーが残り
+   続けるのを防ぐ（要素数が多いページでのメモリ常駐を回避）。
+   状態管理を JS に分散させず .is-visible に集約しているため、
+   順次表示でも見た目の切り替えはこの 1 ルールに集約される。
+
+   セレクタは [data-fade-in].is-visible で要素フックを残し、詳細度を
+   (0,3,0) に保つ。方向の子孫セレクタ（.js [dir] [data-fade-in] = 0,3,0）
+   と同点になり、ソース順で後方の本ルールが勝つため、left/right/down では
+   translate(0,0) が、none では will-change:auto が確実に最終勝ちする。
+   .is-visible は出現対象（data-fade-in を持つ子）にのみ付与されるため、
+   この要素フックは常に一致する。 */
+.js [data-fade-in].is-visible {
+  opacity: 1;
+  transform: translate(0, 0);
+  /* 表示されたら操作可能に戻す。 */
+  pointer-events: auto;
+  will-change: auto;
+}
+
+/* ================================================
+   prefers-reduced-motion: 動きを減らす設定への配慮
+   前庭機能障害等で OS の「視差効果を減らす」を有効に
+   しているユーザーには、フェード/スライドも順次の遅延も
+   行わず、即時に最終状態（表示）で見せる。
+   出現演出を中核とする本シリーズの全パターン共通の前提。
+   ================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-fade-in] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    /* 即時表示されるため、表示と同時に操作可能にする
+       （可視なのに操作不可になる不整合を防ぐ）。 */
+    pointer-events: auto;
+    will-change: auto;
+  }
+}
