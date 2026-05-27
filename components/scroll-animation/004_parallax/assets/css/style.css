@@ -20,7 +20,7 @@
                        両経路で見た目の振れ幅を揃える。
      --parallax-y:     JS フォールバックが書き込む現在の縦移動量（px）。
                        CSS の view() 経路では使わない（CSS が直接動かす）。 */
-  --parallax-shift:             80px;
+  --parallax-shift:             120px;
   --parallax-y:                 0px;
 }
 
@@ -58,13 +58,24 @@ code {
 
 /* 視差ステージ。前景と背景を重ねる枠。
    position: relative で背景を内部に絶対配置できるようにし、
-   overflow: hidden で背景のはみ出し（移動分）を切り取る。 */
+   overflow: clip で背景のはみ出し（移動分）を切り取る。
+
+   ここで overflow: hidden を使ってはいけない。hidden はスクロール
+   コンテナを生成するため、内部の背景レイヤーから見た「最も近い
+   スクロールポート」がページ（document）ではなくこのステージ自身に
+   なってしまう。すると背景はステージ内でスクロールせず、スクロール
+   連動アニメーション（要素の通過進捗を使う方式）の進捗が一定値に
+   張り付き、視差がまったく動かなくなる。
+   overflow: clip は hidden と同じくはみ出しを切り取るが、スクロール
+   コンテナを作らないため、背景の基準スクロールポートが document に
+   戻り、ページスクロールに連動して進捗が進む。
+   （clip は Chrome 90+ / Firefox 81+ / Safari 16+ で利用可。） */
 .c-parallax {
   position: relative;
   /* 速度差を体感できるよう、各ステージを縦に長く取る。 */
   min-height: 90vh;
   margin: 0 0 24px;
-  overflow: hidden;
+  overflow: clip;
   border-radius: var(--parallax-radius);
   border: 1px solid var(--parallax-color-border);
   background-color: var(--parallax-color-bg);
@@ -93,7 +104,7 @@ code {
   position: absolute;
   display: block;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.16);
+  background-color: rgba(255, 255, 255, 0.24);
 }
 
 .c-parallax__shape--1 {
@@ -108,7 +119,7 @@ code {
   inset-inline-end: 12%;
   width: 220px;
   height: 220px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.16);
 }
 
 .c-parallax__shape--3 {
@@ -117,7 +128,7 @@ code {
   width: 280px;
   height: 280px;
   transform: translateX(-50%);
-  background-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.18);
 }
 
 .c-parallax__shape--4 {
@@ -132,7 +143,7 @@ code {
   inset-inline-start: 14%;
   width: 200px;
   height: 200px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.16);
 }
 
 /* 前景コンテンツ。背景の上（z-index 上）に通常フローで重ねる。

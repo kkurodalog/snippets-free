@@ -63,13 +63,13 @@
   const root = document.documentElement;
 
   // 視差の総移動量（px）を CSS トークン --parallax-shift から読み取り、
-  // CSS 経路と振れ幅を揃える。取得できない／不正値なら既定 80px。
+  // CSS 経路と振れ幅を揃える。取得できない／不正値なら既定 120px。
   function readShift() {
     const raw = getComputedStyle(root)
       .getPropertyValue("--parallax-shift")
       .trim();
     const value = parseFloat(raw);
-    return Number.isFinite(value) && value >= 0 ? value : 80;
+    return Number.isFinite(value) && value >= 0 ? value : 120;
   }
 
   let shift = readShift();
