@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>004_parallax</title>
+
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで、画面描画前に切り替わる。
+
+      ただし、この視差スクロールは出現演出（フェードイン等）と性質が異なる。
+      出現演出は「JS が要素を表示状態にしないとコンテンツが隠れたまま」になる
+      ため、JS 前提を no-js / js で厳密に切り分ける必要があった。
+      一方この視差は、対応ブラウザでは CSS の animation-timeline: view()
+      だけで背景レイヤーがスクロールに連動して動くため、JS は「非対応
+      ブラウザ向けの保険」にすぎない。よって no-js / js を視差の有無には
+      使わない（背景は対応・非対応・JS無効のいずれでも常に表示される）。
+      （no-js / js クラス自体は同シリーズの作法に揃えて付与しておく。）
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <main class="l-main">
+      <section class="p-intro">
+        <h1 class="p-intro__title">004_parallax</h1>
+
+        <!-- デモ専用クローム: 視差の動きを最初から見直すための再読み込みボタン（スニペット範囲外） -->
+        <button
+          type="button"
+          class="p-intro__reload"
+          onclick="location.reload()"
+        >
+          ページを再読み込み
+        </button>
+
+        <p class="p-intro__text">
+          背景レイヤーと前景コンテンツに<strong>スクロール速度の差</strong>を
+          つけることで、奥行き（視差）を感じさせる実装です。対応ブラウザでは
+          <code>animation-timeline: view()</code> によって、各レイヤーが
+          ビューポートを通過する進捗に連動して動きます（<strong>JS なし・CSS
+          だけ</strong>）。この機能に未対応のブラウザでは、<code>scroll</code>
+          イベントと <code>requestAnimationFrame</code> を使った軽量な JS が
+          同じ <code>translateY</code> を計算してレイヤーを動かします
+          （フォールバック）。OS の「視差効果を減らす」設定が有効な場合は、
+          視差を完全に無効化して通常の表示にします。下方向にスクロールして
+          奥行きを確認してください。
+        </p>
+      </section>
+
+      <!--
+        スニペットここから
+
+        視差レイヤーの基本構造。
+          .c-parallax       : 視差を成立させるステージ（前景＋背景を重ねる枠）。
+          .c-parallax__bg   : 背景レイヤー。前景よりゆっくり動かして「奥」に見せる。
+          .c-parallax__fg   : 前景コンテンツ。通常のスクロール速度で流れる。
+
+        data-parallax       : 背景レイヤーを視差駆動する対象を示すフック属性。
+          出現演出（data-fade-in）・進捗バー（data-scroll-progress）とは別系統の
+          独立した属性にしているため、同じページに同居しても互いに干渉しない。
+
+        背景は外部画像に依存せず、CSS のグラデーションと装飾図形だけで自己完結
+        させている（assets に画像を置かなくてもデモが成立する）。
+      -->
+      <section class="c-parallax c-parallax--a">
+        <div class="c-parallax__bg" data-parallax aria-hidden="true">
+          <span class="c-parallax__shape c-parallax__shape--1"></span>
+          <span class="c-parallax__shape c-parallax__shape--2"></span>
+        </div>
+        <div class="c-parallax__fg">
+          <h2 class="c-parallax__heading">奥行きセクション 1</h2>
+          <p class="c-parallax__lead">
+            背景の図形が前景の見出しよりゆっくり動くことで、背景が「奥」に
+            あるように感じられます。スクロールするほど、その速度差が
+            奥行きとして見えてきます。
+          </p>
+        </div>
+      </section>
+
+      <section class="c-parallax c-parallax--b">
+        <div class="c-parallax__bg" data-parallax aria-hidden="true">
+          <span class="c-parallax__shape c-parallax__shape--3"></span>
+        </div>
+        <div class="c-parallax__fg">
+          <h2 class="c-parallax__heading">奥行きセクション 2</h2>
+          <p class="c-parallax__lead">
+            背景のグラデーションと図形がスクロールに対してゆっくり追従します。
+            前景のテキストは通常の速度で流れるため、レイヤー間に視差が生まれます。
+          </p>
+        </div>
+      </section>
+
+      <section class="c-parallax c-parallax--c">
+        <div class="c-parallax__bg" data-parallax aria-hidden="true">
+          <span class="c-parallax__shape c-parallax__shape--4"></span>
+          <span class="c-parallax__shape c-parallax__shape--5"></span>
+        </div>
+        <div class="c-parallax__fg">
+          <h2 class="c-parallax__heading">奥行きセクション 3</h2>
+          <p class="c-parallax__lead">
+            対応ブラウザではこの動きを CSS の animation-timeline: view() だけで
+            実現しています。未対応ブラウザでは軽量な JS が同じ translateY を
+            計算して背景を動かします。
+          </p>
+        </div>
+      </section>
+      <!-- スニペットここまで -->
+
+      <section class="p-outro">
+        <p class="p-outro__text">
+          ここがページの終端です。各セクションで、背景が前景より遅れて動いて
+          いたことを確認できたでしょうか。十分なスクロール量を確保するために、
+          各セクションは縦に長く取っています。
+        </p>
+      </section>
+    </main>
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>
