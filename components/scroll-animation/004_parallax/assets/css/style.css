@@ -120,7 +120,7 @@ code {
 /* パターン 2 の背景: 1 枚の画像を敷いて丸ごと視差で動かす（単層）。
    画像は装飾（aria-hidden）。cover で全面を覆い、center で中央寄せ。 */
 .c-parallax--b .c-parallax__bg {
-  background-image: url("../img/img.jpg");
+  background-image: url("../img/parallax-bg.jpg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -144,7 +144,7 @@ code {
 .c-parallax--c .c-parallax__bg--far {
   /* 遠景は移動量を小さく＝ゆっくり＝遠く見える。 */
   --parallax-shift: 50px;
-  background-image: url("../img/fv-bg.jpg");
+  background-image: url("../img/parallax-far.jpg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
