@@ -41,12 +41,17 @@
 
         <p class="p-intro__text">
           背景レイヤーと前景コンテンツに<strong>スクロール速度の差</strong>を
-          つけることで、奥行き（視差）を感じさせる実装です。対応ブラウザでは
-          <code>animation-timeline: view()</code> によって、各レイヤーが
-          ビューポートを通過する進捗に連動して動きます（<strong>JS なし・CSS
-          だけ</strong>）。この機能に未対応のブラウザでは、<code>scroll</code>
-          イベントと <code>requestAnimationFrame</code> を使った軽量な JS が
-          同じ <code>translateY</code> を計算してレイヤーを動かします
+          つけることで、奥行き（視差）を感じさせる実装です。このデモでは
+          <strong>3 種類のパターン</strong>を並べています ——
+          <strong>(1) CSS の図形だけで作る視差</strong>、
+          <strong>(2) 1 枚の画像を背景に動かす視差</strong>、
+          <strong>(3) 複数レイヤーを別々の速度で動かす多層視差</strong>です。
+          対応ブラウザでは <code>animation-timeline: view()</code> によって、
+          各レイヤーがビューポートを通過する進捗に連動して動きます
+          （<strong>JS なし・CSS だけ</strong>）。この機能に未対応のブラウザ
+          では、<code>scroll</code> イベントと
+          <code>requestAnimationFrame</code> を使った軽量な JS が同じ
+          <code>translateY</code> を計算してレイヤーを動かします
           （フォールバック）。OS の「視差効果を減らす」設定が有効な場合は、
           視差を完全に無効化して通常の表示にします。下方向にスクロールして
           奥行きを確認してください。
@@ -61,12 +66,24 @@
           .c-parallax__bg   : 背景レイヤー。前景よりゆっくり動かして「奥」に見せる。
           .c-parallax__fg   : 前景コンテンツ。通常のスクロール速度で流れる。
 
-        data-parallax       : 背景レイヤーを視差駆動する対象を示すフック属性。
+        data-parallax       : 視差駆動する対象（動かすレイヤー）を示すフック属性。
           出現演出（data-fade-in）・進捗バー（data-scroll-progress）とは別系統の
           独立した属性にしているため、同じページに同居しても互いに干渉しない。
+          このデモでは「背景 1 枚」だけでなく「複数レイヤー」にも付与し、
+          レイヤーごとに別の速度で動かす（後述の多層パターンを参照）。
 
-        背景は外部画像に依存せず、CSS のグラデーションと装飾図形だけで自己完結
-        させている（assets に画像を置かなくてもデモが成立する）。
+        各レイヤーが動く総移動量は CSS 変数 --parallax-shift で決まる。
+          レイヤーごとに別の --parallax-shift を持たせれば、同じ仕組みのまま
+          「速いレイヤー／遅いレイヤー」を作り分けられる。移動量が小さいほど
+          ゆっくり動いて「遠く」に、大きいほど速く動いて「近く」に見える。
+
+        ↓ 以下、3 つの異なる視差パターンを並べる。
+      -->
+
+      <!--
+        パターン 1: 図形オブジェクトの視差（画像を使わない）
+          背景は外部画像に依存せず、CSS のグラデーションと装飾図形だけで
+          自己完結させている。素材（画像）を用意しなくても視差が作れる例。
       -->
       <section class="c-parallax c-parallax--a">
         <div class="c-parallax__bg" data-parallax aria-hidden="true">
@@ -74,39 +91,65 @@
           <span class="c-parallax__shape c-parallax__shape--2"></span>
         </div>
         <div class="c-parallax__fg">
-          <h2 class="c-parallax__heading">奥行きセクション 1</h2>
+          <h2 class="c-parallax__heading">パターン 1: 図形だけの視差</h2>
           <p class="c-parallax__lead">
-            背景の図形が前景の見出しよりゆっくり動くことで、背景が「奥」に
-            あるように感じられます。スクロールするほど、その速度差が
-            奥行きとして見えてきます。
+            画像を一切使わず、<strong>CSS のグラデーションと半透明の円</strong>
+            だけで作った視差です。背景の図形が前景の見出しよりゆっくり動くこと
+            で「奥」にあるように感じられます。素材がなくても視差は作れます。
           </p>
         </div>
       </section>
 
+      <!--
+        パターン 2: 画像背景の視差（単層）
+          背景レイヤーに 1 枚の実画像（img.jpg）を background-image で敷き、
+          それを丸ごと視差で動かす。画像は装飾なので背景レイヤーは
+          aria-hidden="true"。前景テキストの可読性のため、画像の上に
+          半透明の暗色オーバーレイ（::after）を重ねている。
+      -->
       <section class="c-parallax c-parallax--b">
-        <div class="c-parallax__bg" data-parallax aria-hidden="true">
-          <span class="c-parallax__shape c-parallax__shape--3"></span>
-        </div>
+        <div class="c-parallax__bg" data-parallax aria-hidden="true"></div>
         <div class="c-parallax__fg">
-          <h2 class="c-parallax__heading">奥行きセクション 2</h2>
+          <h2 class="c-parallax__heading">パターン 2: 画像背景の視差</h2>
           <p class="c-parallax__lead">
-            背景のグラデーションと図形がスクロールに対してゆっくり追従します。
-            前景のテキストは通常の速度で流れるため、レイヤー間に視差が生まれます。
+            <strong>1 枚の画像</strong>を背景に敷き、それを丸ごと視差で
+            ゆっくり動かすパターンです。前景のテキストは通常の速度で流れる
+            ため、画像との間に視差が生まれます。
           </p>
         </div>
       </section>
 
+      <!--
+        パターン 3: 多層（マルチレイヤー）の視差
+          複数のレイヤーを「別々の速度」で動かして段階的な奥行きを作る本命。
+            __bg--far   : 遠景の画像（fv-bg.jpg）。移動量を小さくしてゆっくり
+                          動かす ＝ 遠くに見える。
+            __layer--near: 近景の装飾図形。移動量を大きくして速く動かす
+                          ＝ 近くに見える。
+          どちらも data-parallax で視差駆動するが、各レイヤーが自分の
+          --parallax-shift（移動量）を持つため、別速度で動く。
+          画像レイヤーは装飾なので aria-hidden="true"。
+      -->
       <section class="c-parallax c-parallax--c">
-        <div class="c-parallax__bg" data-parallax aria-hidden="true">
+        <div
+          class="c-parallax__bg c-parallax__bg--far"
+          data-parallax
+          aria-hidden="true"
+        ></div>
+        <div
+          class="c-parallax__layer c-parallax__layer--near"
+          data-parallax
+          aria-hidden="true"
+        >
           <span class="c-parallax__shape c-parallax__shape--4"></span>
           <span class="c-parallax__shape c-parallax__shape--5"></span>
         </div>
         <div class="c-parallax__fg">
-          <h2 class="c-parallax__heading">奥行きセクション 3</h2>
+          <h2 class="c-parallax__heading">パターン 3: 多層の視差</h2>
           <p class="c-parallax__lead">
-            対応ブラウザではこの動きを CSS の animation-timeline: view() だけで
-            実現しています。未対応ブラウザでは軽量な JS が同じ translateY を
-            計算して背景を動かします。
+            <strong>複数のレイヤーを違う速度で動かして</strong>奥行きを出す
+            パターンです。遠景の画像はゆっくり、手前の図形は速く動きます。
+            「遠いものほどゆっくり動く」ことで段階的な立体感が生まれます。
           </p>
         </div>
       </section>
@@ -114,9 +157,11 @@
 
       <section class="p-outro">
         <p class="p-outro__text">
-          ここがページの終端です。各セクションで、背景が前景より遅れて動いて
-          いたことを確認できたでしょうか。十分なスクロール量を確保するために、
-          各セクションは縦に長く取っています。
+          ここがページの終端です。図形だけの視差・画像背景の視差・多層の視差の
+          3 パターンで、背景が前景より遅れて動いていたことを確認できたでしょうか。
+          特に多層パターンでは、遠景の画像と手前の図形が別々の速度で動いて
+          いました。十分なスクロール量を確保するため、各セクションは縦に長く
+          取っています。
         </p>
       </section>
     </main>

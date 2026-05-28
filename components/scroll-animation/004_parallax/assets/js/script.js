@@ -7,9 +7,15 @@
  * - 第一実装は CSS の animation-timeline: view()。対応ブラウザでは
  *   この JS は何もしない（CSS だけで背景がスクロールに連動する）。
  * - この JS は animation-timeline 非対応ブラウザ（Safari / Firefox 等）
- *   向けの「フォールバック」専任。各背景レイヤーの視差量を計算し、要素ごとの
+ *   向けの「フォールバック」専任。各視差レイヤーの視差量を計算し、要素ごとの
  *   CSS カスタムプロパティ --parallax-y（px）へ書き込む。CSS 側がそれを
  *   translateY に反映する。
+ *
+ * レイヤーごとの速度差（多層パララックス対応）:
+ * - 各レイヤーの移動量（総移動量）は、その要素自身の --parallax-shift から
+ *   読み取る。要素に指定がなければ :root の既定値、それも取れなければ 120px。
+ *   これにより「遠景はゆっくり・近景は速く」のように、レイヤーごとに別速度で
+ *   動かせる（CSS の view() 経路と同じ振れ幅になる）。
  *
  * 二重駆動の防止:
  * - CSS.supports('animation-timeline', 'view()') が true の環境では、
@@ -62,9 +68,9 @@
 
   const root = document.documentElement;
 
-  // 視差の総移動量（px）を CSS トークン --parallax-shift から読み取り、
-  // CSS 経路と振れ幅を揃える。取得できない／不正値なら既定 120px。
-  function readShift() {
+  // 既定の総移動量（px）。:root の --parallax-shift から読み取り、要素側に
+  // 個別指定がないレイヤーのフォールバックに使う。取れない／不正なら 120px。
+  function readRootShift() {
     const raw = getComputedStyle(root)
       .getPropertyValue("--parallax-shift")
       .trim();
@@ -72,18 +78,29 @@
     return Number.isFinite(value) && value >= 0 ? value : 120;
   }
 
-  let shift = readShift();
+  // 個々のレイヤーの総移動量（px）。そのレイヤー自身の computed style から
+  // --parallax-shift を読み、レイヤーごとに別の移動量（＝速度）を許す。
+  // 取れない／不正なら :root の既定値へフォールバックする。
+  function readLayerShift(el, rootShift) {
+    const raw = getComputedStyle(el).getPropertyValue("--parallax-shift").trim();
+    const value = parseFloat(raw);
+    return Number.isFinite(value) && value >= 0 ? value : rootShift;
+  }
+
+  let rootShift = readRootShift();
 
   // 多重 rAF 予約を防ぐフラグ。scroll が連続発火しても、
   // 1 フレームにつき更新は 1 回だけにする。
   let ticking = false;
 
   /**
-   * 各背景レイヤーの視差量を計算し、要素ごとに --parallax-y（px）を更新する。
+   * 各視差レイヤーの視差量を計算し、要素ごとに --parallax-y（px）を更新する。
    *
    * 各レイヤーがビューポートを通過する進捗（0〜1）を求め、それを
    * +shift（画面下から入る瞬間）→ -shift（画面上へ抜ける瞬間）へ
-   * 線形にマッピングする。前景は動かないため、この背景の移動が視差になる。
+   * 線形にマッピングする。shift はレイヤーごとに個別に読むため、遠景・近景
+   * など複数レイヤーをそれぞれ別の速度で動かせる。前景は動かないため、
+   * このレイヤーの移動が視差になる。
    */
   function update() {
     const viewportH = window.innerHeight || root.clientHeight || 0;
@@ -91,6 +108,9 @@
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
       const rect = layer.getBoundingClientRect();
+
+      // このレイヤー固有の総移動量（速度）。要素指定がなければ root 既定へ。
+      const shift = readLayerShift(layer, rootShift);
 
       // 要素がビューポートを通過する進捗 0〜1。
       // 要素の上端が画面下端にあるとき 0、要素の下端が画面上端に
@@ -119,9 +139,10 @@
     window.requestAnimationFrame(update);
   }
 
-  // resize ではビューポート高とトークン値が変わり得るため、shift を読み直す。
+  // resize ではビューポート高とトークン値が変わり得るため、root 既定の
+  // shift を読み直す（各レイヤー固有値は update 内で毎回読むため不要）。
   function onResize() {
-    shift = readShift();
+    rootShift = readRootShift();
     onScroll();
   }
 

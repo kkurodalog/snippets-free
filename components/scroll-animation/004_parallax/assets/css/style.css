@@ -15,9 +15,12 @@
   --parallax-radius:            10px;
 
   /* 視差のトークン
-     --parallax-shift: 背景レイヤーが視差で動く総移動量（px）。
-                       view() 経路・JS 経路のどちらもこの値を使い、
-                       両経路で見た目の振れ幅を揃える。
+     --parallax-shift: レイヤーが視差で動く総移動量（px）。ここ（:root）の値は
+                       既定値で、各レイヤー側で modifier クラスから個別に
+                       上書きできる（例: 遠景は小さく＝ゆっくり、近景は
+                       大きく＝速く）。移動量が小さいほど「遠く」、大きいほど
+                       「近く」に見える。view() 経路・JS 経路のどちらもこの値を
+                       使い、両経路で見た目の振れ幅を揃える。
      --parallax-y:     JS フォールバックが書き込む現在の縦移動量（px）。
                        CSS の view() 経路では使わない（CSS が直接動かす）。 */
   --parallax-shift:             120px;
@@ -81,22 +84,88 @@ code {
   background-color: var(--parallax-color-bg);
 }
 
-/* 背景レイヤー。ステージいっぱいに広げ、視差で動かす対象。
-   上下に余白（-shift〜+shift 分）を持たせ、移動しても背景が
-   途切れないように天地を広めに確保する。
+/* 視差で動かすレイヤー（背景 __bg ／ 任意の中間層 __layer 共通）。
+   ステージいっぱいに広げ、上下に余白（-shift〜+shift 分）を持たせて、
+   移動しても途切れないよう天地を広めに確保する。
+   余白はそのレイヤーの --parallax-shift を参照するため、レイヤーごとに
+   移動量が違っても、その移動量に見合った余白が確保される。
    フックは data-parallax（出現演出・進捗バーとは別系統）。 */
-.c-parallax__bg {
+.c-parallax__bg,
+.c-parallax__layer {
   position: absolute;
   inset-inline: 0;
-  /* 移動しても隙間ができないよう、上下に shift 分の余白を確保。 */
+  /* 移動しても隙間ができないよう、上下にそのレイヤーの shift 分の余白を確保。 */
   inset-block: calc(var(--parallax-shift) * -1) calc(var(--parallax-shift) * -1);
+}
+
+/* 背景レイヤーは最背面（z 0）。中間層（近景）はその上（z 1）。 */
+.c-parallax__bg {
   z-index: 0;
-  /* 装飾図形を散らすための土台グラデーション。外部画像は使わない。 */
+}
+
+.c-parallax__layer {
+  z-index: 1;
+}
+
+/* パターン 1 の背景: 装飾図形を散らすための土台グラデーション。
+   外部画像は使わず CSS だけで自己完結させる。 */
+.c-parallax--a .c-parallax__bg {
   background-image: linear-gradient(
     160deg,
     var(--parallax-color-accent) 0%,
     var(--parallax-color-accent-soft) 100%
   );
+}
+
+/* パターン 2 の背景: 1 枚の画像を敷いて丸ごと視差で動かす（単層）。
+   画像は装飾（aria-hidden）。cover で全面を覆い、center で中央寄せ。 */
+.c-parallax--b .c-parallax__bg {
+  background-image: url("../img/img.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* パターン 2 の前景テキストの可読性を確保するため、画像の上に
+   半透明の暗色グラデーションを重ねる（前景より下・画像より上）。 */
+.c-parallax--b .c-parallax__bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    180deg,
+    rgba(20, 28, 48, 0.35) 0%,
+    rgba(20, 28, 48, 0.6) 100%
+  );
+}
+
+/* パターン 3 の遠景レイヤー: 画像（装飾）。移動量を小さくしてゆっくり
+   動かす ＝ 遠くに見える。前景テキストの可読性のため暗色オーバーレイを重ねる。 */
+.c-parallax--c .c-parallax__bg--far {
+  /* 遠景は移動量を小さく＝ゆっくり＝遠く見える。 */
+  --parallax-shift: 50px;
+  background-image: url("../img/fv-bg.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.c-parallax--c .c-parallax__bg--far::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    180deg,
+    rgba(20, 28, 48, 0.3) 0%,
+    rgba(20, 28, 48, 0.55) 100%
+  );
+}
+
+/* パターン 3 の近景レイヤー: 半透明の装飾図形。移動量を大きくして速く
+   動かす ＝ 近くに見える。背景は透明（図形だけを重ねる）。 */
+.c-parallax--c .c-parallax__layer--near {
+  /* 近景は移動量を大きく＝速く＝近く見える。遠景との速度差が奥行きになる。 */
+  --parallax-shift: 130px;
 }
 
 /* 背景に散らす装飾図形（外部画像を使わず CSS だけで奥行きの手がかりを作る）。 */
@@ -120,15 +189,6 @@ code {
   width: 220px;
   height: 220px;
   background-color: rgba(255, 255, 255, 0.16);
-}
-
-.c-parallax__shape--3 {
-  inset-block-start: 30%;
-  inset-inline-start: 50%;
-  width: 280px;
-  height: 280px;
-  transform: translateX(-50%);
-  background-color: rgba(255, 255, 255, 0.18);
 }
 
 .c-parallax__shape--4 {
@@ -196,9 +256,10 @@ code {
 }
 
 @supports (animation-timeline: view()) {
-  .c-parallax__bg[data-parallax] {
+  .c-parallax__bg[data-parallax],
+  .c-parallax__layer[data-parallax] {
     animation: c-parallax-slide linear;
-    /* 背景自身がビューポートを通過する進捗をタイムラインに使う。 */
+    /* レイヤー自身がビューポートを通過する進捗をタイムラインに使う。 */
     animation-timeline: view();
     /* スクロールタイムラインでは duration はタイムラインの全長に
        マッピングされるため秒数は意味を持たないが、ショートハンドの
@@ -215,7 +276,8 @@ code {
    更新する。CSS 側はそれを translateY に反映する。
    ------------------------------------------------ */
 @supports not (animation-timeline: view()) {
-  .c-parallax__bg[data-parallax] {
+  .c-parallax__bg[data-parallax],
+  .c-parallax__layer[data-parallax] {
     transform: translateY(var(--parallax-y, 0px));
   }
 }
@@ -231,7 +293,8 @@ code {
    両経路とも translateY を初期位置に固定し、視差が無効になる。
    ================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .c-parallax__bg[data-parallax] {
+  .c-parallax__bg[data-parallax],
+  .c-parallax__layer[data-parallax] {
     animation: none;
     transform: none;
   }
