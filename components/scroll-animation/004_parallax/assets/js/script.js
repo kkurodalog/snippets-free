@@ -13,7 +13,7 @@
  *
  * レイヤーごとの速度差（多層パララックス対応）:
  * - 各レイヤーの移動量（総移動量）は、その要素自身の --parallax-shift から
- *   読み取る。要素に指定がなければ :root の既定値、それも取れなければ 120px。
+ *   読み取る。要素に指定がなければ :root の既定値、それも取れなければ 220px。
  *   これにより「遠景はゆっくり・近景は速く」のように、レイヤーごとに別速度で
  *   動かせる（CSS の view() 経路と同じ振れ幅になる）。
  *
@@ -69,13 +69,13 @@
   const root = document.documentElement;
 
   // 既定の総移動量（px）。:root の --parallax-shift から読み取り、要素側に
-  // 個別指定がないレイヤーのフォールバックに使う。取れない／不正なら 120px。
+  // 個別指定がないレイヤーのフォールバックに使う。取れない／不正なら 220px。
   function readRootShift() {
     const raw = getComputedStyle(root)
       .getPropertyValue("--parallax-shift")
       .trim();
     const value = parseFloat(raw);
-    return Number.isFinite(value) && value >= 0 ? value : 120;
+    return Number.isFinite(value) && value >= 0 ? value : 220;
   }
 
   // 個々のレイヤーの総移動量（px）。そのレイヤー自身の computed style から
