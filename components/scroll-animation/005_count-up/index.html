@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>カウントアップ｜スクロール発火の数値アニメーション</title>
+
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで、画面描画前に
+      切り替わり、初期状態のチラつき（FOUC）を防ぐ。
+      JS 無効環境・このスクリプトが届かない環境では no-js のままになり、
+      CSS 側で数値を最初から最終値で表示する（情報の欠落を防ぐ）。
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <main class="l-main">
+      <section class="p-section">
+        <h1 class="p-section__title">カウントアップ</h1>
+
+        <!-- デモ専用クローム: カウント演出を見直すための再読み込みボタン（スニペット範囲外） -->
+        <button
+          type="button"
+          class="p-section__reload"
+          onclick="location.reload()"
+        >
+          ページを再読み込み
+        </button>
+
+        <p class="p-section__text">
+          Intersection Observer でビューポートへの進入を検知し、
+          <code>requestAnimationFrame</code> で 0 から目標値まで数値を補間する
+          カウントアップです。イージング（easeOutQuad）で最初は速く、
+          最後はゆっくり目標値へ着地します。各カウンターは一度発火したら監視を解除します。
+          OS の「視差効果を減らす」設定が有効な場合は、カウントせず即時に最終値を表示します。
+        </p>
+
+        <!-- スクロールで発火する様子を確認するための前置きコンテンツ -->
+        <p class="p-section__lead">
+          下方向へスクロールすると、画面に入ったタイミングで数値が
+          0 から動き出します。実績やKPIをページ内で印象的に見せたいときに使えます。
+        </p>
+
+        <!-- スニペットここから -->
+        <!--
+          data-count-up:       監視対象であることを示すフック属性。
+          data-count-to:       目標値（必須）。0 以上の有限数を指定する。
+          data-count-duration: カウント時間（ms）。省略時は 2000ms。
+          data-count-suffix:   接尾辞（+ / % / 人 / 件 など）。省略可。
+          data-count-decimals: 小数桁数。省略時は 0。
+          data-count-easing:   "linear" で等速に切り替え可。省略時は easeOutQuad。
+
+          各 .c-count__value のテキストには「整形済みの最終値」を書いておく。
+          JS が動けば一旦 0 に初期化してカウントし、JS 無効・IO 非対応環境では
+          この最終値がそのまま表示される（情報が欠落しない）。
+        -->
+        <ul class="c-count">
+          <li class="c-count__item">
+            <span
+              class="c-count__value"
+              data-count-up
+              data-count-to="1200"
+              data-count-suffix="+"
+              >1,200+</span
+            >
+            <span class="c-count__label">導入企業</span>
+          </li>
+
+          <li class="c-count__item">
+            <span
+              class="c-count__value"
+              data-count-up
+              data-count-to="98"
+              data-count-suffix="%"
+              >98%</span
+            >
+            <span class="c-count__label">満足度</span>
+          </li>
+
+          <li class="c-count__item">
+            <span
+              class="c-count__value"
+              data-count-up
+              data-count-to="50000"
+              data-count-duration="2600"
+              >50,000</span
+            >
+            <span class="c-count__label">累計ダウンロード</span>
+          </li>
+
+          <li class="c-count__item">
+            <span
+              class="c-count__value"
+              data-count-up
+              data-count-to="4.8"
+              data-count-decimals="1"
+              >4.8</span
+            >
+            <span class="c-count__label">平均評価</span>
+          </li>
+        </ul>
+        <!-- スニペットここまで -->
+      </section>
+    </main>
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>
