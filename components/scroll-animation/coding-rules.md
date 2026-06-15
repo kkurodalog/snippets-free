@@ -29,3 +29,12 @@ scroll-animation シリーズ（001 fade-in / 002 stagger / 003 以降）共通�
 - `prefers-reduced-motion: reduce` で即時最終状態表示（opacity:1 / transform:none / transition:none / pointer-events:auto / will-change:auto）。**ただし情報提示UI（progress-bar 等）は上記「scroll-driven CSS 系」の例外規定に従う。**
 - 不可視中は `pointer-events: none`、reveal 後 `.is-visible` で `auto` に戻す。
 - 状態は `.is-visible` を単一の真実の源とし、見た目切替は CSS に集約する。
+
+## 実挙動検証（視覚効果系は Reid 後に Playwright 実測を必須とする）
+
+- **【重要】スクロール連動・アニメーション等の視覚効果系 snippet は、Reid の静的規範照合だけでは実挙動の不具合を捉えきれない。Reid レビュー後に Playwright/Chromium で実挙動を実測検証することを必須工程とする。** 静的にコードが規範どおりでも、ブラウザの実挙動（スクロールコンテナの解決・タイムラインの fill 挙動・合成/再描画）でしか露見しない不具合が出る。
+- **実例（いずれも静的レビューを通過したが実測で初めて発覚）**:
+  - 004 parallax: `.c-parallax` の `overflow: hidden` が view() の最近接スクロールポートを自身にしてしまい進捗固定化 → `overflow: clip` で解決。
+  - 006 blur: `animation-timeline` 駆動で `animation-fill-mode` 未指定（ショートハンドで none）のため、`animation-range`（先頭ビューポート）超過後に `backdrop-filter` が基底値 blur(0) へ復帰 → `animation-fill-mode: forwards` で最終状態保持。
+- **検証観点（最低限）**: (1) アニメ/エフェクトがスクロール等に連動して意図どおり駆動・保持されるか（範囲端・超過後の挙動含む）、(2) `prefers-reduced-motion: reduce` で意図どおり無効化/最終状態になるか、(3) PE（JS 無効・機能非対応）で情報欠落・レイアウト破壊がないか。
+- **手順**: `playwright-core`（chromium headless）を一時ディレクトリに用意し、`getComputedStyle` 等で実値を計測。**ローカル file と公開 URL（GitHub Pages 反映後）の両方**で確認する。検証用一時ディレクトリは確認後に削除する。

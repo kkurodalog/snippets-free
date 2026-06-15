@@ -74,6 +74,10 @@ code {
   inset-block-start: 0;
   /* 先頭ビューポートに収まる高さ。背景はこの範囲に貼り付く。 */
   height: 100vh;
+  /* 親コンテナ（max-width 制限のある .l-main）を突き抜けてビューポート
+     全幅にする。背景画像が画面全幅を覆う。 */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
   /* backdrop-filter の塗りをステージ内に閉じ込めてコストを抑える。 */
   contain: paint;
   overflow: clip;
@@ -105,27 +109,6 @@ code {
   backdrop-filter: blur(0);
   /* ぼかしの合成を最適化する（backdrop-filter の変化を予告）。 */
   will-change: backdrop-filter;
-}
-
-/* ステージ上に重ねる説明テキスト。背景・オーバーレイより前面（z 2）。 */
-.c-blur__caption {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  height: 100%;
-  padding: 0 24px 48px;
-}
-
-.c-blur__lead {
-  margin: 0;
-  max-width: 640px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--blur-color-text);
-  text-shadow: 0 1px 8px rgba(20, 28, 48, 0.55);
 }
 
 /* ------------------------------------------------
@@ -200,7 +183,7 @@ code {
 }
 
 /* ================================================
-   l-main / p-intro / p-outro: デモページのレイアウト
+   l-main / p-intro: デモページのレイアウト
    ================================================ */
 .l-main {
   max-width: 880px;
@@ -319,28 +302,9 @@ code {
   }
 }
 
-/* ================================================
-   p-outro: デモページの締めセクション
-   ================================================ */
-.p-outro {
-  padding: 32px 24px;
-  background-color: var(--blur-color-bg);
-  border: 1px solid var(--blur-color-border);
-  border-radius: var(--blur-radius);
-}
-
-.p-outro__text {
-  margin: 0;
-  color: var(--blur-color-text-muted);
-}
-
 @media (min-width: 768px) {
   .p-intro__title {
     font-size: 28px;
-  }
-
-  .c-blur__lead {
-    font-size: 18px;
   }
 
   .p-reveal__title {
