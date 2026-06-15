@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>006_blur</title>
+
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで、画面描画前に切り替わる。
+
+      ただし、この背景ぼかしは出現演出（フェードイン等）と性質が異なる。
+      出現演出は「JS が要素を表示状態にしないとコンテンツが隠れたまま」になる
+      ため、JS 前提を no-js / js で厳密に切り分ける必要があった。
+      一方この背景ぼかしは、対応ブラウザでは CSS の animation-timeline: scroll()
+      だけでスクロール量に連動して backdrop-filter が強まるため、JS は「非対応
+      ブラウザ向けの保険」にすぎない。よって no-js / js をぼかしの有無には
+      使わない（背景は対応・非対応・JS無効のいずれでも常に表示され、ぼかしが
+      効かない場合はシャープなまま見える）。
+      （no-js / js クラス自体は同シリーズの作法に揃えて付与しておく。）
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <main class="l-main">
+      <section class="p-intro">
+        <h1 class="p-intro__title">006_blur</h1>
+
+        <!-- デモ専用クローム: ぼかしの動きを最初から見直すための再読み込みボタン（スニペット範囲外） -->
+        <button
+          type="button"
+          class="p-intro__reload"
+          onclick="location.reload()"
+        >
+          ページを再読み込み
+        </button>
+
+        <p class="p-intro__text">
+          画面に固定した背景画像が、<strong>スクロール量に連動して
+          徐々にぼけていく</strong>実装です。対応ブラウザでは
+          <code>animation-timeline: scroll()</code> によって、最初のビューポートを
+          スクロールするほど <code>backdrop-filter: blur()</code> が強まります
+          （<strong>JS なし・CSS だけ</strong>）。この機能に未対応のブラウザでは、
+          <code>scroll</code> イベントと <code>requestAnimationFrame</code> を
+          使った軽量な JS が同じぼかし量を計算して反映します（フォールバック）。
+          OS の「視差効果を減らす」設定が有効な場合は、ぼかしを完全に無効化して
+          背景をシャープなまま表示します。下方向にスクロールして、背景が
+          ぼけていく様子を確認してください。
+        </p>
+      </section>
+
+      <!--
+        スニペットここから
+
+        背景ぼかしステージの基本構造。
+          .c-blur          : 背景画像を画面に貼り付けるステージ（sticky・100vh）。
+          .c-blur__overlay : 背景の上に重ねるぼかしオーバーレイ。backdrop-filter で
+                             直下の背景をぼかす。ぼかし量はこのレイヤーが担う。
+          .c-blur__caption : ステージ上に重ねる説明テキスト。
+
+        data-scroll-blur   : ぼかしを駆動する対象（オーバーレイ）を示すフック属性。
+          他のスクロール系スニペットと別系統の独立した属性にしているため、
+          同じページに同居しても互いに干渉しない。
+
+        ぼかしは純粋な装飾的エンハンスメント。CSS も JS も効かない環境では
+        背景はシャープに表示され、テキストは通常どおり読める（情報欠落なし）。
+      -->
+      <section class="c-blur">
+        <div class="c-blur__bg" aria-hidden="true"></div>
+        <div class="c-blur__overlay" data-scroll-blur aria-hidden="true"></div>
+        <div class="c-blur__caption">
+          <p class="c-blur__lead">
+            スクロールするほど、この背景が少しずつぼけていきます。
+          </p>
+        </div>
+      </section>
+      <!-- スニペットここまで -->
+
+      <!--
+        第2セクション: ビューポート進入でフェードインする見出し。
+        背景がぼけきった先に現れる見せ場。出現演出は別系統の
+        data-fade-in / .is-visible で制御する（ぼかしとは独立）。
+      -->
+      <section class="p-reveal">
+        <hgroup class="p-reveal__group">
+          <h2 class="p-reveal__title" data-fade-in>背景をぼかすスクロール演出</h2>
+          <p class="p-reveal__sub" data-fade-in>Scroll blur effect</p>
+        </hgroup>
+      </section>
+
+      <section class="p-outro">
+        <p class="p-outro__text">
+          ここがページの終端です。最初のビューポートをスクロールするにつれて
+          背景がぼけていき、続く見出しがビューポートに入った瞬間に
+          フェードインで現れたことを確認できたでしょうか。ぼかしは
+          <code>backdrop-filter</code> による装飾で、対応していない環境や
+          JS 無効環境では背景がシャープなまま表示されるだけで、テキストは
+          いずれの環境でも通常どおり読めます。
+        </p>
+      </section>
+    </main>
+
+    <script src="./assets/js/script.js" defer></script>
+  </body>
+</html>

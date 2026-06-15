@@ -1,0 +1,353 @@
+/* ================================================
+   カスタムプロパティ
+   背景ぼかし専用のトークン名（--blur-*）でまとめる。
+   他のスクロール系スニペットと別系統のトークン名にしているため、
+   同じページに複数を同居させてもトークンが衝突しない。
+   ================================================ */
+:root {
+  --blur-color-text:        #f4f6fa;
+  --blur-color-text-muted:  #51596b;
+  --blur-color-bg:          #ffffff;
+  --blur-color-border:      #d9dde6;
+  --blur-color-accent:      #5c6b8a;
+
+  --blur-radius:            10px;
+
+  /* 背景ぼかしのトークン
+     --blur-max:    ぼかしの最大強度（px）。スクロール最深部での blur 量。
+                    CSS の scroll() 経路・JS フォールバック経路のどちらも
+                    この値を使い、両経路で見た目の振れ幅を揃える。
+     --blur-amount: JS フォールバックが書き込む現在のぼかし量（px）。
+                    CSS の scroll() 経路では使わない（CSS が直接駆動する）。 */
+  --blur-max:               20px;
+  --blur-amount:            0px;
+
+  /* 出現演出のトークン（第2セクションのフェードイン用）。
+     出現演出スニペットと同じ idiom を踏襲しつつ、本スニペット内で自己完結させる。 */
+  --blur-fade-distance:     24px;
+  --blur-fade-duration:     0.6s;
+  --blur-fade-easing:       cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ================================================
+   ベースリセット（デモページ用）
+   ================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    "Hiragino Sans", "Noto Sans JP", sans-serif;
+  color: #2b2b2b;
+  background-color: #f4f6fa;
+  line-height: 1.7;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  background-color: #e7eaf1;
+  border-radius: 4px;
+}
+
+/* ================================================
+   背景ぼかしステージ本体
+   画面に貼り付く背景（__bg）の上にぼかしオーバーレイ（__overlay）を
+   重ね、スクロール量に連動して backdrop-filter の blur を強めていく。
+   ================================================ */
+
+/* ぼかしステージ。背景・オーバーレイ・キャプションを重ねる枠。
+   sticky で先頭ビューポートに貼り付け、その間ページ全体はスクロール
+   できるようにする。これにより「背景は止まったまま、スクロール量に
+   応じてぼけていく」体験になる。
+
+   contain: paint で、このステージの描画をサブツリー内に閉じ込める。
+   backdrop-filter は合成・再描画のコストが高いため、塗りの影響範囲を
+   ステージ内に限定して周囲への再描画波及を抑える。 */
+.c-blur {
+  position: sticky;
+  inset-block-start: 0;
+  /* 先頭ビューポートに収まる高さ。背景はこの範囲に貼り付く。 */
+  height: 100vh;
+  /* backdrop-filter の塗りをステージ内に閉じ込めてコストを抑える。 */
+  contain: paint;
+  overflow: clip;
+}
+
+/* 背景画像レイヤー（装飾なので aria-hidden）。ステージ全面を覆う。
+   この画像自体はぼかさない。直上のオーバーレイが backdrop-filter で
+   この背景をぼかす。 */
+.c-blur__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("../img/blur-bg.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* ぼかしオーバーレイ。背景の上に透明な層として重ね、backdrop-filter で
+   直下（背景画像）をぼかす。ぼかし量だけをこのレイヤーが担う。
+   フックは data-scroll-blur（出現演出・進捗バー・視差とは別系統）。
+   初期は blur(0)＝ぼかしなし（PE: 何も効かなくても背景はシャープ）。 */
+.c-blur__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* 初期状態はぼかしなし。スクロール連動で 0 → --blur-max へ強まる。 */
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  /* ぼかしの合成を最適化する（backdrop-filter の変化を予告）。 */
+  will-change: backdrop-filter;
+}
+
+/* ステージ上に重ねる説明テキスト。背景・オーバーレイより前面（z 2）。 */
+.c-blur__caption {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  padding: 0 24px 48px;
+}
+
+.c-blur__lead {
+  margin: 0;
+  max-width: 640px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blur-color-text);
+  text-shadow: 0 1px 8px rgba(20, 28, 48, 0.55);
+}
+
+/* ------------------------------------------------
+   第一実装: CSS だけでスクロール量に連動してぼかす
+   （animation-timeline: scroll()）
+   対応ブラウザ（Chrome / Edge 系）では、JS を一切使わずに
+   backdrop-filter がスクロール量に連動して強まる。
+   scroll(root block) はルート（ページ全体）の縦スクロール進捗を
+   タイムラインに使い、animation-range で「先頭ビューポート相当
+   （0 〜 100vh）」だけを駆動区間に切り出す。これにより最初の 1 画面分を
+   スクロールし切った時点でぼかしが最大（--blur-max）になる。
+   ------------------------------------------------ */
+@keyframes c-blur-deepen {
+  from {
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+  to {
+    -webkit-backdrop-filter: blur(var(--blur-max));
+    backdrop-filter: blur(var(--blur-max));
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .c-blur__overlay[data-scroll-blur] {
+    /* forwards: range 終端（100vh）を超えても最終キーフレーム
+       blur(var(--blur-max)) を保持する（旧実装の min(..,1) クランプ相当）。
+       未指定（none）だと先頭ビューポート超過で blur(0) に復帰してしまう。 */
+    animation: c-blur-deepen linear forwards;
+    /* ルート（ページ全体）の縦スクロール進捗をタイムラインに使う。 */
+    animation-timeline: scroll(root block);
+    /* 駆動区間を先頭ビューポート相当（先頭 0 〜 100vh スクロール）に限定。 */
+    animation-range: 0 100vh;
+    /* スクロールタイムラインでは duration はタイムラインの全長に
+       マッピングされ秒数は意味を持たないが、ショートハンドの省略時
+       挙動のばらつきを避けるため明示しておく。 */
+    animation-duration: auto;
+  }
+}
+
+/* ------------------------------------------------
+   JS フォールバック: animation-timeline 非対応ブラウザ向け
+   （Safari / Firefox 等）
+   非対応環境では上の @supports ブロックが無効化され、ぼかしは
+   blur(0) のまま静止する。JS が先頭ビューポートのスクロール進捗を
+   計算して --blur-amount（px）を更新し、CSS 側がそれを
+   backdrop-filter に反映する。
+   ------------------------------------------------ */
+@supports not (animation-timeline: scroll()) {
+  .c-blur__overlay[data-scroll-blur] {
+    -webkit-backdrop-filter: blur(var(--blur-amount, 0px));
+    backdrop-filter: blur(var(--blur-amount, 0px));
+  }
+}
+
+/* ================================================
+   prefers-reduced-motion: 動きを減らす設定への配慮
+   背景ぼかしは装飾的な演出であり、読了率バーのような「情報提示」では
+   ない。スクロールに連動して画面全体がぼけていく動きは画面酔いを
+   誘発しやすいため、reduce 時はぼかしを完全に無効化し、背景を
+   シャープなまま固定する（視差スニペットと同じ「装飾は完全無効化」の類型）。
+   - CSS 経路（scroll()）: animation を none にしてぼかしアニメを止める。
+   - 両経路とも backdrop-filter を blur(0) に固定し、ぼかしが無効になる。
+     JS 側もリスナーを張らない（後述）ため、--blur-amount は 0 のまま。
+   ================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .c-blur__overlay[data-scroll-blur] {
+    animation: none;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+
+/* ================================================
+   l-main / p-intro / p-outro: デモページのレイアウト
+   ================================================ */
+.l-main {
+  max-width: 880px;
+  margin-inline: auto;
+  padding: 40px 20px;
+}
+
+.p-intro__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.p-intro__text {
+  margin: 0 0 24px;
+  color: var(--blur-color-text-muted);
+}
+
+/* デモ専用クローム: ぼかしの動きを最初から見直すための再読み込みボタン。
+   スニペット本体ではなくデモページの利便機能。 */
+.p-intro__reload {
+  display: inline-block;
+  margin: 0 0 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blur-color-bg);
+  background-color: var(--blur-color-accent);
+  border: 1px solid var(--blur-color-accent);
+  border-radius: var(--blur-radius);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.p-intro__reload:hover {
+  opacity: 0.85;
+}
+
+.p-intro__reload:focus-visible {
+  outline: 2px solid var(--blur-color-accent);
+  outline-offset: 2px;
+}
+
+/* ================================================
+   p-reveal: 第2セクション（フェードインする見出し）
+   背景がぼけきった先に現れる見せ場。十分なスクロール量を
+   確保するため縦に長く取り、進入で見出しがフェードインする。
+   ================================================ */
+.p-reveal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background-color: #1a2238;
+}
+
+.p-reveal__group {
+  margin: 0;
+  text-align: center;
+}
+
+.p-reveal__title {
+  margin: 0 0 12px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--blur-color-text);
+}
+
+.p-reveal__sub {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: rgba(244, 246, 250, 0.7);
+}
+
+/* 出現演出の本体（出現演出スニペットを踏襲）。
+   プログレッシブエンハンスメント:
+   - JS が動く環境では html.js が付与される。このときだけ初期状態を
+     「透明＋下にずらした位置」にし、.is-visible が付くまで隠す。
+   - JS 無効・このスクリプトが届かない環境では html が no-js のままに
+     なり、下記ルールが効かないため見出しは最初から表示される
+     （コンテンツが消えない）。
+   フック（data-fade-in / .is-visible）は出現演出系の共通作法に揃える。
+   見た目トークンは本スニペット内の --blur-fade-* で自己完結させる。 */
+.js .p-reveal__title[data-fade-in],
+.js .p-reveal__sub[data-fade-in] {
+  opacity: 0;
+  transform: translateY(var(--blur-fade-distance));
+  transition:
+    opacity var(--blur-fade-duration) var(--blur-fade-easing),
+    transform var(--blur-fade-duration) var(--blur-fade-easing);
+  will-change: opacity, transform;
+}
+
+/* ビューポート進入後に付与される最終状態。translate を 0 に戻し、
+   本来の位置へ。will-change はワンショット表示後はもう不要なので
+   auto に戻し、合成レイヤーが残り続けるのを防ぐ。 */
+.js .p-reveal__title.is-visible,
+.js .p-reveal__sub.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  will-change: auto;
+}
+
+/* prefers-reduced-motion: フェードインは即時最終状態で見せる（出現演出スニペット踏襲）。
+   出現演出は reduce 時に「最初から表示」で差し支えない（情報提示では
+   ないため）。 */
+@media (prefers-reduced-motion: reduce) {
+  .js .p-reveal__title[data-fade-in],
+  .js .p-reveal__sub[data-fade-in] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
+
+/* ================================================
+   p-outro: デモページの締めセクション
+   ================================================ */
+.p-outro {
+  padding: 32px 24px;
+  background-color: var(--blur-color-bg);
+  border: 1px solid var(--blur-color-border);
+  border-radius: var(--blur-radius);
+}
+
+.p-outro__text {
+  margin: 0;
+  color: var(--blur-color-text-muted);
+}
+
+@media (min-width: 768px) {
+  .p-intro__title {
+    font-size: 28px;
+  }
+
+  .c-blur__lead {
+    font-size: 18px;
+  }
+
+  .p-reveal__title {
+    font-size: 34px;
+  }
+
+  .p-reveal__sub {
+    font-size: 16px;
+  }
+}
