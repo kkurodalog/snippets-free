@@ -1,5 +1,5 @@
 /**
- * 003_hamburger-fullscreen
+ * 006_hamburger-fullscreen
  * フルスクリーン型ハンバーガーメニュー
  *
  * 機能:

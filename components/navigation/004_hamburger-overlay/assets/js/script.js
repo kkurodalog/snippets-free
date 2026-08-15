@@ -1,5 +1,5 @@
 /**
- * 002_hamburger-overlay
+ * 004_hamburger-overlay
  * ドロワー型ハンバーガーメニュー（オーバーレイ付き）
  *
  * 機能:
