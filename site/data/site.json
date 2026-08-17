@@ -1,0 +1,27 @@
+{
+  "siteName": "Snippets Free",
+  "siteOrigin": "https://kkurodalog.github.io/snippets-free/",
+  "repoUrl": "https://github.com/kkurodalog/snippets-free",
+  "repoBranch": "master",
+  "lang": "ja",
+  "top": {
+    "title": "コピペして使えるフロントエンドのパーツ集",
+    "description": "HTML・CSS・JavaScript のパーツを、動くデモとコードで並べたカタログ。カード上でコードを見てそのままコピーできる。"
+  },
+  "categories": [
+    { "slug": "accordion", "name": "アコーディオン", "status": "published" },
+    { "slug": "navigation", "name": "ナビゲーション", "status": "published" },
+    { "slug": "scroll-animation", "name": "スクロール演出", "status": "published" },
+    { "slug": "css-technique", "name": "CSS技法", "status": "published" },
+    { "slug": "visual-effect", "name": "ビジュアル演出", "status": "planned" },
+    { "slug": "text-animation", "name": "テキストアニメーション", "status": "planned" },
+    { "slug": "modal-drawer", "name": "モーダル・ドロワー", "status": "planned" },
+    { "slug": "tab", "name": "タブ", "status": "planned" }
+  ],
+  "externalLinks": [
+    { "icon": "github", "label": "GitHub", "href": "https://github.com/kkurodalog/snippets-free" },
+    { "icon": "person", "label": "制作者について", "href": "https://kurodafolio.com/about/" },
+    { "icon": "book", "label": "技術ブログ", "href": "https://frontend-note.blog" },
+    { "icon": "x", "label": "X", "href": "https://x.com/kurodalog" }
+  ]
+}

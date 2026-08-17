@@ -1,0 +1,57 @@
+MIT License
+
+Copyright (c) 2026 kkurodalog
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+## 適用範囲（Scope）
+
+上記 MIT ライセンスが適用されるのは、本リポジトリの**ソースコード**である。
+
+- 対象: HTML / CSS / JavaScript / 生成スクリプト
+- **対象外: 素材（画像・動画）**
+
+**素材は MIT の対象外である。** 具体的には次のファイルを指す。
+
+- `media/` 配下の動画・静止画
+- 各デモの `assets/images/` `assets/movie/` 配下のファイル
+
+素材には再配布・再利用の許諾を含まない。素材を伴うデモを利用する場合は、
+素材を自前のものへ差し替えること。
+
+The MIT License above covers the source code of this repository only
+(HTML / CSS / JavaScript / build scripts). Assets — images and videos under
+`media/` and under each demo's `assets/images/` and `assets/movie/` — are NOT
+covered by the MIT License and are not licensed for redistribution or reuse.
+
+-------------------------------------------------------------------------------
+
+## 第三者表記（Third-party notices）
+
+本サイトのフッターとヘッダーで、GitHub および X のマークをインライン SVG で表示する。
+
+- 両マークは各社の商標である
+- 単色・形状無改変で、リンク先を示す目的にのみ使用する
+- 利用条件は各社のブランドガイドラインに従う
+
+The GitHub and X marks displayed in this site are trademarks of their
+respective owners. They are used in a single color, without modification to
+their shapes, solely to indicate the destination of a link.

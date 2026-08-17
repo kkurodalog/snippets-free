@@ -1,0 +1,3 @@
+node_modules/
+# npm run serve が作るローカル配信用の入れ物（公開時と同じ深さを再現するためのシンボリックリンク）
+.serve/

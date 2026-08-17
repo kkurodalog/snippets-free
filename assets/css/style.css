@@ -1,0 +1,904 @@
+@charset "UTF-8";
+
+/* =============================================================================
+   Snippets Free — カタログ外殻のスタイル
+   -----------------------------------------------------------------------------
+   ブレークポイントは 600px と 900px の2つだけ。3つ目を足さない。
+   足したくなったら clamp() / min() / コンテナクエリで代替できないかを先に検討する。
+   モバイルファースト（min-width で積み上げる）。
+
+   層の順序は下の @layer で先に宣言する。以降はこの5層の中だけに書く。
+   ========================================================================== */
+
+@layer reset, base, layout, component, utility;
+
+/* =============================================================================
+   base — トークン
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* 配色モードはダーク単一。ライト用のトークンも切替も持たない。
+       この宣言はフォームコントロール・スクロールバーの UA スタイルを黒に揃えるためのもの。 */
+    color-scheme: dark;
+
+    /* ── 面 ── */
+    --canvas: #0b0c0e;
+    --surface: #16181c;
+    --surface-raised: #1e2126;
+    --surface-code: #101215;
+
+    /* ── 操作部の面 ── */
+    --control: #3b424b;
+    --control-hover: #4b525d;
+
+    /* ── 文字 ── */
+    --ink: #f2f4f6;
+    --ink-secondary: #c3c9d1;
+    --ink-muted: #9aa2ad;
+    --on-inverse: #0b0c0e;
+    --on-inverse-muted: #41474f;
+
+    /* ── 罫線（乗る面で使い分ける。取り違えない） ──
+       hairline        = 装飾の区切り
+       hairline-strong = 暗い面の上のコントロール境界
+       ink-muted       = コントロール面（control / control-hover）の上の境界 */
+    --hairline: #2c3138;
+    --hairline-strong: #6f7785;
+
+    /* ── フォーカス ── */
+    --ring: #ffffff;
+    --ring-on-light: #0b0c0e;
+
+    /* ── プレビュー窓とその額装 ── */
+    --preview-canvas: #ffffff;
+    --preview-matte: #31373f;
+
+    /* ── オーバーレイ ── */
+    --scrim: rgba(4, 5, 6, 0.78);
+
+    /* ── コードのシンタックスハイライト ──
+       彩度を持ってよいのはこの8色だけ。UI 側へ流用しない（逆も同じ）。 */
+    --code-plain: #dfe3e8;
+    --code-punct: #98a2ae;
+    --code-comment: #8b95a2;
+    --code-keyword: #b6a9d6;
+    --code-name: #9dc3cd;
+    --code-attr: #d8b78d;
+    --code-string: #a9c39c;
+    --code-number: #dda9a9;
+    --code-selection: #252d36;
+
+    /* ── 書体 ── Web フォントを読み込まない（システムフォントのみ） */
+    --font-sans:
+      system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+      "Yu Gothic Medium", "YuGothic", "Meiryo", sans-serif;
+    --font-mono:
+      ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+
+    /* =========================================================================
+       ここから下は px を rem に換算した値である。
+       ⚠️ 換算面はこのトークン定義1箇所だけ。使用側に生の rem を書かず var() で参照する。
+          換算式は px ÷ 16。隣に書いた px がデザイン正本の値であり、突合はこの1列で足りる。
+       ⚠️ rem にする理由は、ブラウザの既定フォントサイズを大きくしている利用者に
+          文字と余白の両方を追従させるためである（px は追従しない）。
+       ⚠️ html に `font-size: 62.5%` の類を書かない。利用者の既定値を縮めるため逆効果になる。
+       ⚠️ 例外として px のまま残すもの — 線幅・角丸・リング・影の距離
+          （利用者設定でヘアラインが太るのは意図しない）と、メディアクエリの条件値
+          （rem にすると BP そのものが利用者設定で動く）。
+       ========================================================================= */
+
+    /* ── 文字サイズ ── */
+    --fs-display: clamp(1.625rem, 5vw, 2.125rem); /* clamp(26px, 5vw, 34px) */
+    --fs-logo: 1.375rem; /* 22px */
+    --fs-logo-sp: 1.25rem; /* 20px */
+    --fs-body: 1rem; /* 16px */
+    --fs-small: 0.875rem; /* 14px */
+    --fs-caption: 0.8125rem; /* 13px */
+
+    /* ── 余白（4px ベースの段階値。余白に clamp() を使わない） ── */
+    --space-xxs: 0.125rem; /* 2px */
+    --space-xs: 0.25rem; /* 4px */
+    --space-sm: 0.5rem; /* 8px */
+    --space-md: 0.75rem; /* 12px */
+    --space-lg: 1rem; /* 16px */
+    --space-xl: 1.5rem; /* 24px */
+    --space-xxl: 2rem; /* 32px */
+    --space-section-sp: 3rem; /* 48px */
+    --space-section: 4rem; /* 64px */
+    --space-section-lg: 6rem; /* 96px  セクションが並ぶ画面で使う。今のページにはまだ出番がない */
+
+    /* ── 段階値に乗らない個別寸法（デザイン正本が実値で指定しているもの） ── */
+    --control-min-height: 2.5rem; /* 40px  操作要素の最小寸法 */
+    --item-min-height: 2.75rem; /* 44px  パネル項目 */
+    --skip-link-padding-block: 0.375rem; /* 6px */
+    --skip-link-padding-inline: 0.625rem; /* 10px */
+    --skip-link-hidden-offset: 6.25rem; /* 100px  画面外へ逃がす距離 */
+    --nav-bar-width: 1.125rem; /* 18px  ハンバーガーの3本線 */
+    --nav-bar-height: 0.125rem; /* 2px */
+    --nav-bar-gap: 0.3125rem; /* 5px  線と線の間隔 */
+    --drawer-width: 17.5rem; /* 280px  右から入るドロワーの幅 */
+
+    /* ── 角丸 ── px のまま（利用者のフォント設定で角丸が膨らむのは意図しない） */
+    --radius-xs: 3px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-pill: 9999px;
+
+    /* ── 線幅 ── px のまま（ヘアラインが利用者設定で太るのは意図しない） */
+    --border-hairline: 1px;
+    --border-control: 1px;
+    --ring-width: 2px;
+    --ring-offset: 2px;
+    --bar-current-width: 2px; /* 現在地を示す左端の縦バー */
+
+    /* ── 影 ── 影を持つ面はモーダル1つだけ。距離は px のまま ── */
+    --shadow-modal: 0 32px 64px -24px rgba(0, 0, 0, 0.8);
+
+    /* ── 重なり ── <dialog> の showModal() は top layer に載るので z-index を持たせない ── */
+    --z-sticky-header: 100;
+    --z-dropdown-panel: 110;
+    --z-skip-link: 200;
+
+    /* 暗幕とドロワーはヘッダーの中にある。ヘッダー自身が --z-sticky-header で
+       重なりの文脈を作るため、この2つはその文脈の中だけで効く局所の値である。
+       ページ全体に対する順序は --z-sticky-header が決めており、ここを 200 より
+       大きくしてもスキップ導線を越えることはない。 */
+    --z-nav-overlay: 120;
+    --z-nav-drawer: 130;
+
+    /* ── レイアウト ── */
+    --container-max: 70rem; /* 1120px */
+    --gutter: 1rem; /* 16px */
+    --modal-max: 55rem; /* 880px */
+    --grid-gap: 1rem; /* 16px */
+    --header-min-height: 3.5rem; /* 56px */
+    --dropdown-panel-min-width: 15rem; /* 240px */
+    --dropdown-panel-max-height: 60vh; /* はみ出し防止の上限。高さの確保ではない */
+    --icon-size: 1rem; /* 16px  文字と一緒に拡大させるため rem */
+    --preview-matte-width: 0.5rem; /* 8px */
+    --codeblock-max-height: 20rem; /* 320px */
+
+    /* ── 動き ── */
+    --duration-fast: 120ms;
+    --duration: 200ms; /* 面の開閉に使う。開閉する面はモーダル（4b）で出る */
+    --easing: cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  @media (min-width: 600px) {
+    :root {
+      --gutter: 1.5rem; /* 24px */
+      --grid-gap: 1.5rem; /* 24px */
+      --codeblock-max-height: 26.25rem; /* 420px */
+    }
+  }
+
+  @media (min-width: 900px) {
+    :root {
+      --header-min-height: 4rem; /* 64px */
+    }
+  }
+}
+
+/* =============================================================================
+   reset
+   ========================================================================== */
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    margin: 0;
+    padding: 0;
+  }
+
+  ul[class],
+  ol[class] {
+    list-style: none;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg,
+  iframe {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+/* =============================================================================
+   base — 素の要素
+   ========================================================================== */
+
+@layer base {
+  body {
+    min-height: 100svh;
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    font-weight: 400;
+    line-height: 1.8;
+    letter-spacing: 0.04em;
+    font-feature-settings: "kern" 1;
+    line-break: strict;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-feature-settings: "palt" 1, "kern" 1;
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+    letter-spacing: 0;
+    font-feature-settings: normal;
+    font-variant-ligatures: none;
+    tab-size: 2;
+  }
+
+  /* フォーカスを消さない。白いプレビュー窓の上に出る要素だけ別扱いにする。 */
+  :focus-visible {
+    outline: var(--ring-width) solid var(--ring);
+    outline-offset: var(--ring-offset);
+  }
+
+  ::selection {
+    background-color: var(--control);
+    color: var(--ink);
+  }
+}
+
+/* =============================================================================
+   layout
+   ========================================================================== */
+
+@layer layout {
+  .l-container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* ── ヘッダー ──
+     高さは min-height で組む。ロゴが2行に折り返したらヘッダーは伸びる。
+     ヘッダーの高さを前提にした固定値をどこにも書かない。 */
+  .l-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky-header);
+    background-color: var(--canvas);
+    border-bottom: var(--border-hairline) solid var(--hairline);
+  }
+
+  .l-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    min-height: var(--header-min-height);
+    padding-block: var(--space-sm);
+  }
+
+  /* 空きはロゴと右群の間に1つだけ置く。右群の内側に2つ目の空きを作らない。 */
+  .l-header__nav {
+    display: none;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-inline-start: auto;
+  }
+
+  .l-main {
+    display: block;
+  }
+
+  /* ── フッター ── */
+  .l-footer {
+    background-color: var(--canvas);
+    border-top: var(--border-hairline) solid var(--hairline);
+    padding-block: var(--space-section-sp);
+  }
+
+  .l-footer__blocks {
+    display: grid;
+    gap: var(--space-xxl);
+  }
+
+  @media (min-width: 600px) {
+    /* ヘッダーのカテゴリ導線が横並び（ドロップダウン）に変わるのはここ。
+       〜599px はハンバーガー ＋ ドロワー。600px を境にする理由は
+       カテゴリを1つのドロップダウンに畳んだことで、必要な幅が大きく減ったためである。
+       ⚠️ 900px の役割（カード3列・フッター3カラム・ヘッダー高・ロゴ）は変えない。 */
+    .l-header__nav {
+      display: flex;
+    }
+
+    .l-footer__blocks {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .l-footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .l-footer__blocks {
+      grid-template-columns: auto 1fr 1fr;
+      gap: var(--space-section-sp);
+    }
+
+    .l-footer__brand {
+      grid-column: auto;
+    }
+  }
+}
+
+/* =============================================================================
+   component
+   ========================================================================== */
+
+@layer component {
+  /* ── スキップ導線 ──
+     既定では高さを占有しない。フォーカスが当たったときだけ可視になる。
+     白いプレビュー窓の上に重なっても読めるよう、常に暗いチップとして描く。 */
+  .c-skip-link {
+    position: absolute;
+    inset-block-start: calc(var(--skip-link-hidden-offset) * -1);
+    inset-inline-start: var(--gutter);
+    z-index: var(--z-skip-link);
+    padding: var(--skip-link-padding-block) var(--skip-link-padding-inline);
+    background-color: var(--canvas);
+    color: var(--ink);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-caption);
+    line-height: 1.7;
+    text-decoration: none;
+  }
+
+  .c-skip-link:focus {
+    inset-block-start: var(--space-sm);
+  }
+
+  /* ── ロゴ（サイト名 / 文字のみ） ──
+     nowrap を付けない。狭い幅では2行に折り返す。 */
+  .c-logo {
+    min-width: 0;
+    color: var(--ink);
+    font-size: var(--fs-logo-sp);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    font-feature-settings: "palt" 1, "kern" 1;
+    text-decoration: none;
+    white-space: normal;
+  }
+
+  .c-logo:hover {
+    text-decoration: underline;
+  }
+
+  @media (min-width: 900px) {
+    .c-logo {
+      font-size: var(--fs-logo);
+    }
+  }
+
+  /* ── インライン SVG アイコン ── */
+  .c-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+
+  /* ── 別タブで開くことを示す記号。ラベルより一段弱くする ── */
+  .c-ext {
+    color: var(--ink-muted);
+    margin-inline-start: var(--space-xs);
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  /* ── ヘッダー右の「ソースコード」 ── */
+  .c-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: var(--control-min-height);
+    padding-inline: var(--space-md);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  .c-nav-link:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  /* ── 「カテゴリ ▾」ドロップダウン ──
+     ホバーだけで開かない。押す操作（タップ / Enter / Space）で開閉する。 */
+  .c-dropdown {
+    position: relative;
+  }
+
+  .c-dropdown__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: var(--control-min-height);
+    padding: 0 var(--space-md);
+    background-color: transparent;
+    color: var(--ink-secondary);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    transition:
+      color var(--duration-fast) var(--easing),
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  .c-dropdown__toggle:hover,
+  .c-dropdown__toggle[aria-expanded="true"] {
+    background-color: var(--surface);
+    color: var(--ink);
+    border-color: var(--ink-muted);
+  }
+
+  /* 開閉の状態は記号の向きでも示す（色に依存させない） */
+  .c-dropdown__glyph::after {
+    content: "▾";
+  }
+
+  .c-dropdown__toggle[aria-expanded="true"] .c-dropdown__glyph::after {
+    content: "▴";
+  }
+
+  /* パネルは影を持たない。境界は二重罫線で作る。
+     内側 = hairline-strong 1px（パネル面の上 3.58:1）
+     外側 = canvas 1px（内側の線の外隣を canvas に固定する。重なる先に依存しなくなる）
+     外側は outline で描く。影では描かない（0 0 0 1px の代用も含めて使わない）。 */
+  .c-dropdown__panel {
+    position: absolute;
+    inset-block-start: calc(100% + var(--space-sm));
+    inset-inline-start: 0;
+    min-width: var(--dropdown-panel-min-width);
+    max-height: var(--dropdown-panel-max-height);
+    overflow-y: auto;
+    z-index: var(--z-dropdown-panel);
+    padding: var(--space-sm);
+    background-color: var(--surface-raised);
+    border: var(--border-hairline) solid var(--hairline-strong);
+    border-radius: var(--radius-md);
+    outline: var(--border-hairline) solid var(--canvas);
+  }
+
+  /* コンテナ右端からはみ出す場合だけ右端揃えに切り替える（横スクロールを出さないため） */
+  .c-dropdown__panel.is-align-end {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+  }
+
+  /* 左の padding は縦バーの幅 2px を差し引いて、視覚的な内側余白を 12px に揃える。 */
+  .c-dropdown__item,
+  .c-nav-drawer__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: var(--item-min-height);
+    padding-inline: calc(var(--space-md) - var(--bar-current-width)) var(--space-md);
+    border-inline-start: var(--bar-current-width) solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    text-decoration: none;
+    transition:
+      color var(--duration-fast) var(--easing),
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  .c-dropdown__item:hover,
+  .c-nav-drawer__item:hover {
+    background-color: var(--control);
+    color: var(--ink);
+  }
+
+  /* control の面の上に載せる文字は ink だけにする */
+  /* ⚠️ .c-dropdown__item 側は現時点で .c-ext を持たないため書いていない。
+     ドロップダウンの項目に外部リンクの記号やコードボタンを足すときは、
+     このセレクタに .c-dropdown__item:hover .c-ext を並べる。
+     ink-muted のまま control の面へ載せると 3.94:1 で AA を割る。
+     ⚠️ 押した先の見た目（ホバー・フォーカスの当たり方）は実装が出揃った時点で
+        まとめて見直す。上の1行もその見直しに含めて判断する。 */
+  .c-nav-drawer__item:hover .c-ext {
+    color: var(--ink);
+  }
+
+  /* 現在地は「太字 ＋ 左の縦バー ＋ 文字色」の3手段で示す。白の塗りを使わない。 */
+  .c-dropdown__item.is-current,
+  .c-nav-drawer__item.is-current {
+    border-inline-start-color: var(--ink);
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* ── ハンバーガー（〜599px） ──
+     3本線は 2px の矩形。アイコンフォント・SVG スプライトを導入しない。
+     ⚠️ 押しても × に変形させない。閉じる手段はドロワーの中の閉じるボタンが持っており、
+        変形させると同じ役割の表示が2つ並ぶ。状態は aria-expanded とドロワーの有無で示す。 */
+  .c-nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nav-bar-gap);
+    flex-shrink: 0;
+    min-width: var(--control-min-height);
+    min-height: var(--control-min-height);
+    margin-inline-start: auto;
+    background-color: transparent;
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    transition:
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  .c-nav-toggle:hover {
+    background-color: var(--surface);
+    border-color: var(--ink-muted);
+  }
+
+  /* 3本線はボタンと一緒に拡大させたいので rem で持つ（線ではなく図形として扱う）。
+     角丸を付けない — 掲載パーツ側は端を丸めているが、本サイトは「2px の矩形3本」で描く。 */
+  .c-nav-toggle__bar {
+    display: block;
+    width: var(--nav-bar-width);
+    height: var(--nav-bar-height);
+    background-color: var(--ink);
+  }
+
+  /* ── ドロワーの暗幕（〜599px） ──
+     押すと閉じる。影を持たせない（影を持つ面はモーダルだけ）。
+
+     ⚠️ visibility は「時間 0 ＋ 遅延」で切り替える。長さのある transition を当てると、
+        クラスを付けた直後の算出値がまだ hidden のままになり、
+        その瞬間に呼ぶ focus() が効かない（開いた直後にフォーカスを移せない）。
+        開くときは遅延 0 で即座に可視、閉じるときは遅延を動きの長さに合わせて、
+        消えるのを待たせる。 */
+  .c-nav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-nav-overlay);
+    background-color: var(--scrim);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; /* 不可視の間は押せない。可視になったら auto へ戻す */
+    transition:
+      opacity var(--duration) var(--easing),
+      visibility 0s linear var(--duration);
+  }
+
+  .c-nav-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity var(--duration) var(--easing),
+      visibility 0s linear 0s;
+  }
+
+  /* ── モバイルナビのドロワー（〜599px） ──
+     右端から入る。開閉に display を使わず transform と visibility で切り替える。
+     ⚠️ display で開くと utility 層の .is-open が component 層の display: none に勝ち、
+        600px 以上で開いたままの面が出る（同じ型の不具合を一度踏んでいる）。
+     境界はドロップダウンのパネルと同じ二重罫線で作る。
+       内側 = hairline-strong 1px（ドロワー面の上 3.58:1）
+       外側 = canvas 1px（内側の線の外隣を canvas に固定する）
+     ⚠️ 暗幕越しの地色は重なる先で変わる。白いプレビュー窓の上では暗幕込みでも
+        hairline-strong 1本では 2.51:1 にしかならず、線1本では解けない。 */
+  .c-nav-drawer {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: var(--z-nav-drawer);
+    /* 縦の flex にして、最下部のブロック（ソースコード）を margin で押し下げる。
+       中身が増えて高さが足りなくなったら auto の余白は 0 になり、
+       ドロワー自身の overflow-y: auto で送れる（最下部固定は破綻せず、下端に付いてくる）。 */
+    display: flex;
+    flex-direction: column;
+    width: var(--drawer-width);
+    max-width: calc(100% - var(--space-xxl));
+    padding-block: var(--space-sm) var(--space-lg);
+    background-color: var(--surface-raised);
+    border-inline-start: var(--border-hairline) solid var(--hairline-strong);
+    outline: var(--border-hairline) solid var(--canvas);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(100%);
+    visibility: hidden;
+    transition:
+      transform var(--duration) var(--easing),
+      visibility 0s linear var(--duration); /* 理由は .c-nav-overlay 側の注記 */
+  }
+
+  .c-nav-drawer.is-open {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform var(--duration) var(--easing),
+      visibility 0s linear 0s;
+  }
+
+  /* ドロワーの中の閉じるボタン。ハンバーガーとは別の独立した操作要素。
+     開いた直後のフォーカスはここへ移り、閉じるとハンバーガーへ戻る。 */
+  .c-nav-drawer__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* 縦の flex になったため、高さが足りないときに潰れないようにする */
+    min-width: var(--control-min-height);
+    min-height: var(--control-min-height);
+    margin-inline: auto var(--space-md);
+    background-color: transparent;
+    color: var(--ink-secondary);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-small);
+    line-height: 1;
+    transition:
+      color var(--duration-fast) var(--easing),
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  .c-nav-drawer__close:hover {
+    background-color: var(--control);
+    color: var(--ink);
+    border-color: var(--ink-muted);
+  }
+
+  .c-nav-drawer__list {
+    flex-shrink: 0;
+    padding-block-start: var(--space-sm);
+    padding-inline: var(--space-sm);
+  }
+
+  /* 「ソースコード」はカテゴリと行き先の性質が違う（外部サイト・別タブ）ため、
+     リストから外してドロワーの最下部へ寄せる。
+     ⚠️ 区切りは hairline の横罫1本と余白だけで作る。新しい色を作らない。
+        hairline は装飾の区切り用であり、コントラスト要求の対象ではない。
+     ⚠️ margin-block-start: auto が押し下げを担う。中身が増えて高さが足りなくなると
+        auto は 0 になり、最下部固定は破綻せずスクロールの末尾に付いてくる。 */
+  .c-nav-drawer__foot {
+    flex-shrink: 0;
+    margin-block-start: auto;
+    padding-block-start: var(--space-sm);
+    padding-inline: var(--space-sm);
+    border-block-start: var(--border-hairline) solid var(--hairline);
+  }
+
+  .c-nav-drawer__item--external {
+    color: var(--ink-secondary);
+  }
+
+  /* ── フッター ── */
+  .c-footer__heading {
+    color: var(--ink-muted);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1.7;
+    letter-spacing: 0.04em;
+    font-feature-settings: "kern" 1;
+  }
+
+  .c-footer__list {
+    margin-block-start: var(--space-sm);
+  }
+
+  .c-footer__list--wrap {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-lg);
+  }
+
+  .c-footer__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: var(--control-min-height);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  .c-footer__link:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .c-footer__license {
+    margin-block-start: var(--space-xxl);
+    padding-block-start: var(--space-lg);
+    border-top: var(--border-hairline) solid var(--hairline);
+  }
+
+  .c-footer__license .c-footer__link {
+    font-size: var(--fs-caption);
+  }
+
+  @media (min-width: 600px) {
+    .c-footer__list--wrap {
+      display: block;
+    }
+  }
+
+  /* 600px 以上はドロップダウンに切り替わる。ハンバーガーとドロワーは出さない。
+     ⚠️ ここを 900px に戻さない。カテゴリ導線が「カテゴリ ▾」1つに畳まれ、
+        横並びに必要な幅が大きく減ったための境界である。
+     ⚠️ 対になる .l-header__nav の表示側（layout 層）も同じ 600px にする。
+        片方だけ動かすと、ドロップダウンとハンバーガーが同時に出るか、両方消える。 */
+  @media (min-width: 600px) {
+    .c-nav-toggle,
+    .c-nav-overlay,
+    .c-nav-drawer {
+      display: none;
+    }
+  }
+
+  /* ── ヒーロー ──
+     高さを vh で確保しない。上下のパディングだけで組む。 */
+  .p-hero {
+    padding-block: var(--space-section-sp) var(--space-xxl);
+  }
+
+  /* 見出しの折り返し位置を文節の切れ目に寄せる。
+     和文は既定（word-break: normal）だとほぼどの文字の間でも折れるため、
+     「フロントエ / ンドの」のように語の途中で切れる幅が出る。
+     ⚠️ 対応するのは Chromium 119 以降だけである。非対応のブラウザは値ごと捨て、
+        base 層の word-break: normal のまま既定の折り返しになる（格上げであって前提ではない）。
+     ⚠️ text-wrap: balance を併用しない。行数を揃える処理と競合し、
+        文節の切れ目が使われなくなる場合がある。
+     ⚠️ 当てるのはこの見出し1つだけ。他の見出しへ広げない。 */
+  .p-hero__title {
+    font-size: var(--fs-display);
+    line-height: 1.35;
+    word-break: auto-phrase;
+  }
+
+  @media (min-width: 900px) {
+    .p-hero {
+      padding-block: var(--space-section) var(--space-section-sp);
+    }
+  }
+}
+
+/* =============================================================================
+   utility
+   ========================================================================== */
+
+@layer utility {
+  /* 1px は「見えない大きさ」を作るための実寸であり、利用者設定で拡大させない（px のまま）。 */
+  .u-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* JS が有効なときだけ、開閉する面を畳む。
+     JS 無効時はドロップダウンとハンバーガーごと出さず、カテゴリはフッターから辿らせる。
+     ⚠️ ここで面を畳むのは display である。したがって display で開く面は、
+        component 層の @media (min-width: 600px) { display: none } に層の順序で勝ってしまう。
+        ドロワーが display を使わず transform と visibility で開閉するのはこのためである。 */
+  .js [data-disclosure-panel] {
+    display: none;
+  }
+
+  .js [data-disclosure-panel].is-open {
+    display: block;
+  }
+
+  /* ドロワーが開いている間は背面をスクロールさせない。
+     ドロワー自身は overflow-y: auto を持つので、中身が長ければドロワーの内側で送れる。 */
+  .is-nav-open {
+    overflow: hidden;
+  }
+
+  .no-js [data-disclosure-toggle],
+  .no-js .c-dropdown,
+  .no-js .c-nav-overlay,
+  .no-js .c-nav-drawer {
+    display: none;
+  }
+
+  .no-js .l-header__nav {
+    display: flex;
+  }
+}
+
+/* =============================================================================
+   動きの制御 — サイト UI と掲載パーツの両方を止める
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
