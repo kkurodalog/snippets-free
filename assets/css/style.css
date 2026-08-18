@@ -199,7 +199,17 @@
 
     /* ── 動き ── */
     --duration-fast: 120ms;
-    --duration: 200ms; /* 面の開閉に使う。開閉する面はモーダル（4b）で出る */
+    --duration: 200ms; /* 面の開閉 ＋ コピーボタンのラベルが待機へ戻るとき */
+    /* ★ロゴのホバー専用（2026-08-18 / ★代表指示「時間差で変化するようにしてほしい」）。
+       ⚠️ --duration-fast(120ms) では体感できなかった。宣言が無かったのではなく、
+          短すぎたのが原因である（実測 = 23ms で 0.80・40ms で 0.753 まで進み、
+          残る 80ms は 0.753 → 0.70 しか動かない）。
+       ⚠️ easing が cubic-bezier(0.2, 0, 0, 1) で前半に寄っているため、
+          変化の 50% が所要時間の 20% で終わる。**長さで受け止めるしかない。**
+       ⚠️ --duration-fast を直接いじらない。**多くの部品が共有している**ため、全部品の応答が鈍る
+          （⚠️ 件数を書かない。数えた時点の値はすぐ古くなり、次に読む人が数え直すと合わない）。
+       ⚠️ ロゴ専用の名前にしてある。**他へ流用しない**（流用したくなったら役割で名前を分ける）。 */
+    --duration-logo: 320ms;
     --easing: cubic-bezier(0.2, 0, 0, 1);
   }
 
@@ -589,7 +599,7 @@
        ⚠️ 動きを減らす設定では、末尾の @media (prefers-reduced-motion: reduce) が
           transition-duration を 0.01ms に落とす。ここに個別の打ち消しを書かない
           （2箇所で同じことを決めると、片方だけ直したときに食い違う）。 */
-    transition: opacity var(--duration-fast) var(--easing);
+    transition: opacity var(--duration-logo) var(--easing);
   }
 
   /* ⚠️ ロゴだけの例外である。他のリンクのホバーは文字色・下線のままにする
@@ -1718,16 +1728,33 @@
 
   /* ── ファイルパス行 ＋ コピーボタン ──
      貼り先が分かるようにパスを出す。「CSS」だけでは、どのファイルとして保存するか伝わらない。 */
+  /* ★2行で組む（★代表判断 / 2026-08-18）。
+       1行目 = パスだけ ／ 2行目 = 左端に GitHub リンク・右端に Copy。
+     ⚠️ 3つを1行に並べていた形から変えた。**戻さない。**
+        1行に並べていたときは、既定フォントを大きくした利用者（32px）の 320px 幅で
+        **縮まないリンクが行から 18px はみ出していた**（余裕 14.2px しか無かった）。
+        行を分けると、リンクと Copy が使える幅が**パスに食われなくなる**。
+     ⚠️ 行を1つ増やすぶんモーダルは縦に伸びる。**コード枠の高さ上限（SP 320px）は変えない。** */
   .c-modal__filerow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding-block: var(--space-sm);
+  }
+
+  /* 2行目。左端 = GitHub リンク ／ 右端 = Copy。
+     ⚠️ 折り返しても順序は変えない（読み上げ順と見た目を一致させる）。 */
+  .c-modal__fileactions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-md);
-    padding-block: var(--space-sm);
   }
 
   .c-modal__path {
+    /* ⚠️ 2行構成（列方向）にしたため、横方向の伸縮指定は持たない。
+       min-width: 0 だけを残す（長いパスが親を押し広げないため）。 */
     min-width: 0;
     color: var(--ink-muted);
     font-family: var(--font-mono);
@@ -1763,7 +1790,12 @@
     transition: background-color var(--duration-fast) var(--easing);
   }
 
-  /* 2つのラベルを同じマス目へ重ねる。場所を取るのは常に両方で、見え方だけを切り替える。 */
+  /* 2つのラベルを同じマス目へ重ねる。場所を取るのは常に両方で、見え方だけを切り替える。
+     ⚠️ ラベルは英字（Copy / Copied!）である（★代表判断 / 2026-08-18）。
+        ⚠️ サイトの他の導線は日本語のままにしてある（「デモを別タブで開く」「解説記事へ」）。
+           ここだけ英字にしてよい理由は、**この行がタブ（HTML / CSS / JS）と同じ字種の並びで、
+           押した結果も1語で言い切れる**ためである。⚠️ 理由が当てはまらない場所へ広げない。
+        ⚠️ 英字にした目的の1つは**待機と成功の幅を近づけること**である。 */
   .c-copy__label {
     grid-area: 1 / 1;
     display: inline-flex;
@@ -1775,21 +1807,90 @@
   /* ⚠️ visibility で切り替える。読み上げの対象からも同時に外れるため、
      ボタンの読み上げ名は「いま見えているラベル」と必ず一致する
      （見えている文字と読み上げ名が食い違う状態を作らない）。
-     ⚠️ opacity や色で消さない。消えたつもりのラベルが読み上げ名に残る。 */
+     ⚠️ 色で消さない。消えたつもりのラベルが読み上げ名に残る。
+
+     ★戻り（Copied! → Copy）だけ補間する（★代表指示 / 2026-08-18）。
+       仕掛け = **遷移先の状態が持つ transition が使われる**という規則を利用している。
+         行き（.is-copied を付ける）… 遷移先＝ .is-copied 側で transition: none  → 即時
+         戻り（.is-copied を外す）  … 遷移先＝ 既定側で transition あり          → 補間
+       ⚠️ 逆向きにしない。**成功の表示は即座に出したい**（押した手応えが遅れる）。
+     ⚠️ opacity と visibility の切り替え時刻をずらしてある。
+        Copied! は **opacity 1→0 を補間したあと** visibility を落とし、
+        Copy は **同じ時刻に** visibility を戻す。
+        ⚠️ こうしないと、補間の途中で**両方が読み上げ木に載る**（名前が2つ連結される）。
+           **見えているラベルと読み上げ名が一致する**という現行の作りを崩さないため、
+           切り替えは1点に揃える。 */
   .c-copy__label--done {
+    opacity: 0;
     visibility: hidden;
+    transition:
+      opacity var(--duration) var(--easing),
+      visibility 0s var(--duration);
   }
 
-  .c-copy.is-copied .c-copy__label:not(.c-copy__label--done) {
+  .c-copy__label--idle {
+    transition: visibility 0s var(--duration);
+  }
+
+  /* 行きは補間しない（遷移先の状態に transition を置かない）。 */
+  .c-copy.is-copied .c-copy__label {
+    transition: none;
+  }
+
+  .c-copy.is-copied .c-copy__label--idle {
     visibility: hidden;
   }
 
   .c-copy.is-copied .c-copy__label--done {
+    opacity: 1;
     visibility: visible;
   }
 
   .c-copy:hover {
     background-color: var(--copy-hover);
+  }
+
+  /* ── パス行 2行目の左端に置く「GitHubで全ソースを見る ↗」（2026-08-18 / ★代表指示） ──
+     ⚠️ モーダルが見せているのは**マーカーで囲んだ範囲だけ**である。
+        範囲外まで要る人の行き先が、モーダルへ格上げしたことで消えていた。
+     ⚠️ ラベルを「ソースコード」にしない（ヘッダー右端が既にその名前でリポジトリ全体を指す）。
+     ⚠️ ラベルを「全文」にしない（廃止した「全文を表示」ボタンと同じ語になる）。
+     ⚠️ 最下部のフッター行へ移さない。あちらは「デモ」と「記事」＝**読む先**であり、
+        ここは**同じファイルの続き**である。役割を混ぜない。
+     ⚠️ 白の塗りを使わない（R-3 の3箇所目にしない）。文字色と記号だけで示す。
+     ⚠️ **縮む側にしてある**（`flex-shrink: 1` ＋ `min-width: 0` ＋ `max-width: 100%`）。
+        ⚠️ 縮まない指定のままだと、既定フォントを大きくした利用者の狭い幅で
+           **リンク1つが行より広くなり、行からはみ出す**（1行に3つ並べていた頃に実測した型）。
+           ラベルはボタンの中で折り返させる（`.c-stop-toggle` と同じ受け方）。
+     ⚠️ アイコンと `↗` は縮ませない。**文字だけが折り返す。** */
+  .c-modal__source {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 100%;
+    min-height: var(--control-min-height);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  /* アイコンと `↗` は潰れない。折り返すのは文字だけである。 */
+  .c-modal__source > svg,
+  .c-modal__source > .c-ext {
+    flex-shrink: 0;
+  }
+
+  .c-modal__source:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .c-modal__source:hover .c-ext {
+    color: var(--ink);
   }
 
   /* ⚠️ フォーカスリングは base 層の :focus-visible（白 2px ＋ offset 2px）をそのまま使う。
@@ -2111,6 +2212,18 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* ★遅延も打ち消す（2026-08-18 追加）。
+       ⚠️ 長さだけ落として遅延を残すと、**遅延の分だけ状態が宙に浮く**。
+          実際に起きた形 = コピーボタンの2つのラベルは `visibility` の切り替えを
+          `0s var(--duration)` の遅延で1点に揃えている。長さだけ落とすと
+          `opacity` は即座に 0 になるのに `visibility` の切り替えだけ 200ms 残り、
+          **どちらのラベルも見えない空のボタンが 200ms 出た**（実測 = 空のサンプル11個）。
+          ⚠️ **「見えているラベルと読み上げ名が一致する」という不変条件を、
+             よりによって動きを減らす設定の利用者に対して破っていた。**
+       ⚠️ 打ち消しは **duration と delay の両方**を見る。片方だけでは足りない。
+       ⚠️ ここ1箇所で決める。**個別の要素へ打ち消しを書かない**（2箇所で同じことを
+          決めると、片方だけ直したときに食い違う）。 */
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
 }

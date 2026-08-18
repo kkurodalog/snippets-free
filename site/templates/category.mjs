@@ -138,6 +138,21 @@ ${toggle}
  *     - notes        … 使うときの注記（最大3項目・言い切り）
  *     - verification … 掲載基準4項目のどれを満たしたかと、その実測日
  *
+ * ★もう1つ、**サイト全体で1つだけ**の値をここから配る = `repoPartBase`
+ *   （= リポジトリの起点 ＋ ブランチ ＋ このカテゴリのディレクトリ）。
+ *   ⚠️ **パーツごとには持たせない。** 画面側でパーツの slug を足すだけにする。
+ *   ⚠️ **ブランチ名（master）をコードへ書かない。** 正本は `site/data/site.json` の
+ *      `repoUrl` / `repoBranch` である。
+ *      ⚠️ ★**ただし `repoUrl` は `tools/check-paths.sh` にもハードコードされている**
+ *         （相対パス検査が「許してよい絶対 URL」を判定するために持っている / 既存の書き方）。
+ *         **`repoUrl` を変える場所は2箇所である。「1箇所で済む」は誤りだった。**
+ *         ⚠️ **片方だけ直すと `check-paths.sh` の (a-1) が落ちる**ため、**失敗は静かではない**。
+ *         ⚠️ スクリプト側から `site.json` を読みに行かない — **シェルであり、JSON を読むには
+ *            依存（jq 等）が要る**。依存ゼロを崩す代わりに、**ずれたら落ちる形**で受けている。
+ *   ⚠️ **これは DOM から読めない**（リポジトリの起点はヘッダー右の外部リンクにしか無く、
+ *      そこから組み立てると「ヘッダーのリンクを差し替えた瞬間にモーダルの行き先が変わる」）。
+ *      **「同じ値を2箇所に置かない」の例外ではなく、置き場所がここしか無い値である。**
+ *
  * ★パーツ名・ファイルの種類・ファイルのパス・デモの場所は**ここに書かない**。
  *   いずれもカードの DOM に既にあり、モーダルはそこから読む。同じ値を2箇所に置かない。
  *
@@ -149,7 +164,7 @@ ${toggle}
  * ⚠️ `</script>` と `<` を実体で書けないため、`<` を \u003c へ逃がす
  *    （JSON としては同じ文字列であり、読み手も画面も変わらない）。
  */
-function partsMeta({ category }) {
+function partsMeta({ site, category }) {
   const parts = {};
   for (const part of category.parts) {
     const entry = {};
@@ -159,7 +174,12 @@ function partsMeta({ category }) {
     if (part.verifiedOn) entry.verifiedOn = part.verifiedOn;
     parts[part.slug] = entry;
   }
-  const json = JSON.stringify({ verificationItems: VERIFICATION_ITEMS, parts }).replace(/</g, '\\u003c');
+  // ⚠️ 末尾にスラッシュを付けない。画面側で `${repoPartBase}/${slug}` と足す。
+  const repoPartBase = `${site.repoUrl}/tree/${site.repoBranch}/components/${category.slug}`;
+  const json = JSON.stringify({ verificationItems: VERIFICATION_ITEMS, repoPartBase, parts }).replace(
+    /</g,
+    '\\u003c'
+  );
   // 字下げは隣に置く <dialog>（4スペース）と揃える。生成物の差分を読むときのノイズになる。
   return `    <script type="application/json" data-parts-meta>${json}</script>`;
 }
@@ -195,7 +215,7 @@ ${category.parts.map((part) => card({ category, part, media: mediaFor(part) })).
 
   // ⚠️ 空の分岐で改行だけを残さない（生成物に無意味な空行が1本増える）。
   //    連結する側に改行を持たせる。
-  const modal = count === 0 ? '' : `\n${partsMeta({ category })}\n${codeModal()}`;
+  const modal = count === 0 ? '' : `\n${partsMeta({ site, category })}\n${codeModal()}`;
 
   const main = `    <main class="l-main" id="main" tabindex="-1">
       <div class="l-container">

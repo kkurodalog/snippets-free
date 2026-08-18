@@ -105,6 +105,7 @@ export class CodeModal {
       verify: $('verify'),
       article: $('article'),
       demo: $('demo'),
+      source: $('source'),
       toast: $('toast'),
       announce: $('announce'),
     };
@@ -193,7 +194,8 @@ export class CodeModal {
 
     this.el.title.textContent = this.current.name;
     this.el.demo.href = this.current.demoHref;
-    this.el.demo.setAttribute('aria-label', `デモを別タブで開く: ${this.current.name}`);
+    applyLabel(this.el.demo, this.current.name);
+    this.renderSource();
 
     this.renderTabs();
     this.renderMeta();
@@ -214,6 +216,30 @@ export class CodeModal {
     // ★呼び出し元のボタンへ戻す。どのカードから開いたか分からなくなるのを防ぐ。
     if (this.opener && this.opener.isConnected) this.opener.focus();
     this.opener = null;
+  }
+
+  /**
+   * パス行 2行目の左端「GitHubで全ソースを見る ↗」。
+   *
+   * ★行き先は**パーツのディレクトリ**であり、**タブを切り替えても変わらない**
+   *   （見せている範囲はファイルごとに違うが、範囲外まで見たい人が欲しいのはパーツ一式である）。
+   * ⚠️ URL をここで組み立てない。生成側が配った基点（repoPartBase）に slug を足すだけにする。
+   *    **ブランチ名をこのファイルへ書かない**（変えたときに全パーツが一斉に壊れる）。
+   * ⚠️ 基点が無い・slug が無いときは**出さない**。押しても行き先の無いリンクを画面に置かない。
+   */
+  renderSource() {
+    const base = this.meta.repoPartBase;
+    const slug = this.current.slug;
+    if (!base || !slug) {
+      this.el.source.hidden = true;
+      this.el.source.removeAttribute('href');
+      return;
+    }
+    this.el.source.href = `${base}/${slug}`;
+    // ⚠️ 先に出してから名前を付ける。applyLabel は「目印はあるが空」のとき hidden を立てるため、
+    //    後から hidden = false を書くとその判断を打ち消してしまう。
+    this.el.source.hidden = false;
+    applyLabel(this.el.source, this.current.name);
   }
 
   /** タブは「そのパーツが持つ言語だけ」出す。カードのボタン構成と必ず一致する。 */
@@ -471,6 +497,44 @@ const MESSAGES = {
 };
 
 /** `./001_js-toggle/assets/css/style.css` → `001_js-toggle/assets/css/style.css` */
+/**
+ * ★可視ラベルを読み取って、後ろへ文脈（パーツ名）を足した読み上げ名を作る。
+ *
+ * ★WCAG 2.5.3（Label in Name / Level A）は**アクセシブル名に可視テキストが含まれること**を求める。
+ *   音声入力の利用者は**見えている文字をそのまま言う**ため、含まれていないと押せない。
+ *
+ * ⚠️ ★**文字列をここに書かない。** 可視ラベルの `<span>` から読み取る。
+ *    2026-08-18 に「全ファイル」→「GitHubで全ソースを見る」と可視ラベルを変えたとき、
+ *    **`aria-label` に書いた文字列だけが追随せず、名前と見える文字が食い違った**。
+ *    ⚠️ **本案件で3回目の同型**（コードボタンの行き先 / コピーボタンのラベル / 今回）。
+ *    ★**同じ文字列を2箇所に置くのをやめれば、食い違いは起こりようがない。**
+ *
+ * ★「目印が無い」と「目印はあるが空」を**分けて扱う**（2026-08-18 に分離）。
+ *   - 目印が**無い**   … `aria-label` を外す。**可視テキストがそのまま名前になる**ので 2.5.3 を満たす
+ *   - 目印は**あるが空** … ★**リンクごと出さない**（`hidden`）。
+ *     ⚠️ この場合、残る子は `aria-hidden` のアイコンと `↗` だけであり、
+ *        **属性を外しても名前が空のまま画面に残る**（WCAG 4.1.2 Name, Role, Value / Level A に触れる）。
+ *        ⚠️ **押せるのに名前が無い要素を画面へ置かない**。これは
+ *        「押しても何も起きないボタンを画面に置かない」（`CODING-RULES.md` §2）と同じ姿勢である。
+ *   ⚠️ **現在のテンプレートからは到達しない**（ラベルはテンプレートに直書きしてある）。
+ *      ⚠️ **到達しないから放置する、にしない** — 到達しうる形へ変えた人が気づけないためである。
+ *      ⚠️ **層2（tools/check-label-in-name.mjs）も捕らえられない**（可視テキストが無いと対象外に落ちる）。
+ */
+function applyLabel(el, context) {
+  const label = el.querySelector('[data-modal-source-label], [data-modal-demo-label]');
+  if (!label) {
+    el.removeAttribute('aria-label');
+    return;
+  }
+  const visible = label.textContent.trim();
+  if (!visible) {
+    el.removeAttribute('aria-label');
+    el.hidden = true;
+    return;
+  }
+  el.setAttribute('aria-label', context ? `${visible}: ${context}` : visible);
+}
+
 function stripLeadingDot(href) {
   return String(href).replace(/^\.\//, '');
 }
@@ -491,11 +555,15 @@ function selectContents(element) {
  */
 function readPartsMeta() {
   const script = document.querySelector('[data-parts-meta]');
-  const empty = { verificationItems: [], parts: {} };
+  const empty = { verificationItems: [], repoPartBase: '', parts: {} };
   if (!script) return empty;
   try {
     const data = JSON.parse(script.textContent);
-    return { verificationItems: data.verificationItems || [], parts: data.parts || {} };
+    return {
+      verificationItems: data.verificationItems || [],
+      repoPartBase: data.repoPartBase || '',
+      parts: data.parts || {},
+    };
   } catch {
     return empty;
   }

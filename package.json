@@ -11,12 +11,13 @@
   },
   "scripts": {
     "build": "node tools/build.mjs",
-    "check": "S=0; bash tools/check-paths.sh . || S=$?; bash tools/check-design.sh . || S=$?; node tools/check-links.mjs || S=$?; node tools/check-markers.mjs || S=$?; node tools/check-verification.mjs || S=$?; node tools/check-notation.mjs || S=$?; exit $S",
+    "check": "S=0; bash tools/check-paths.sh . || S=$?; bash tools/check-design.sh . || S=$?; node tools/check-links.mjs || S=$?; node tools/check-markers.mjs || S=$?; node tools/check-verification.mjs || S=$?; node tools/check-notation.mjs || S=$?; node tools/check-label-in-name.mjs || S=$?; exit $S",
     "check:release": "S=0; npm run --silent check || S=$?; node tools/check-markers.mjs . --require-embedded || S=$?; node tools/check-verification.mjs . --require-verified || S=$?; exit $S",
     "check:links": "node tools/check-links.mjs",
     "check:markers": "node tools/check-markers.mjs",
     "check:verification": "node tools/check-verification.mjs",
     "check:notation": "node tools/check-notation.mjs",
+    "check:labels": "node tools/check-label-in-name.mjs",
     "serve": "mkdir -p .serve && ln -sfn \"$PWD\" .serve/snippets-free && cd .serve && python3 -m http.server 8000"
   },
   "dependencies": {},
