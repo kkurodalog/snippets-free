@@ -1,0 +1,46 @@
+{
+  "slug": "scroll-animation",
+  "name": "スクロール演出",
+  "description": "スクロールに連動して動くパーツ集。HTML・CSS・JavaScript をそのままコピーして使えます。",
+  "previewAspect": "wide",
+  "preview": "video",
+  "parts": [
+    {
+      "slug": "001_fade-in",
+      "name": "ふわっと出現する",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"],
+      "featured": true
+    },
+    {
+      "slug": "002_stagger",
+      "name": "順番に遅れて出る",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "003_progress-bar",
+      "name": "読了率のバー",
+      "tags": ["JS必要", "scroll-driven CSS"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "004_parallax",
+      "name": "奥行きのある視差",
+      "tags": ["JS必要", "scroll-driven CSS", "画像素材あり"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "005_count-up",
+      "name": "数字を数え上げる",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "006_blur",
+      "name": "スクロールでぼかす",
+      "tags": ["JS必要", "scroll-driven CSS", "画像素材あり"],
+      "files": ["html", "css", "js"]
+    }
+  ]
+}

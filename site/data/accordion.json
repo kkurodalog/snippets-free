@@ -1,0 +1,52 @@
+{
+  "slug": "accordion",
+  "name": "アコーディオン",
+  "description": "クリックで開閉するアコーディオンのパーツ集。HTML・CSS・JavaScript をそのままコピーして使えます。",
+  "previewAspect": "wide",
+  "preview": "dom",
+  "parts": [
+    {
+      "slug": "001_js-toggle",
+      "name": "JS で開閉する基本形",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "002_details-basic",
+      "name": "details 要素で作る",
+      "tags": ["CSSのみ"],
+      "files": ["html", "css"]
+    },
+    {
+      "slug": "003_css-only",
+      "name": "CSS だけで開閉する",
+      "tags": ["CSSのみ"],
+      "files": ["html", "css"]
+    },
+    {
+      "slug": "004_multi-open",
+      "name": "すべて開く・すべて閉じる",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "005_single-open",
+      "name": "1つだけ開く",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "006_animation",
+      "name": "高さがなめらかに動く",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"],
+      "featured": true
+    },
+    {
+      "slug": "007_nested",
+      "name": "入れ子にする",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    }
+  ]
+}

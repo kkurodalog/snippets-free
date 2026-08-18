@@ -12,9 +12,16 @@
 #   (b) が拾う `href="/…"` は文字列に "/snippets-free/" を含まないため、(a) を素通りする。
 #   しかもこの形は**ローカルのルート配信では正しく動き、本番配信でだけ壊れる**。
 #
-# サイト内リンクは相対パスで書く。絶対 URL を書いてよいのは次の3つだけ。
+# サイト内リンクは相対パスで書く。絶対 URL を書いてよいのは次の4つだけ。
 #   - sitemap.xml の <loc>
 #   - canonical / og:url / og:image
+#   - 構造化データ（BreadcrumbList）の "item"
+#     ★schema.org は item に絶対 URL を要求する（相対では要件を満たさない）。
+#       許す文脈をここに書き足すのは検査を緩めることになるため、キー名まで絞って列挙する。
+#     ⚠️ この除外は**出力の字面**（キー名 "item" の直後に値が来ること）に依存している。
+#       JSON-LD の整形を変えると除外が外れ、正しい実装が NG(a-2) で落ちる（＝落ちる方向の
+#       誤りなので見逃しにはならないが、原因が分からないと検査を緩めたくなる）。
+#       コロンの後ろの空白だけは 0個以上を許してあるが、キーと値の間に改行を挟む形にすると外れる。
 #   - 外部サイト（GitHub / ポートフォリオ / ブログ / X）へのリンク
 # =============================================================================
 set -u
@@ -55,13 +62,14 @@ if [ -n "$A1" ]; then
   FAIL=1
 fi
 
-# (a-2) 公開オリジン付きの絶対 URL は、許した3つの文脈にだけ現れてよい
+# (a-2) 公開オリジン付きの絶対 URL は、許した文脈にだけ現れてよい
 #       許した文脈 = sitemap の <loc> / canonical / og:url / og:image /
-#                    site.json の siteOrigin（絶対 URL の唯一の起点）/ package.json の homepage
+#                    構造化データの "item" / site.json の siteOrigin（絶対 URL の唯一の起点）/
+#                    package.json の homepage
 #       ★除外を先に列挙しておかないと、canonical と og:url が毎回ヒットして
 #         「ヒットするのが正常」と運用され、やがて見られなくなる（破れる検出器は無いのと同じ）
 A2=$(grep "${GREP_OPTS[@]}" -e "$ORIGIN" "$TARGET" \
-     | grep -vE '<loc>|rel="canonical"|property="og:url"|property="og:image"|"siteOrigin"|siteOrigin \+|site\.siteOrigin|"homepage"')
+     | grep -vE '<loc>|rel="canonical"|property="og:url"|property="og:image"|"item":[[:space:]]*"|"siteOrigin"|siteOrigin \+|site\.siteOrigin|"homepage"')
 if [ -n "$A2" ]; then
   echo "NG(a-2): 許した文脈の外で公開オリジンの絶対 URL を検出した"
   echo "$A2"
@@ -70,8 +78,8 @@ fi
 
 # 除外した行は件数を出す（黙って消さない）
 A2X=$(grep "${GREP_OPTS[@]}" -e "$ORIGIN" "$TARGET" \
-      | grep -cE '<loc>|rel="canonical"|property="og:url"|property="og:image"|"siteOrigin"|siteOrigin \+|site\.siteOrigin|"homepage"')
-echo "許容した絶対 URL（canonical / og / sitemap / データの起点）: ${A2X} 行"
+      | grep -cE '<loc>|rel="canonical"|property="og:url"|property="og:image"|"item":[[:space:]]*"|"siteOrigin"|siteOrigin \+|site\.siteOrigin|"homepage"')
+echo "許容した絶対 URL（canonical / og / sitemap / 構造化データ / データの起点）: ${A2X} 行"
 
 # -----------------------------------------------------------------------------
 # (b) ルート絶対パスが残っていないこと

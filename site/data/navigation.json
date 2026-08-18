@@ -1,0 +1,52 @@
+{
+  "slug": "navigation",
+  "name": "ナビゲーション",
+  "description": "開閉の方式ごとに並べたハンバーガーメニューのパーツ集。HTML・CSS・JavaScript をそのままコピーして使えます。",
+  "previewAspect": "tall",
+  "preview": "video",
+  "parts": [
+    {
+      "slug": "001_hamburger-basic",
+      "name": "基本のハンバーガー",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "002_hamburger-slidein-top",
+      "name": "上から下りてくる",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "003_hamburger-slidein-right",
+      "name": "右からスライドイン",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "004_hamburger-overlay",
+      "name": "オーバーレイつきドロワー",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"],
+      "featured": true
+    },
+    {
+      "slug": "005_hamburger-push",
+      "name": "本文を押し出す",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "006_hamburger-fullscreen",
+      "name": "画面全体に広がる",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    },
+    {
+      "slug": "007_hamburger-expand-corner",
+      "name": "右下から円で開く",
+      "tags": ["JS必要"],
+      "files": ["html", "css", "js"]
+    }
+  ]
+}

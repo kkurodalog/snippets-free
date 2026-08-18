@@ -43,19 +43,31 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SKIP = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
 
 /**
- * href / src の値を抜き出す。
+ * href / src / poster / srcset の値を抜き出す。
  *
- * ⚠️ 現時点では二重引用符で囲まれた href / src しか見ていない。
- *    単引用符・poster・srcset は素通りする（生成物がすべてこの形なので今は当たらない）。
- *    プレビュー素材（動画と poster）を入れる工程の直前に、
- *    `href|src|poster|srcset` へ広げ、引用符を `["']` にすること。
- *    素材が入ってから広げると、既に死んでいるリンクの棚卸しから始まる。
+ * ★プレビュー素材（動画と poster）が入る前に広げてある。
+ *   入ってから広げると、既に死んでいるリンクの棚卸しから始まることになる。
+ *   引用符は二重・単の両方を見る（片方だけだと書き方1つで検査が素通りする）。
+ *
+ * ⚠️ srcset は「URL 記述子」をカンマ区切りで並べる形式のため、
+ *    値をそのまま1本のパスとして扱うと必ず外れる。カンマで割って先頭の URL だけを見る。
  */
 function extractLinks(html) {
   const out = [];
-  const re = /(?:href|src)\s*=\s*"([^"]*)"/gi;
+  const re = /(href|src|poster|srcset)\s*=\s*(["'])([^"']*)\2/gi;
   let m;
-  while ((m = re.exec(html)) !== null) out.push(m[1]);
+  while ((m = re.exec(html)) !== null) {
+    const attr = m[1].toLowerCase();
+    const value = m[3];
+    if (attr !== 'srcset') {
+      out.push(value);
+      continue;
+    }
+    for (const candidate of value.split(',')) {
+      const url = candidate.trim().split(/\s+/)[0];
+      if (url) out.push(url);
+    }
+  }
   return out;
 }
 

@@ -90,10 +90,15 @@
 
     /* ── 文字サイズ ── */
     --fs-display: clamp(1.625rem, 5vw, 2.125rem); /* clamp(26px, 5vw, 34px) */
+    --fs-h1: clamp(1.375rem, 3.4vw, 1.625rem); /* clamp(22px, 3.4vw, 26px) */
+    --fs-h2: 1.25rem; /* 20px */
     --fs-logo: 1.375rem; /* 22px */
     --fs-logo-sp: 1.25rem; /* 20px */
     --fs-body: 1rem; /* 16px */
     --fs-small: 0.875rem; /* 14px */
+    --fs-card-title: 0.9375rem; /* 15px */
+    --fs-button: 0.875rem; /* 14px */
+    --fs-button-mono: 0.8125rem; /* 13px */
     --fs-caption: 0.8125rem; /* 13px */
 
     /* ── 余白（4px ベースの段階値。余白に clamp() を使わない） ── */
@@ -106,7 +111,11 @@
     --space-xxl: 2rem; /* 32px */
     --space-section-sp: 3rem; /* 48px */
     --space-section: 4rem; /* 64px */
-    --space-section-lg: 6rem; /* 96px  セクションが並ぶ画面で使う。今のページにはまだ出番がない */
+    --space-section-lg: 6rem; /* 96px */
+
+    /* セクションどうしの間。幅で 48 → 64 → 96px に切り替える。
+       ⚠️ 新しい rem を足さず、上の段階値を参照するだけにする（換算面を増やさない）。 */
+    --space-section-gap: var(--space-section-sp);
 
     /* ── 段階値に乗らない個別寸法（デザイン正本が実値で指定しているもの） ── */
     --control-min-height: 2.5rem; /* 40px  操作要素の最小寸法 */
@@ -118,6 +127,9 @@
     --nav-bar-height: 0.125rem; /* 2px */
     --nav-bar-gap: 0.3125rem; /* 5px  線と線の間隔 */
     --drawer-width: 17.5rem; /* 280px  右から入るドロワーの幅 */
+    --btn-padding-block: 0.625rem; /* 10px  デモボタン・コードボタンの上下 */
+    --btn-demo-padding-inline: 0.875rem; /* 14px  デモボタンの左右 */
+    --skip-link-card-offset: 1.5rem; /* 24px  カード内のスキップ導線を白い窓の内側へ寄せる距離 */
 
     /* ── 角丸 ── px のまま（利用者のフォント設定で角丸が膨らむのは意図しない） */
     --radius-xs: 3px;
@@ -160,6 +172,14 @@
     --preview-matte-width: 0.5rem; /* 8px */
     --codeblock-max-height: 20rem; /* 320px */
 
+    /* ── プレビュー枠の縦横比 ── 比であって長さではないので rem 換算の対象外 ──
+       wide = 実DOM再生とスクロール送りの収録（960×600）
+       tall = モバイルUI型の収録（390×600）
+       top  = トップのショーケース（全カテゴリ 3:2 に統一） */
+    --aspect-preview-wide: 16 / 10;
+    --aspect-preview-tall: 39 / 60;
+    --aspect-preview-top: 3 / 2;
+
     /* ── 動き ── */
     --duration-fast: 120ms;
     --duration: 200ms; /* 面の開閉に使う。開閉する面はモーダル（4b）で出る */
@@ -171,12 +191,14 @@
       --gutter: 1.5rem; /* 24px */
       --grid-gap: 1.5rem; /* 24px */
       --codeblock-max-height: 26.25rem; /* 420px */
+      --space-section-gap: var(--space-section);
     }
   }
 
   @media (min-width: 900px) {
     :root {
       --header-min-height: 4rem; /* 64px */
+      --space-section-gap: var(--space-section-lg);
     }
   }
 }
@@ -347,6 +369,36 @@
 
   .l-main {
     display: block;
+    padding-block-end: var(--space-section-gap);
+  }
+
+  /* ── カードグリッド ──
+     列数は 1 / 2 / 3。minmax(0, 1fr) にするのは、中身（長い名前・等幅ラベル）が
+     列幅を押し広げて横スクロールを出すのを止めるため。
+     ⚠️ カードの高さは行内で自然に揃う（グリッド項目が行の高さまで伸びる）。
+        ボタンが折り返して1行増えても、同じ行のカードが一緒に伸びるので凸凹は出ない。 */
+  .l-grid {
+    display: grid;
+    gap: var(--grid-gap);
+    grid-template-columns: minmax(0, 1fr);
+    margin-block-start: var(--space-xl);
+  }
+
+  @media (min-width: 600px) {
+    .l-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 900px) {
+    .l-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* トップのショーケースだけは 2列で止める。3列にすると1枚が小さくなりすぎる。 */
+    .l-grid--showcase {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   /* ── フッター ── */
@@ -416,6 +468,53 @@
 
   .c-skip-link:focus {
     inset-block-start: var(--space-sm);
+  }
+
+  /* ── スキップ導線その2: カード一覧を飛ばす ──
+     本文の途中に置くため、その場所に高さ0の起点（.c-skip-anchor）を1つ作り、
+     そこを基準に絶対配置する。⚠️ 起点を作らないと、絶対配置の基準がページ全体になり、
+     フォーカスした瞬間にヘッダーの位置へ出てしまう（利用者の現在地と離れる）。 */
+  .c-skip-anchor {
+    position: relative;
+  }
+
+  /* ⚠️ 本文の途中に置く2種は、画面外へ逃がす方法（上へ 100px）では隠れない。
+     基準がページの先頭ではなく「置いた場所」になるため、100px 上に出るだけで見えてしまう。
+     絶対配置で場所を取らないのは同じなので、隠すのはクリップで行う。 */
+  .c-skip-link--inflow,
+  .c-skip-link--card {
+    inset-block-start: 0;
+    clip-path: inset(50%);
+  }
+
+  .c-skip-link--inflow:focus,
+  .c-skip-link--card:focus {
+    clip-path: none;
+  }
+
+  .c-skip-link--inflow {
+    inset-inline-start: 0;
+  }
+
+  .c-skip-link--inflow:focus {
+    inset-block-start: var(--space-sm);
+  }
+
+  /* ── スキップ導線その3: このデモのプレビューを飛ばす（実DOM再生のカードだけ） ──
+     ⚠️ 白いプレビュー窓の上に重なる。チップは暗いまま（面が #ffffff に対し 19.57:1）だが、
+        リングは窓の白地に落ちるため反転させる（白いリングは白い窓の上で消える）。
+     ⚠️ 24px は「窓の内側へ入る」ための距離である。カード余白 8px ＋ マット帯 8px = 16px の
+        外側に出すとリングがマット帯にかかる（そこでは反転リングが 1.63:1 で消える）。 */
+  .c-skip-link--card {
+    inset-inline-start: var(--skip-link-card-offset);
+  }
+
+  .c-skip-link--card:focus {
+    inset-block-start: var(--skip-link-card-offset);
+  }
+
+  .c-skip-link--card:focus-visible {
+    outline-color: var(--ring-on-light);
   }
 
   /* ── ロゴ（サイト名 / 文字のみ） ──
@@ -660,7 +759,7 @@
        内側 = hairline-strong 1px（ドロワー面の上 3.58:1）
        外側 = canvas 1px（内側の線の外隣を canvas に固定する）
      ⚠️ 暗幕越しの地色は重なる先で変わる。白いプレビュー窓の上では暗幕込みでも
-        hairline-strong 1本では 2.51:1 にしかならず、線1本では解けない。 */
+        hairline-strong 1本では 2.45:1（合成色 #3b3c3d）にしかならず、線1本では解けない。 */
   .c-nav-drawer {
     position: fixed;
     inset-block: 0;
@@ -812,6 +911,569 @@
     }
   }
 
+  /* ── パンくず（カテゴリ一覧のみ） ── */
+  .c-breadcrumb__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .c-breadcrumb__item {
+    color: var(--ink-muted);
+    font-size: var(--fs-caption);
+    line-height: 1.7;
+  }
+
+  /* 区切りは記号1つ。装飾ではなく階層を示すため、canvas の上で見える色にする。 */
+  .c-breadcrumb__item + .c-breadcrumb__item::before {
+    content: "/";
+    margin-inline-end: var(--space-sm);
+    color: var(--hairline-strong);
+  }
+
+  .c-breadcrumb__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-min-height);
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  .c-breadcrumb__link:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  /* ── カテゴリ一覧の見出し ──
+     件数はデータから数えた値だけを出す。手で書いた数字を画面に置かない。 */
+  .p-listing__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-md);
+    font-size: var(--fs-h1);
+    line-height: 1.4;
+  }
+
+  .p-listing__count {
+    color: var(--ink-muted);
+    font-size: var(--fs-caption);
+    font-weight: 400;
+    line-height: 1.7;
+    font-feature-settings: "tnum" 1, "kern" 1;
+  }
+
+  /* パーツがまだ無いカテゴリ。空白のまま黙って置かない。 */
+  .p-empty {
+    margin-block-start: var(--space-xl);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+  }
+
+  /* ── タグフィルタ ──
+     状態は aria-pressed で持つ。単一選択。
+     アクティブは「塗りの反転 ＋ 太字 ＋ ✓」の3手段で示す（色相を変えない）。
+     ⚠️ 白の塗りを使ってよいのはここと（後続工程の）コピーボタンだけ。3箇所目を作らない。 */
+  /* ⚠️ 行は1本にまとめる（左＝タグ chip 列 / 右＝動画の全停止トグル）。
+     行を増やすとカード一覧までの距離が伸びる。 */
+  .c-tagfilter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-block-start: var(--space-xl);
+    /* ⚠️ 既定フォントを大きくしている利用者（32px 等）では、320px 幅にトグル1個すら
+       収まらなくなる（実測 = コンテナ 256px に対しトグル 330px）。
+       ⚠️ この 330px はラベル「プレビューを停止」での実測値である。2026-08-18 に
+          ラベルを「再生を止める」から変えたことで 275px → 330px へ 55px 伸びた。
+          古い 275px のまま読むと「256 対 275 なら 20px 足せば1行に収まる」と
+          誤読でき、下の flex-wrap を外す根拠にされる。実際は 74px 足りない。
+       そのときだけ2行に折り返す。⚠️ 既定16px では**1行のまま**である
+       （chip 列の基準サイズを 0 にしてあるため、折り返しの判定に効くのはトグルの幅だけ）。
+       ページ本体に横スクロールを出すより、その条件でだけ行が増えるほうを採る。 */
+    flex-wrap: wrap;
+  }
+
+  /* 〜599px は横スクロールで送る。
+     ⚠️ overflow を持たせると、その分だけ枠の外がクリップされる。
+        フォーカスリングは chip の外側 4px（offset 2px ＋ 線 2px）に出るため、
+        上下に 4px の余白を先に確保しておく。詰めるとリングの端が切れる。 */
+  .c-tagfilter__list {
+    display: flex;
+    gap: var(--space-sm);
+    overflow-x: auto;
+    padding-block: var(--space-xs);
+    /* ★position: relative を外さない（ページ本体の横スクロールを止めている1行）。
+       ⚠️ overflow-x: auto は「自分の中身」しかクリップしない。position: static のままだと
+          中の position: absolute な子（chip の中の .u-sr-only「件」）の包含ブロックが
+          この要素の外側になるため、クリップの対象から外れ、はみ出しがドキュメント側の
+          スクロール領域へそのまま出る。relative にしてこの要素を包含ブロックにすると、
+          overflow-x の内側に入り、外へ漏れなくなる。
+       ⚠️ html / body に overflow-x: hidden を当てても消えない（実測）。効くのはこちらである。
+       ⚠️ 今後この列に position: absolute な子（ツールチップ・バッジ等）を足す場合も、
+          この1行が前提になる。 */
+    position: relative;
+    /* ⚠️ min-width: 0 を書かないと、flex 項目は中身の最小幅より縮まず、
+       右端のトグルを押し出して横スクロールが出る。
+       ⚠️ 基準サイズ（flex-basis）は auto ではなく 0 にする。auto だと「中身の幅」で
+          折り返しが判定されるため、親の flex-wrap が chip 1個ぶんの幅でも即座に効いて
+          トグルが常に2行目へ落ちる。0 にすると、折り返しの判定に効くのはトグルの幅だけになり、
+          **既定16px では1行のまま**・**トグルが物理的に収まらないときだけ2行**になる。
+          残りの空きを埋める挙動（flex-grow: 1）は auto のときと変わらない。 */
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* ⚠️ 縮まないようにするのは chip ではなく**その親の項目**である。
+     chip 側にだけ書いても、間に挟まる <li> が既定で縮み、
+     中のラベルが「JS必 / 要」のように途中で折り返す（本文の overflow-wrap が効くため）。 */
+  .c-tagfilter__list > * {
+    flex-shrink: 0;
+  }
+
+  /* ⚠️ タグ chip と全停止トグルは**同じ行に並ぶ同じ形の操作要素**である。
+     寸法・角丸・遷移は必ず一致させたいので、共通部分は1つの規則にまとめる
+     （2箇所に同じ宣言を置くと、片方だけ直して行の中で高さや角丸がずれる）。
+     ⚠️ まとめてよいのはここまで。**押した状態は意図的に違う**
+        （chip = 白の塗り ／ トグル = 面の明度差。白の塗りを3箇所目にしない）ので、
+        `[aria-pressed="true"]` の規則は別々に持つ。 */
+  .c-tag,
+  .c-stop-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+    min-height: var(--control-min-height);
+    padding: var(--space-sm) var(--space-lg);
+    background-color: transparent;
+    color: var(--ink-secondary);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    transition:
+      color var(--duration-fast) var(--easing),
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  /* ✓ は常に場所を取り、見え方だけを切り替える。押すたびに幅が跳ねない。 */
+  .c-tag__check,
+  .c-stop-toggle__check {
+    visibility: hidden;
+  }
+
+  /* ⚠️ アクティブな chip にホバーの面色を当てない（白い塗りが灰色に戻ってしまう）。
+     :not() で対象から外し、アクティブの規則をこの後ろに置く。
+     ⚠️ トグル側は :not() を付けない。押した状態にもホバーの面色を当てるためである
+        （塗りの反転ではなく明度差で示しているので、ホバーで戻ってしまう問題が起きない）。 */
+  .c-tag:not([aria-pressed="true"]):hover,
+  .c-stop-toggle:hover {
+    background-color: var(--surface);
+    color: var(--ink);
+    border-color: var(--ink-muted);
+  }
+
+  .c-tag[aria-pressed="true"] {
+    background-color: var(--ink);
+    color: var(--on-inverse);
+    border-color: var(--ink);
+    font-weight: 700;
+  }
+
+  .c-tag[aria-pressed="true"] .c-tag__check {
+    visibility: visible;
+  }
+
+  .c-tag__count {
+    color: var(--ink-muted);
+    font-size: var(--fs-caption);
+    font-feature-settings: "tnum" 1, "kern" 1;
+  }
+
+  /* ⚠️ 白い塗りの上では muted を必ず切り替える。ink-muted のままだと 2.34:1 で AA を割る。 */
+  .c-tag[aria-pressed="true"] .c-tag__count {
+    color: var(--on-inverse-muted);
+    font-weight: 400;
+  }
+
+  @media (min-width: 600px) {
+    .c-tagfilter__list {
+      flex-wrap: wrap;
+      overflow-x: visible;
+    }
+  }
+
+  /* ── 動画プレビューの全停止トグル ──
+     ★自動再生する動きには、ページ内に止める手段が要る（WCAG 2.2.2 / Level A）。
+       ビューポート内だけ再生する方式は変えず、止める手段だけを足している。
+
+     ⚠️ 白の塗りを使わない。白の塗りは「アクティブなタグ」と「コピーボタン」の2箇所限定であり、
+        ここを3箇所目にしない。押した状態は**面と枠の明度差 ＋ ✓** で示す
+        （タグ chip の ✓ と同じ語彙。記号を増やしていない）。
+     ⚠️ 既定は `hidden` 属性で出さず、外殻JS が動画の実在を確かめてから外す。
+        収録素材が入るまでは <video> が1本も出ないため、押しても何も起きないボタンを画面に置かない。
+     ⚠️ 動きを減らす設定のときは、**再生中のものが1つも無い間だけ**出さない。
+        その状態は既に「全件停止 ＋ 再生チップ」であり、同じ状態を2つの UI で表さないためである。
+        ⚠️ ただし利用者が再生チップを押すと、その設定でも動画が動き出す。
+           そこからは止める手段が要るので、そのときはトグルを出す（詳細は catalog.js）。
+
+     ⚠️ 寸法・角丸・遷移・ホバー・✓ はタグ chip と共通の規則で持っている（上の .c-tag と同じ塊）。
+        ここに書くのは**トグルにしか無い見え方**（押した状態）だけにする。 */
+  /* ⚠️ 既定フォントを大きくしている利用者では、ボタン1個が行より広くなることがある
+     （実測 = 320px 幅・既定32px でコンテナ 256px に対し 330px）。
+     ⚠️ 330px はラベル「プレビューを停止」での値である。2026-08-18 にラベルを
+        「再生を止める」から変えたため 275px → 330px へ伸びた。
+        古い 275px を根拠に「あと少しで収まる」と判断しない。
+     行の幅で頭打ちにして、ラベルはボタンの中で折り返させる（body の overflow-wrap が効く）。
+     ⚠️ この1行が無いと、2行目に落ちてもなお行からはみ出してページが横に動く。 */
+  .c-stop-toggle {
+    max-width: 100%;
+  }
+
+  /* 停止中。面を1段持ち上げ、枠を明るくする（塗りの反転ではない）。 */
+  .c-stop-toggle[aria-pressed="true"] {
+    background-color: var(--control);
+    color: var(--ink);
+    border-color: var(--ink-muted);
+    font-weight: 700;
+  }
+
+  .c-stop-toggle[aria-pressed="true"]:hover {
+    background-color: var(--control-hover);
+  }
+
+  .c-stop-toggle[aria-pressed="true"] .c-stop-toggle__check {
+    visibility: visible;
+  }
+
+  /* ── プレビュー窓と額装 ──
+     窓の面色は白のまま落とさない（実物と一致させる）。緩衝は外側で作る。
+       黒（カード面）→ 中間灰（マット帯 8px）→ 白（窓）の3段。
+     ⚠️ 高さは aspect-ratio で先に確定させる。素材の読み込み前後で高さが跳ねない。
+     ⚠️ 窓に影を落とさない。 */
+  .c-preview__frame {
+    position: relative; /* 動きを減らす設定のときの「再生」を窓の中央に置くための基準 */
+    padding: var(--preview-matte-width);
+    background-color: var(--preview-matte);
+    border: var(--border-hairline) solid var(--hairline);
+    border-radius: var(--radius-md);
+  }
+
+  .c-preview__window {
+    display: block;
+    width: 100%;
+    background-color: var(--preview-canvas);
+    border: 0;
+    border-radius: var(--radius-sm);
+  }
+
+  .c-preview--wide .c-preview__window {
+    aspect-ratio: var(--aspect-preview-wide);
+  }
+
+  .c-preview--tall .c-preview__window {
+    aspect-ratio: var(--aspect-preview-tall);
+  }
+
+  .c-preview--top .c-preview__window {
+    aspect-ratio: var(--aspect-preview-top);
+  }
+
+  /* 収録素材が入る前の窓。白地の上に載るチップは必ず暗い面で描く。 */
+  .c-preview__window--pending {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 白い窓・白い poster の上に置くチップ。動きを減らす設定のときの「再生」もこの形で描く。 */
+  .c-preview__note,
+  .c-preview__play {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: var(--control-min-height);
+    padding: var(--space-sm) var(--btn-demo-padding-inline);
+    background-color: var(--surface);
+    color: var(--ink);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-caption);
+    line-height: 1.7;
+  }
+
+  .c-preview__play {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+    transition:
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  /* ⚠️ ホバーの枠に ink-muted を使わない。
+     暗い面の上では ink-muted は hairline-strong より明るく、枠を「強める」側に働くが、
+     このチップが載るのは白い窓である。白地に対しては ink-muted のほうが暗くならず
+     2.58:1 まで落ち、ホバーが枠を**弱める**（設計意図と逆向きになる）。
+     白い窓の上では反転させる — 枠を canvas まで暗くすると窓に対し 19.57:1 になり、
+     ホバーでチップの輪郭が締まる。R-5「白い窓の上に載る要素は反転させる」と同じ考え方。
+     ⚠️ 枠はチップ面（surface-raised）に対しては 1.21:1 で溶けるが、境界を担うのは
+        面と窓の対比（16.14:1）であり、枠はその外側の縁として働く。 */
+  .c-preview__play:hover {
+    background-color: var(--surface-raised);
+    border-color: var(--canvas);
+  }
+
+  /* リングは窓の白地の上に落ちるため反転させる。 */
+  .c-preview__play:focus-visible {
+    outline-color: var(--ring-on-light);
+  }
+
+  /* ── カード ── */
+  .c-card {
+    position: relative;
+    /* カード幅そのものを条件にできるようにする。
+       ⚠️ これはメディアクエリではない。ブレークポイントは 600 / 900px の2つのままである。
+          ボタン行が1行に収まるかどうかは「画面幅」ではなく「カード1枚の幅」で決まるため、
+          画面幅で分岐すると 3つ目のブレークポイントを足すことになる。 */
+    container-type: inline-size;
+    container-name: card;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-sm);
+    background-color: var(--surface);
+    border: var(--border-hairline) solid var(--hairline);
+    border-radius: var(--radius-md);
+    transition: border-color var(--duration-fast) var(--easing);
+  }
+
+  /* ⚠️ ホバーで動かさない（transform を使わない）。中の iframe ごと揺れる。
+     変えるのは罫線の色だけ。 */
+  .c-card:hover {
+    border-color: var(--hairline-strong);
+  }
+
+  .c-card__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-xs) var(--space-xs);
+  }
+
+  /* ⚠️ nowrap を付けない。3列グリッドの狭い幅で溢れる。
+     収まらない名前は名前のほうを短くする。 */
+  .c-card__title {
+    font-size: var(--fs-card-title);
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-feature-settings: "palt" 1, "kern" 1;
+  }
+
+  /* ボタン行はカードの下端に寄せる。名前が2行になっても行内で下端が揃う。
+     ⚠️ 狭い幅では折り返してよい。同じ行のカードは一緒に伸びるので凸凹は出ない。 */
+  .c-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-md);
+    margin-block-start: auto;
+  }
+
+  /* デモ群とコード群を分ける縦罫。
+     ⚠️ hairline はカード面の上で 1.36:1 と実質見えず、群を分ける役割を果たせない。
+     ⚠️ 左右の余白は .c-card__actions の gap が持つ。ここに margin を足すと二重になる。 */
+  .c-card__divider {
+    align-self: stretch;
+    flex-shrink: 0;
+    width: var(--border-hairline);
+    min-height: var(--control-min-height);
+    background-color: var(--hairline-strong);
+  }
+
+  /* ── 「デモ」ボタン（別画面へ移動する） ──
+     区別の手段は 塗りなし・和文・↗・単独 の4つ。色で区別しない。 */
+  .c-btn-demo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: var(--control-min-height);
+    padding: var(--btn-padding-block) var(--btn-demo-padding-inline);
+    background-color: transparent;
+    color: var(--ink);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-button);
+    font-weight: 700;
+    line-height: 1;
+    font-feature-settings: "palt" 1, "kern" 1;
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  .c-btn-demo:hover {
+    background-color: var(--surface-raised);
+    border-color: var(--ink-muted);
+  }
+
+  .c-btn-demo:hover .c-ext {
+    color: var(--ink);
+  }
+
+  /* ── コードボタン（その場でコードを見る） ──
+     3つを1本のセグメントに連結する。塗り・等幅・記号なし・連結の4点でデモと区別する。
+     ⚠️ 群に overflow: hidden を掛けない。中のボタンのフォーカスリングが切れる。
+        角丸は両端のボタンに個別に当てる。 */
+  .c-codes {
+    display: inline-flex;
+    align-items: stretch;
+    background-color: var(--control);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+  }
+
+  .c-codes__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--control-min-height);
+    padding: var(--btn-padding-block) var(--space-md);
+    background-color: transparent;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--fs-button-mono);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: background-color var(--duration-fast) var(--easing);
+  }
+
+  .c-codes__item:first-child {
+    border-start-start-radius: var(--radius-sm);
+    border-end-start-radius: var(--radius-sm);
+  }
+
+  .c-codes__item:last-child {
+    border-start-end-radius: var(--radius-sm);
+    border-end-end-radius: var(--radius-sm);
+  }
+
+  /* ⚠️ 内側の縦罫だけは ink-muted にする。コントロール面の上では
+     hairline-strong が 2.25:1（ホバー中 1.75:1）で見えなくなる。 */
+  .c-codes__item + .c-codes__item {
+    border-inline-start: var(--border-control) solid var(--ink-muted);
+  }
+
+  .c-codes__item:hover {
+    background-color: var(--control-hover);
+  }
+
+  /* ── ボタン行が1行に収まらない幅のとき ──
+     カードが狭いと [デモ] とセグメントは同じ行に載らない。そのとき縦罫だけが
+     1行目の末尾に取り残されて、何も分けていない線が1本立つ。
+     そこで**幅で折り返しを確定させ**、縦罫を下げてセグメントを次の行に置く。
+     群を分ける役割は改行そのものが引き受ける。
+     ⚠️ 単位は em にする。カードの幅は利用者のフォント設定で変わらないが、
+        ボタンの中身は変わるため、px で書くと文字を大きくした利用者だけ縦罫が取り残される。 */
+  @container card (max-width: 17.5em) {
+    .c-card__divider {
+      display: none;
+    }
+
+    .c-codes {
+      flex-basis: 100%;
+    }
+
+    .c-codes__item {
+      flex: 1;
+    }
+  }
+
+  /* ── 他のカテゴリへ（カード一覧を飛ばした先） ── */
+  .p-others {
+    margin-block-start: var(--space-section-gap);
+  }
+
+  .p-others__heading {
+    color: var(--ink-muted);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1.7;
+    letter-spacing: 0.04em;
+    font-feature-settings: "kern" 1;
+  }
+
+  .p-others__list {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-xl);
+    margin-block-start: var(--space-sm);
+  }
+
+  .c-otherlink {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-min-height);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  .c-otherlink:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  /* ── トップのショーケース ──
+     カードごと1つのリンクにする（中にボタンを置かないので入れ子にならない）。
+     ⚠️ 件数を出さない。パーツを足すたびに数字が古くなり、古いことが画面から分からない。 */
+  .p-showcase {
+    padding-block-end: var(--space-section-gap);
+  }
+
+  .c-showcase__link {
+    display: block;
+    padding: var(--space-sm);
+    background-color: var(--surface);
+    color: var(--ink);
+    border: var(--border-hairline) solid var(--hairline);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--easing);
+  }
+
+  .c-showcase__link:hover {
+    border-color: var(--hairline-strong);
+  }
+
+  .c-showcase__name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xs) var(--space-xs);
+    font-size: var(--fs-h2);
+    line-height: 1.5;
+  }
+
+  .c-showcase__arrow {
+    color: var(--ink-muted);
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  .c-showcase__link:hover .c-showcase__arrow {
+    color: var(--ink);
+  }
+
   /* ── ヒーロー ──
      高さを vh で確保しない。上下のパディングだけで組む。 */
   .p-hero {
@@ -876,10 +1538,18 @@
     overflow: hidden;
   }
 
+  /* JS が要る操作要素は JS 無効時に出さない。押せない UI を画面へ残さない。
+     ⚠️ この規約から外れた操作要素だけが、<head> の1箇所で効く退避の網から漏れる。
+     ⚠️ カード上のコードボタンはここに入れない — あれはファイルへの素のリンクであり、
+        JS はモーダルへ格上げするだけである（JS 無効でも中身に到達できる）。 */
   .no-js [data-disclosure-toggle],
   .no-js .c-dropdown,
   .no-js .c-nav-overlay,
-  .no-js .c-nav-drawer {
+  .no-js .c-nav-drawer,
+  .no-js [data-tagfilter],
+  /* 動画の全停止トグルは今のところ [data-tagfilter] の内側にあり、上の行で既に下がる。
+     それでも独立して列挙する — 置き場所を動かしたときに規約から外れて網から漏れるため。 */
+  .no-js [data-stop-videos] {
     display: none;
   }
 

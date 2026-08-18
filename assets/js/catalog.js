@@ -1,7 +1,10 @@
 /**
  * カタログ外殻のスクリプト。バンドルしない（ES modules をそのまま配信する）。
  *
- * 今のところ持っている機能は開閉する面（ヘッダーの「カテゴリ ▾」／ハンバーガー）だけ。
+ * 持っている機能は3つ。
+ * - 開閉する面（ヘッダーの「カテゴリ ▾」／ハンバーガーのドロワー）
+ * - タグフィルタ（カテゴリ一覧）
+ * - 動画プレビューの再生制御（ビューポート内だけ再生 / 全停止トグル / 動きを減らす設定では止める）
  *
  * 決めていること
  * - ホバーで開かない。開閉は「押す」操作で行う（タップ / Enter / Space）。
@@ -192,10 +195,203 @@ class Drawer extends Disclosure {
   }
 }
 
+/**
+ * タグフィルタ（カテゴリ一覧）。
+ *
+ * 決めていること
+ * - 単一選択。複数選択は件数規模で利得がなく、状態管理と読み上げのコストだけ増える。
+ * - 状態は `aria-pressed` が持つ。見た目（塗りの反転・太字・✓）は CSS が引き受ける。
+ * - URL を書き換えない（フィルタ状態を URL に持たない）。
+ * - JS 無効時は UI ごと出さない（CSS の .no-js で下げる）。全件がそのまま並ぶ。
+ *
+ * ⚠️ カードのタグはカンマ区切りで持つ。タグ名に空白を含むものがあるため、
+ *    空白区切りにすると1つのタグが2つに割れる。
+ */
+class TagFilter {
+  constructor(root) {
+    this.buttons = Array.from(root.querySelectorAll('[data-tag]'));
+    const list = document.querySelector('[data-cards]');
+    this.cards = list ? Array.from(list.children) : [];
+    if (this.buttons.length === 0 || this.cards.length === 0) return;
+
+    root.addEventListener('click', (e) => {
+      const button = e.target.closest('[data-tag]');
+      if (button) this.select(button);
+    });
+
+    const initial = this.buttons.find((b) => b.getAttribute('aria-pressed') === 'true');
+    this.select(initial || this.buttons[0]);
+  }
+
+  select(button) {
+    const tag = button.dataset.tag;
+    for (const b of this.buttons) b.setAttribute('aria-pressed', b === button ? 'true' : 'false');
+    for (const card of this.cards) {
+      const tags = (card.dataset.tags || '').split(',');
+      card.hidden = tag !== '' && !tags.includes(tag);
+    }
+  }
+}
+
+/**
+ * 動画プレビュー。
+ *
+ * - `autoplay` を使わない。ビューポートに入ったときだけ再生し、外れたら止める。
+ * - `preload="none"` と合わせて、初期表示では1本も読み込まない。
+ * - ⚠️ 自動で動き続けるものには、ページの中に止める手段が要る（WCAG 2.2.2 / Level A）。
+ *   `loop` が付いており5秒を超えて動き続けるため、**一覧に全停止トグルを1つ置く**。
+ *   ⚠️ 「ビューポート内だけ再生する」方式そのものは変えない。止める手段を足しただけである。
+ * - ⚠️ 動きを減らす設定では自動再生しない。poster を出したまま「再生」を1つ置き、
+ *   利用者が押したときだけ再生する。押せる形を残すのは、動きを見たい人の出口を塞がないため。
+ * - JS 無効時は poster が静止画として出るだけで壊れない。
+ *
+ * ★停止中の状態は1つに統合してある。
+ *   利用者が全停止トグルを押した状態と、動きを減らす設定の状態は**同じ状態**であり、
+ *   どちらも「全件停止 ＋ 各カードに『▶ 再生』チップ」で表す。UI を二重に持たない。
+ *
+ * ★トグルを出す条件と押した状態は、**画面でいま動いているもの**から決める。
+ *   ⚠️ 当初は「動きを減らす設定のときは出さない」という固定の条件で組んでいたが、
+ *      その理由（押しても状態が変わらないボタンになる）は**最初に再生チップを押すまでしか
+ *      成り立たない**。押せば動画は動き出し、その設定の利用者にだけ止める手段が無くなる。
+ *      `loop` が付いているので、止めなければ動き続ける。
+ *   そこで条件を2つとも「実際に再生中のものがあるか」で決める形に変えた。
+ *     - 出す条件   … 動きを減らす設定のときは、**再生中のものが1つでもある間だけ**出す
+ *                    （何も動いていないのに「止める」ボタンを置かない、は保つ）
+ *     - 押した状態 … 「止まっていること」を表す。停止中でも個別再生が残っていれば押していない状態
+ *   ⚠️ この形にすると、停止中に再生チップで動かしたものも**トグル1回で止まる**。
+ *      以前は「解除 → 全部動き出す → もう一度止める」の2回押しになっていた。
+ *
+ * ★停止の選択はページの中だけで保つ（ページをまたいで覚えない）。
+ *   理由は3つ。(1) 覚えると、次に開いた利用者に「動かない理由が画面から分からない」
+ *   状態を渡すことになる (2) 「常に動きを減らしたい」という恒久的な意思は
+ *   `prefers-reduced-motion` が受け持つ層であり、その層と役割が二重になる
+ *   (3) 保存領域は同一オリジンの掲載デモとも共有され、影響範囲がこの一覧を越える。
+ */
+function initPreviewVideos() {
+  const videos = Array.from(document.querySelectorAll('[data-preview-video]'));
+  const toggle = document.querySelector('[data-stop-videos]');
+  // ⚠️ 動画が1本も無いときはトグルを出さない（hidden のまま残す）。
+  //    収録素材が入るまでの間、押しても何も起きないボタンを画面に置かないため。
+  if (videos.length === 0) return;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  /** 利用者が全停止トグルを押しているか。動きを減らす設定とは別に持つ。 */
+  let stoppedByUser = false;
+  const isStopped = () => reduce.matches || stoppedByUser;
+
+  /**
+   * ⚠️ `play()` の返す Promise を受け取らないと、自動再生がブロックされたときや
+   *    素材の取得に失敗したときに未処理の拒否がコンソールへ出る。
+   *    握りつぶす代わりに、失敗したら「▶ 再生」チップを出して利用者の出口を残す。
+   */
+  /** いま1本でも再生中か。トグルの出す条件と押した状態は、どちらもこれで決まる。 */
+  const anyPlaying = () => videos.some((video) => !video.paused);
+
+  /**
+   * トグルの見え方を、いまの再生状況に合わせる。
+   * - 出す条件   … 動きを減らす設定のときは、再生中のものがある間だけ出す
+   * - 押した状態 … 「止まっている」ことを表す（利用者が押したかどうかではない）
+   */
+  const syncToggle = () => {
+    if (!toggle) return;
+    const playing = anyPlaying();
+    toggle.hidden = reduce.matches && !playing;
+    toggle.setAttribute('aria-pressed', isStopped() && !playing ? 'true' : 'false');
+  };
+
+  const play = (video) => {
+    const started = video.play();
+    // ⚠️ play() は paused を同期で false にする。押した直後の状態でトグルを合わせられる。
+    syncToggle();
+    if (started && typeof started.catch === 'function') {
+      started.catch(() => {
+        addPlayButton(video);
+        syncToggle();
+      });
+    }
+  };
+
+  function addPlayButton(video) {
+    const frame = video.parentElement;
+    if (!frame || frame.querySelector('.c-preview__play')) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'c-preview__play';
+    const glyph = document.createElement('span');
+    glyph.setAttribute('aria-hidden', 'true');
+    glyph.textContent = '▶';
+    const label = document.createElement('span');
+    label.textContent = '再生';
+    button.append(glyph, label);
+    button.setAttribute('aria-label', `再生: ${video.getAttribute('aria-label') || ''}`.trim());
+    button.addEventListener('click', () => {
+      button.remove();
+      play(video);
+    });
+    frame.append(button);
+  }
+
+  const removePlayButton = (video) => {
+    const frame = video.parentElement;
+    const button = frame && frame.querySelector('.c-preview__play');
+    if (button) button.remove();
+  };
+
+  let observer = null;
+
+  const apply = () => {
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+
+    if (isStopped()) {
+      for (const video of videos) {
+        video.pause();
+        addPlayButton(video);
+      }
+      syncToggle();
+      return;
+    }
+
+    syncToggle();
+
+    for (const video of videos) removePlayButton(video);
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) play(entry.target);
+          else entry.target.pause();
+        }
+      },
+      { threshold: 0.25 }
+    );
+    for (const video of videos) observer.observe(video);
+  };
+
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      // ⚠️ 反転させない。「止まっているなら再生へ、そうでなければ停止へ」で決める。
+      //    停止中に再生チップで動かしたものが残っている場合、反転させると
+      //    いったん全部動き出してしまう（止めたいのに動く）。
+      const allStopped = isStopped() && !anyPlaying();
+      // 動きを減らす設定では「全部再生する」を用意しない（その層の意思を上書きしない）。
+      stoppedByUser = allStopped ? false : true;
+      apply();
+    });
+  }
+
+  reduce.addEventListener('change', apply);
+  apply();
+}
+
 function init() {
   const instances = Array.from(document.querySelectorAll('[data-disclosure-toggle]')).map((toggle) =>
     toggle.hasAttribute('data-disclosure-overlay') ? new Drawer(toggle) : new Disclosure(toggle)
   );
+
+  for (const root of document.querySelectorAll('[data-tagfilter]')) new TagFilter(root);
+  initPreviewVideos();
 
   document.addEventListener('pointerdown', (e) => {
     for (const d of instances) {

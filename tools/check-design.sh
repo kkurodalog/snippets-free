@@ -150,8 +150,13 @@ BPBAD=$(printf '%s\n' "$BP" | grep -vE "min-width:[[:space:]]*(600|900)px" | gre
 #           ※本実装ではこのバーを border-inline-start で描いており、背景色としては現れない
 #         - ハンバーガーの3本線（ink / 2px の矩形。塗りの面ではなく線を引いているだけ）
 #       ⚠️ 除外を書いておかないと「3箇所目の白い塗りだ」と誤読され、検査が信用されなくなる
+#       ⚠️ 除外対象を**検出したうえで却下する**形にする。
+#          白い値を持つカスタムプロパティ（--preview-canvas / --ring）を検出パターンから
+#          落としてしまうと、除外規定に列挙した当の面が**そもそも出力に現れず**、
+#          「列挙して却下した」のか「見ていないだけ」なのかを読み手が区別できない。
+#          その経路で3箇所目が入っても目視項目に現れない。
 echo "--- (5) 白い塗りのセレクタ（目視 / 上記の除外規定を当てる） ---"
-grep -n -B3 -iE "background(-color)?:[[:space:]]*(var\(--ink\)|#f2f4f6|#ffffff|#fff[^0-9a-fA-F]|white)" "${SHELL_CSS[@]}"
+grep -n -B3 -iE "background(-color)?:[[:space:]]*(var\(--(ink|preview-canvas|ring)\)|#f2f4f6|#ffffff|#fff[^0-9a-fA-F]|white)" "${SHELL_CSS[@]}"
 
 # (6) 影を持つ面がモーダル1つだけであること
 #     ★目視項目（終了コードに反映しない）
