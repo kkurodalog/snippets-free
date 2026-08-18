@@ -1,7 +1,8 @@
 import { esc, publishedCategories } from '../partials/html.mjs';
 import { page } from '../partials/page.mjs';
 import { card } from '../partials/card.mjs';
-import { tagOrder } from '../partials/parts.mjs';
+import { codeModal } from '../partials/modal.mjs';
+import { tagOrder, VERIFICATION_ITEMS } from '../partials/parts.mjs';
 
 /**
  * カテゴリ一覧ページ。このサイトの主戦場。
@@ -125,6 +126,42 @@ ${toggle}
         </div>`;
 }
 
+/**
+ * モーダルが使う「コードでは表せない情報」。
+ *
+ * ★ここに**コードは1バイトも入れない**。コードは開いたときに実ファイルから読む
+ *   （カタログ側に写しを持たない = 乖離が構造的に起きない）。
+ *   ここに置くのは、実ファイルからは分からない3つだけである。
+ *     - article      … 解説記事の URL（無いパーツでは記事リンクを出さない。非活性にしない）
+ *     - notes        … 使うときの注記（最大3項目・言い切り）
+ *     - verification … 掲載基準4項目のどれを満たしたかと、その実測日
+ *
+ * ★パーツ名・ファイルの種類・ファイルのパス・デモの場所は**ここに書かない**。
+ *   いずれもカードの DOM に既にあり、モーダルはそこから読む。同じ値を2箇所に置かない。
+ *
+ * ★検証行の文言（4項目のラベル）もここから配る。
+ *   ラベルの正本は site/partials/parts.mjs の VERIFICATION_ITEMS で、
+ *   その中身は CODING-RULES.md「1. 掲載基準（4項目）」と同じ文言である。
+ *   ⚠️ 画面側で文字列を組み立てると、公開している基準と画面の表示が割れる。
+ *
+ * ⚠️ `</script>` と `<` を実体で書けないため、`<` を \u003c へ逃がす
+ *    （JSON としては同じ文字列であり、読み手も画面も変わらない）。
+ */
+function partsMeta({ category }) {
+  const parts = {};
+  for (const part of category.parts) {
+    const entry = {};
+    if (part.article) entry.article = part.article;
+    if (part.notes?.length) entry.notes = part.notes;
+    if (part.verification) entry.verification = part.verification;
+    if (part.verifiedOn) entry.verifiedOn = part.verifiedOn;
+    parts[part.slug] = entry;
+  }
+  const json = JSON.stringify({ verificationItems: VERIFICATION_ITEMS, parts }).replace(/</g, '\\u003c');
+  // 字下げは隣に置く <dialog>（4スペース）と揃える。生成物の差分を読むときのノイズになる。
+  return `    <script type="application/json" data-parts-meta>${json}</script>`;
+}
+
 /** 他のカテゴリへ。カード一覧を飛ばした先でもある。 */
 function otherCategories({ site, category, root }) {
   const others = publishedCategories(site).filter((c) => c.slug !== category.slug);
@@ -154,6 +191,10 @@ export function categoryPage({ site, category, root, pagePath, mediaFor }) {
 ${category.parts.map((part) => card({ category, part, media: mediaFor(part) })).join('\n')}
         </ul>`;
 
+  // ⚠️ 空の分岐で改行だけを残さない（生成物に無意味な空行が1本増える）。
+  //    連結する側に改行を持たせる。
+  const modal = count === 0 ? '' : `\n${partsMeta({ category })}\n${codeModal()}`;
+
   const main = `    <main class="l-main" id="main" tabindex="-1">
       <div class="l-container">
 ${breadcrumb({ site, category, root, pagePath })}
@@ -162,7 +203,7 @@ ${tagFilter({ category })}
 ${list}
 ${otherCategories({ site, category, root })}
       </div>
-    </main>`;
+    </main>${modal}`;
 
   return page({
     site,

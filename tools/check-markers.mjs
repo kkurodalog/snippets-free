@@ -19,6 +19,16 @@
  *    条件 = そのカテゴリの中に1本でもマーカー入りのファイルが現れること。
  *    埋め込みはカテゴリ単位で進むため、1本入った時点で「そのカテゴリは作業中」であり、
  *    残りが未埋め込みなら取りこぼしである。
+ *    ⚠️ ただしこの自動格上げは**カテゴリの中でしか閉じない**。カテゴリが丸ごと未着手だと
+ *       保留のまま合格になる。埋め込みはカテゴリ単位で進むため、
+ *       「3カテゴリ完了・1カテゴリ未着手」は必ずこの形になる。
+ *
+ * ★公開ゲート（--require-embedded）
+ *    公開してよいかの判定では、保留を1件も許さない。
+ *      node tools/check-markers.mjs . --require-embedded
+ *    このモードでは未埋め込みを違反として数え、1件でもあれば exit 1 になる。
+ *    ⚠️ 既定（引数なし）は保留のままにする。**埋め込み作業の最中に常時 exit 1 にすると、
+ *       検査そのものが無視されるようになる。** 日常の検査と公開ゲートを分ける理由はこれである。
  *
  * ⚠️ 「行頭コメントの日本語」は厳密なパーサではなく字面の判定である。
  *    デモの表示文言（日本語の本文）は対象にならない。対象はコメント行だけ。
@@ -96,29 +106,47 @@ export async function checkMarkers(root = DEFAULT_ROOT) {
   return { violations, pending, scanned };
 }
 
-export function reportMarkers({ violations, pending, scanned }) {
-  console.log(`掲載範囲マーカー検査: ${scanned} ファイル`);
+export function reportMarkers({ violations, pending, scanned }, { requireEmbedded = false } = {}) {
+  console.log(
+    `掲載範囲マーカー検査: ${scanned} ファイル${requireEmbedded ? '（公開ゲート / 未埋め込みを違反として扱う）' : ''}`
+  );
   if (pending.length > 0) {
-    console.warn(`⚠️ マーカー未埋め込み ${pending.length} ファイル（埋め込みは後続工程）`);
-    for (const p of pending) console.warn(`  - ${p}`);
-    console.warn('  ★同じカテゴリに1本でも埋め込んだ時点で、残りは違反として落ちる。');
+    if (requireEmbedded) {
+      console.error(`NG: マーカー未埋め込み ${pending.length} ファイル`);
+      for (const p of pending) console.error(`  - ${p}`);
+      console.error('  ★未埋め込みのファイルは、公開してもコードを表示できずコピーもできない。');
+    } else {
+      console.warn(`⚠️ マーカー未埋め込み ${pending.length} ファイル（埋め込みは後続工程）`);
+      for (const p of pending) console.warn(`  - ${p}`);
+      console.warn('  ★同じカテゴリに1本でも埋め込んだ時点で、残りは違反として落ちる。');
+      console.warn('  ★公開してよいかは `node tools/check-markers.mjs . --require-embedded` で判定する。');
+    }
   }
   if (violations.length > 0) {
     console.error(`マーカーの規約違反 ${violations.length} 件`);
     for (const v of violations) console.error(`  - ${v}`);
   }
-  if (violations.length === 0) console.log('OK: マーカーの規約違反は0件');
+  // ⚠️ 未埋め込みを一覧に出しながら「OK」と言わない。
+  //    公開ゲートでは未埋め込みも不合格の理由である。
+  const failed = violations.length > 0 || (requireEmbedded && pending.length > 0);
+  if (!failed) console.log('OK: マーカーの規約違反は0件');
+  return failed;
 }
 
 async function main() {
-  const result = await checkMarkers(process.argv[2] ? resolve(process.argv[2]) : DEFAULT_ROOT);
+  // 引数は順不同。`--` で始まらない最初のものを走査の起点として読む。
+  const args = process.argv.slice(2);
+  const requireEmbedded = args.includes('--require-embedded');
+  const target = args.find((a) => !a.startsWith('--'));
+
+  const result = await checkMarkers(target ? resolve(target) : DEFAULT_ROOT);
   if (result.scanned === 0) {
     console.error('NG: 走査対象のファイルが0件。データかパスが違う');
     process.exitCode = 2;
     return;
   }
-  reportMarkers(result);
-  if (result.violations.length > 0) process.exitCode = 1;
+  const failed = reportMarkers(result, { requireEmbedded });
+  if (failed) process.exitCode = 1;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

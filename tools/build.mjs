@@ -43,6 +43,9 @@ import {
   TAGS,
   PREVIEWS,
   PREVIEW_ASPECTS,
+  VERIFICATION_ITEMS,
+  VERIFIED_ON,
+  NOTES_MAX,
 } from './site-data.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -203,6 +206,39 @@ async function checkCategoryData(category) {
     }
     if (part.article && !/^https:\/\//.test(part.article)) {
       errors.push(`${id}: article は https:// で始まる絶対 URL にする`);
+    }
+
+    // モーダルの注記（最大3項目）。
+    // ⚠️ 上限を超えたら足さずに設計を見直す。ここで止めるのはそのためである。
+    if (part.notes !== undefined) {
+      if (!Array.isArray(part.notes)) errors.push(`${id}: notes は配列にする`);
+      else if (part.notes.length > NOTES_MAX) {
+        errors.push(`${id}: notes は ${NOTES_MAX} 項目まで（${part.notes.length}項目）`);
+      }
+    }
+
+    // モーダルの検証行。掲載基準4項目のどれを満たしたかと、その実測日を持つ。
+    // ★key の綴りを間違えたら生成を止める。字面が違うだけで「満たしていない」と表示され、
+    //   それが誤りであることは画面から分からない。
+    // ★verification と verifiedOn は必ず対で置く。日付の無い表明を画面に出さない。
+    const verificationKeys = VERIFICATION_ITEMS.map((i) => i.key);
+    if (part.verification !== undefined) {
+      if (typeof part.verification !== 'object' || part.verification === null) {
+        errors.push(`${id}: verification はオブジェクトにする`);
+      } else {
+        for (const key of Object.keys(part.verification)) {
+          if (!verificationKeys.includes(key)) {
+            errors.push(`${id}: 未定義の検証項目「${key}」（掲載基準は ${verificationKeys.join(' / ')}）`);
+          } else if (typeof part.verification[key] !== 'boolean') {
+            errors.push(`${id}: verification.${key} は true / false にする`);
+          }
+        }
+      }
+      if (!part.verifiedOn) errors.push(`${id}: verification があるのに verifiedOn（実測日）が無い`);
+    }
+    if (part.verifiedOn) {
+      if (!VERIFIED_ON.test(part.verifiedOn)) errors.push(`${id}: verifiedOn は YYYY-MM-DD で書く`);
+      if (!part.verification) errors.push(`${id}: verifiedOn があるのに verification が無い`);
     }
 
     // files[] と実ファイルを両方向で突き合わせる。

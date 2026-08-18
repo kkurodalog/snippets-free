@@ -7,7 +7,7 @@
 #
 #   終了コード: 0 = 機械判定で違反0件 / 1 = 違反あり / 2 = 走査対象が0件（未走査）
 #
-#   ⚠️ exit 0 が保証するのは (1)(2)(2b)(4) の機械判定だけ。(3)(5)(6) は出力の目視が要る。
+#   ⚠️ exit 0 が保証するのは (1)(2)(2b)(2c)(2d)(2e)(4) の機械判定だけ。(3)(5)(6) は出力の目視が要る。
 #
 # ★走査対象は「カタログ外殻」に限る（外殻 = 外殻CSS ＋ 生成ページ）
 #   掲載デモ（components/{カテゴリ}/{パーツ}/ 配下・utils/ 配下）と素材（media/）は対象外。
@@ -114,14 +114,131 @@ R1=$(prepared \
 #      ★コロン形式（CSS 宣言）と属性形式（SVG の fill="red" 等）の両方を見る。
 #        ⚠️ コロン形式だけを見ていると、属性で書かれた色名を素通りする。
 #           スクリプト冒頭の「HTML も見る」という主張は、その状態では色名について偽になる
+#      ★カスタムプロパティの宣言（`--x: lime`）も見る。
+#        ⚠️ プロパティ名で絞るだけだと、`--x: lime` を書いて `color: var(--x)` で参照する形が
+#           素通りしていた。`#hex` と `rgb()` は (2) が名前を見ずに拾うため捕まるが、
+#           色名リテラルだけが抜けており、差し色を持ち込める唯一の経路になっていた。
+#        ★見るのは参照側（`var(…)`）ではなく定義側である。理由は2つ。
+#           (1) 画面に出る色は、必ずどこかでリテラルとして定義される。多段（`--a: lime` →
+#               `--b: var(--a)` → `color: var(--b)`）でも、鎖の根元にリテラルが現れる。
+#               定義側を見れば、参照の深さに関係なく1回の抽出で届く。
+#           (2) 参照側を追うには var の連鎖を解く必要があり、シェルでは解ける保証がない。
+#               解ける保証のない仕掛けを置くと、素通りしたのか解決に失敗したのかを読み手が
+#               区別できなくなる。区別できない検査は、通っても根拠にならない。
+#        ⚠️ 届かない範囲 = 定義が走査対象の外にある場合。外殻CSS は自分のトークンを自分で
+#           定義しており現時点で該当は無いが、外部の CSS から色を受け取る形にしたら当てにならない。
+#        ⚠️ `--code-*` はここでは落とさない。(2c) が別枠（緩い上限88）で見るためである。
+#           両方で落とすと、同じ違反が2つの規則名で出て、どちらの上限に当たったのかが読めなくなる。
 R1KW=$(prepared \
        | grep -oiE \
            -e "(color|background|border|outline|fill|stroke|shadow)[a-z-]*:[^;{}]*" \
+           -e "--[a-z0-9-]+:[^;{}]*" \
            -e "(fill|stroke|color|bgcolor|stop-color|flood-color|lighting-color)[a-z-]*[[:space:]]*=[[:space:]]*\"[^\"]*\"" \
            -e "(fill|stroke|color|bgcolor|stop-color|flood-color|lighting-color)[a-z-]*[[:space:]]*=[[:space:]]*'[^']*'" \
+       | grep -viE "^--code-" \
        | grep -oiE "(^|[^a-z-])(red|blue|green|yellow|orange|purple|pink|cyan|magenta|teal|lime|navy|olive|maroon|aqua|fuchsia|gold|crimson|indigo|violet|turquoise|salmon|tomato|coral|khaki|orchid|lavender)([^a-z-]|$)" \
        | sort -u)
 [ -z "$R1KW" ] || { echo "NG(R-1): 有彩の色名リテラルを検出した"; echo "$R1KW"; FAIL=1; }
+
+# (2c) --code-* の彩度上限（コードのハイライト8色だけに許した彩度に、機械の歯止めを置く）
+#     ⚠️ (2) は --code-* を**名前ごと**除外している。除外だけを置くと、
+#        `--code-` で始まる名前を付けるだけで**値が何であれ振れ幅判定に載らなくなる**。
+#        --code-* を参照するものが1件も無いあいだ除外は空振りしていたが、
+#        コードの着色8色が実際に画面へ出た時点で、この除外が唯一の彩度ゲートの穴になった。
+#        「名前を1つ増やすと塗りが検査から静かに消える」型が、同じ検査のより広い場所に残っていた。
+#     ★除外の代わりに**別枠の上限**を課す。UI 側の上限（振れ幅24）はコードには狭すぎるため、
+#       コード用に緩い上限を持たせる。
+#     ★上限88 の根拠 = 現行8色の最大が --code-attr #d8b78d の 75。そこへ余裕を1段乗せた値である。
+#       ネオン系（例: #00ff88 = 振れ幅255）は通らない。
+#       ⚠️ 上限に近い色を足したくなったら、**上限を上げるのではなく色のほうを落とす**。
+#          上限を上げるとこの検査は「現行を追認するだけの数字」になる。
+#     ⚠️ 色ではない --code-* トークン（--code-fade-height 等の長さ）は対象外。
+#        ただし機械判定できない色表記（rgb() 等）と有彩の色名は要判定として落とす
+#        （素通りさせると、書き方を変えるだけで上限を回避できてしまう）。
+R1C=$(prepared | grep -oE -- "--code-[a-z-]+:[^;]*;" | sort -u \
+      | while read -r decl; do
+          val=${decl#*:}
+          hex=$(printf '%s' "$val" | grep -oE "#[0-9a-fA-F]{6}([^0-9a-fA-F]|$)" | head -1 | grep -oE "#[0-9a-fA-F]{6}")
+          if [ -n "$hex" ]; then
+            h=${hex#\#}
+            r=$((16#${h:0:2})); g=$((16#${h:2:2})); b=$((16#${h:4:2}))
+            mx=$r; [ "$g" -gt "$mx" ] && mx=$g; [ "$b" -gt "$mx" ] && mx=$b
+            mn=$r; [ "$g" -lt "$mn" ] && mn=$g; [ "$b" -lt "$mn" ] && mn=$b
+            [ $((mx-mn)) -gt 88 ] && echo "NG(R-1c): $hex --code-* の振れ幅 $((mx-mn)) が上限88 を超える"
+            continue
+          fi
+          if printf '%s' "$val" | grep -qiE "#[0-9a-fA-F]+|(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(" ; then
+            echo "要判定(R-1c): $decl 色として機械判定できない表記。6桁 HEX で書く"; continue
+          fi
+          if printf '%s' "$val" | grep -qiE "(^|[^a-z-])(red|blue|green|yellow|orange|purple|pink|cyan|magenta|teal|lime|navy|olive|maroon|aqua|fuchsia|gold|crimson|indigo|violet|turquoise|salmon|tomato|coral|khaki|orchid|lavender)([^a-z-]|$)"; then
+            echo "NG(R-1c): $decl --code-* に有彩の色名リテラルを検出した"; continue
+          fi
+        done)
+[ -z "$R1C" ] || { echo "$R1C"; FAIL=1; }
+
+# (2d) ホバーで「内容の出し入れ」をしていないこと（B-34 の規則2 の機械化）
+#     ★これは規則3（`@media (any-hover: hover)` で囲わない）の前提そのものである。
+#       ホバーでしか出ない導線・ホバーでしか押せないボタンが1つも無いからこそ、
+#       タッチ端末にホバー状態が残っても到達できなくなるものが無い、と言える。
+#       ⚠️ その前提はこれまで **CSS のコメントでしか守られていなかった**。
+#          規則を手順に置くと、その手順を通らない経路が素通りする。機械の層へ移す。
+#     ⚠️ 判定はコメントを除いた宣言だけに当てる（注意書きの中の語を拾わない）。
+#     ★落とす対象は下の4群であり、**この列挙が守備範囲そのもの**である。
+#       ⚠️ これより広い言い方（「位置・大きさ・影を動かす宣言も禁じている」等）をここに書かない。
+#          注記が仕掛けより広いと、読み手は「ホバーで何も動かない」と受け取るが、
+#          実際に保証しているのは列挙したぶんだけになる。主張は仕掛けと同じ幅で書く。
+#         - 内容の出し入れ: display / visibility / opacity / content / content-visibility / clip-path
+#         - 位置          : position / top / right / bottom / left / inset* /
+#                           transform* / translate / rotate / scale / perspective / order
+#         - 大きさ        : width / height / block-size / inline-size（min- / max- 付きを含む）/
+#                           margin* / padding* / gap / row-gap / column-gap / flex* / grid* /
+#                           border*width / font-size / font-weight / letter-spacing /
+#                           word-spacing / line-height / zoom
+#         - 影            : box-shadow / text-shadow / filter / backdrop-filter
+#       ⚠️ 面色（background*）・罫線色（border*color）・下線（text-decoration*）・記号の明度（color）は
+#          B-34 が許した変化である。ここでは落とさない（落とすと規範どおりの実装が弾かれる）。
+#       ⚠️ ベンダー接頭辞（-webkit- / -moz- / -ms-）付きも同じ扱いにする。
+#     ★入れ子は1段まで見る（`.a:hover { color: …; .child { display: block } }` の内側まで届く）。
+#       ⚠️ 正規表現では { } の対応を数えられないため、2段以上の入れ子には届かない。
+#          届かないままにせず、(2e) で**ネスト記法そのもの**を機械で禁じている。
+HOVERPROPS='(-webkit-|-moz-|-ms-)?(display|visibility|opacity|content|content-visibility|clip-path|position|top|right|bottom|left|inset[a-z-]*|transform[a-z-]*|translate|rotate|scale|perspective|(min-|max-)?(width|height|block-size|inline-size)|margin[a-z-]*|padding[a-z-]*|gap|(row|column)-gap|flex[a-z-]*|grid[a-z-]*|order|font-size|font-weight|letter-spacing|word-spacing|line-height|border[a-z-]*width|(box|text)-shadow|(backdrop-)?filter|zoom)'
+HOVER=$(cat "${SHELL_CSS[@]}" \
+        | tr '\n' ' ' \
+        | sed -E 's:/\*[^*]*\*+([^/*][^*]*\*+)*/: :g' \
+        | grep -oE "[^{}]*:hover[^{}]*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}" \
+        | sed -E 's/^[^{]*//' \
+        | grep -oiE "(^|[;{])[[:space:]]*${HOVERPROPS}[[:space:]]*:" \
+        | sort -u)
+[ -z "$HOVER" ] || { echo "NG(B-34): :hover が面色・罫線・下線・記号の明度以外を動かしている"; echo "$HOVER"; FAIL=1; }
+
+# (2e) CSS のネスト記法を使っていないこと（(2d) が宣言に届くための前提）
+#     ⚠️ (2d) は正規表現で { } を数えており、入れ子は1段までしか追えない。
+#        「ネストは使わないことにしている」と注記に書くだけでは、書いた本人にしか効かない。
+#        前提のほうを機械で確かめる。
+#     ★判定 = 規則ブロック（プレリュードが @ で始まらないブロック）の中で、さらにブロックが
+#       開いたらネストとみなす。@media / @layer / @supports / @container の入れ子は正当なので
+#       対象外である。文字列とコメントは先に落とす（`content: "{"` を数えないため）。
+NEST=$(cat "${SHELL_CSS[@]}" \
+       | tr '\n' ' ' \
+       | sed -E 's:/\*[^*]*\*+([^/*][^*]*\*+)*/: :g' \
+       | sed -E 's/"[^"]*"/ /g' \
+       | sed -E "s/'[^']*'/ /g" \
+       | awk '{
+           buf = ""; rule = 0; d = 0; n = length($0);
+           for (i = 1; i <= n; i++) {
+             c = substr($0, i, 1);
+             if (c == "{") {
+               p = buf; gsub(/^[ \t]+|[ \t]+$/, "", p);
+               if (rule > 0) print substr(p, 1, 60);
+               if (p ~ /^@/) { stack[++d] = "at" } else { stack[++d] = "rule"; rule++ }
+               buf = "";
+             } else if (c == "}") {
+               if (d > 0) { if (stack[d] == "rule") rule--; d-- }
+               buf = "";
+             } else { buf = buf c }
+           }
+         }')
+[ -z "$NEST" ] || { echo "NG(B-34): CSS のネスト記法を検出した（(2d) が宣言に届かなくなる）"; echo "$NEST"; FAIL=1; }
 
 # (3) コードのハイライト色が UI に流用されていないこと
 #     ★目視項目（終了コードに反映しない）。参照元がコード表示のセレクタだけであることを確認する
@@ -155,8 +272,13 @@ BPBAD=$(printf '%s\n' "$BP" | grep -vE "min-width:[[:space:]]*(600|900)px" | gre
 #          落としてしまうと、除外規定に列挙した当の面が**そもそも出力に現れず**、
 #          「列挙して却下した」のか「見ていないだけ」なのかを読み手が区別できない。
 #          その経路で3箇所目が入っても目視項目に現れない。
+#       ⚠️ 白い値を持つカスタムプロパティを増やしたら、**この抽出パターンにも並べる**。
+#          名前を1つ増やすだけで、その塗りは目視項目から静かに消える
+#          （--copy-hover = コピーボタンのホバー。#ffffff を意味の名前で持ったもの）。
+#       ⚠️ -B の行数は「セレクタ行まで届く」ことを条件に決める。-B3 では新設した .c-copy の
+#          セレクタ行が出力から落ち、どの部品の塗りなのかを読み手が区別できなかった。
 echo "--- (5) 白い塗りのセレクタ（目視 / 上記の除外規定を当てる） ---"
-grep -n -B3 -iE "background(-color)?:[[:space:]]*(var\(--(ink|preview-canvas|ring)\)|#f2f4f6|#ffffff|#fff[^0-9a-fA-F]|white)" "${SHELL_CSS[@]}"
+grep -n -B4 -iE "background(-color)?:[[:space:]]*(var\(--(ink|preview-canvas|ring|copy-hover)\)|#f2f4f6|#ffffff|#fff[^0-9a-fA-F]|white)" "${SHELL_CSS[@]}"
 
 # (6) 影を持つ面がモーダル1つだけであること
 #     ★目視項目（終了コードに反映しない）
@@ -166,5 +288,5 @@ grep -n -e "box-shadow" -e "text-shadow" -e "drop-shadow" "${SHELL_FILES[@]}"
 
 # ★終了コード — 違反を出しながら成功終了しないこと
 [ "$FAIL" -eq 0 ] || { echo "NG: 機械判定で違反を検出した（(3)(5)(6) の目視は別途）"; exit 1; }
-echo "OK: (1)(1b)(2)(2b)(4) は違反0件。(3)(5)(6) の出力は目視すること"
+echo "OK: (1)(1b)(2)(2b)(2c)(2d)(2e)(4) は違反0件。(3)(5)(6) の出力は目視すること"
 exit 0

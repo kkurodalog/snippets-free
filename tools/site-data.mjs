@@ -16,7 +16,16 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { PART_FILES } from '../site/partials/parts.mjs';
 
-export { PART_FILES, PART_FILE_LABELS, TAGS, PREVIEWS, PREVIEW_ASPECTS } from '../site/partials/parts.mjs';
+export {
+  PART_FILES,
+  PART_FILE_LABELS,
+  TAGS,
+  PREVIEWS,
+  PREVIEW_ASPECTS,
+  VERIFICATION_ITEMS,
+  VERIFIED_ON,
+  NOTES_MAX,
+} from '../site/partials/parts.mjs';
 
 /**
  * ⚠️ `publishedCategories()` はここで定義せず、画面側と同じ1本を再輸出する。

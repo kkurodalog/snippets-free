@@ -1,10 +1,11 @@
 /**
  * カタログ外殻のスクリプト。バンドルしない（ES modules をそのまま配信する）。
  *
- * 持っている機能は3つ。
+ * 持っている機能は4つ。
  * - 開閉する面（ヘッダーの「カテゴリ ▾」／ハンバーガーのドロワー）
  * - タグフィルタ（カテゴリ一覧）
  * - 動画プレビューの再生制御（ビューポート内だけ再生 / 全停止トグル / 動きを減らす設定では止める）
+ * - コードモーダルの起動（assets/js/code-modal.js / カード上の [HTML][CSS][JS] を格上げする）
  *
  * 決めていること
  * - ホバーで開かない。開閉は「押す」操作で行う（タップ / Enter / Space）。
@@ -16,6 +17,8 @@
  * 〜599px のハンバーガーはドロワー型（下の Drawer）。暗幕と閉じるボタンが増えるだけで、
  * 上の決めごとはそのまま効く。
  */
+
+import { CodeModal } from './code-modal.js';
 
 /* ナビの導線が切り替わる幅。600px 以上はドロップダウン、〜599px はハンバーガー。
    ⚠️ style.css 側の .l-header__nav / .c-nav-toggle・.c-nav-overlay・.c-nav-drawer と
@@ -383,6 +386,32 @@ function initPreviewVideos() {
 
   reduce.addEventListener('change', apply);
   apply();
+
+  /**
+   * モーダルが開いている間だけ動画を止めるための口。
+   *
+   * ★止めるのは「利用者が止めた」のとは別の事情である。
+   *   したがって stoppedByUser もトグルの押した状態も動かさない。
+   *   ⚠️ 背面は暗幕（78% 不透明）越しに薄く見える。動き続けると読む面の邪魔になる。
+   * ★閉じたら元の状態へ戻す。停止中に個別再生していたものは、その1本だけを戻す
+   *   （apply() を通すと停止中の判定に吸い込まれ、利用者が動かしていたものまで止まる）。
+   */
+  let suspended = [];
+  return {
+    suspend() {
+      suspended = videos.filter((video) => !video.paused);
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+      for (const video of videos) video.pause();
+    },
+    resume() {
+      if (isStopped()) for (const video of suspended) play(video);
+      else apply();
+      suspended = [];
+    },
+  };
 }
 
 function init() {
@@ -391,7 +420,17 @@ function init() {
   );
 
   for (const root of document.querySelectorAll('[data-tagfilter]')) new TagFilter(root);
-  initPreviewVideos();
+  const previews = initPreviewVideos();
+
+  // カード上の [HTML][CSS][JS] をモーダルへ格上げする。
+  // ⚠️ 格上げできない環境では素のリンクのままにする（code-modal.js 側で判定する）。
+  const modal = document.querySelector('[data-code-modal]');
+  if (modal) {
+    new CodeModal(modal, {
+      onOpen: () => previews?.suspend(),
+      onClose: () => previews?.resume(),
+    });
+  }
 
   document.addEventListener('pointerdown', (e) => {
     for (const d of instances) {

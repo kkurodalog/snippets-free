@@ -12,6 +12,7 @@
   "scripts": {
     "build": "node tools/build.mjs",
     "check": "S=0; bash tools/check-paths.sh . || S=$?; bash tools/check-design.sh . || S=$?; node tools/check-links.mjs || S=$?; node tools/check-markers.mjs || S=$?; exit $S",
+    "check:release": "S=0; npm run --silent check || S=$?; node tools/check-markers.mjs . --require-embedded || S=$?; exit $S",
     "check:links": "node tools/check-links.mjs",
     "check:markers": "node tools/check-markers.mjs",
     "serve": "mkdir -p .serve && ln -sfn \"$PWD\" .serve/snippets-free && cd .serve && python3 -m http.server 8000"

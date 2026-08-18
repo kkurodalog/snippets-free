@@ -196,6 +196,44 @@
         </nav>
       </div>
     </main>
+    <script type="application/json" data-parts-meta>{"verificationItems":[{"key":"progressive-enhancement","label":"プログレッシブエンハンスメント"},{"key":"reduced-motion","label":"動きの軽減に対応"},{"key":"keyboard","label":"キーボード操作"},{"key":"measured","label":"実挙動の実測"}],"parts":{"001_js-toggle":{},"002_details-basic":{},"003_css-only":{},"004_multi-open":{},"005_single-open":{},"006_animation":{},"007_nested":{}}}</script>
+    <dialog class="c-modal" aria-labelledby="code-modal-title" data-code-modal>
+      <div class="c-modal__inner">
+        <div class="c-modal__head">
+          <h2 class="c-modal__title" id="code-modal-title" data-modal-title></h2>
+          <button type="button" class="c-modal__close" data-modal-close>
+            <span aria-hidden="true">✕</span><span class="u-sr-only">閉じる</span>
+          </button>
+        </div>
+
+        <div class="c-modal__tabs" role="tablist" aria-label="ファイルの種類" data-modal-tabs></div>
+
+        <div class="c-modal__filerow">
+          <span class="c-modal__path" data-modal-path></span>
+          <button type="button" class="c-copy" data-modal-copy hidden>コピー</button>
+        </div>
+
+        <div class="c-modal__panel" id="code-modal-panel" role="tabpanel" data-modal-panel hidden>
+          <div class="c-code" data-modal-codeframe hidden>
+            <div class="c-code__scroll" tabindex="0" data-modal-scroll>
+              <pre class="c-code__pre"><code data-modal-code></code></pre>
+            </div>
+            <span class="c-code__fade" aria-hidden="true" data-modal-fade hidden></span>
+          </div>
+          <p class="c-modal__message" data-modal-message hidden></p>
+        </div>
+
+        <ul class="c-modal__notes" role="list" data-modal-notes hidden></ul>
+
+        <p class="c-modal__verify" data-modal-verify></p>
+
+        <div class="c-modal__foot">
+          <a class="c-modal__link" data-modal-article hidden>解説記事へ<span class="c-arrow" aria-hidden="true">→</span></a>
+          <a class="c-modal__link c-modal__link--demo" target="_blank" rel="noopener" data-modal-demo>デモを別タブで開く<span class="c-ext" aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <p class="c-modal__toast" role="status" data-modal-toast></p>
+    </dialog>
     <footer class="l-footer">
       <div class="l-container">
         <div class="l-footer__blocks">

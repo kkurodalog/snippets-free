@@ -46,6 +46,12 @@
     --hairline: #2c3138;
     --hairline-strong: #6f7785;
 
+    /* ── 白い塗り（2箇所限定）の一段上 ──
+       コピーボタンのホバーだけが純白になる。ink（#f2f4f6）より 1段だけ明るい。
+       ⚠️ 新しい色ではない（--preview-canvas / --ring と同じ #ffffff）。
+          用途が違うので別の名前で持つ。窓の面色やフォーカスリングを塗りへ流用しない。 */
+    --copy-hover: #ffffff;
+
     /* ── フォーカス ── */
     --ring: #ffffff;
     --ring-on-light: #0b0c0e;
@@ -58,7 +64,14 @@
     --scrim: rgba(4, 5, 6, 0.78);
 
     /* ── コードのシンタックスハイライト ──
-       彩度を持ってよいのはこの8色だけ。UI 側へ流用しない（逆も同じ）。 */
+       彩度を持ってよいのはこの8色だけ。UI 側へ流用しない（逆も同じ）。
+       ⚠️ 黒地に馴染ませるため彩度を落としてある。ネオン系の既存テーマの値をそのまま持ち込まない。
+       ★機械の歯止め = tools/check-design.sh の (2c)。--code-* の振れ幅（max−min）に上限88 を課す。
+         上限88 の根拠は、現行8色の最大が --code-attr の 75 であり、そこへ余裕を1段乗せた値
+         だからである（ネオン系は振れ幅が 200 を超えるため通らない）。
+       ⚠️ 色を足して上限に触れたら、**上限を上げるのではなく色のほうを落とす**。
+       ⚠️ この注記に色の実値を書かない。検査は CSS のコメントも走査するため、
+          例として書いた値が違反として検出される。 */
     --code-plain: #dfe3e8;
     --code-punct: #98a2ae;
     --code-comment: #8b95a2;
@@ -100,6 +113,7 @@
     --fs-button: 0.875rem; /* 14px */
     --fs-button-mono: 0.8125rem; /* 13px */
     --fs-caption: 0.8125rem; /* 13px */
+    --fs-code: 0.8125rem; /* 13px  モーダルのコード（字間・合字・palt を当てない） */
 
     /* ── 余白（4px ベースの段階値。余白に clamp() を使わない） ── */
     --space-xxs: 0.125rem; /* 2px */
@@ -130,6 +144,10 @@
     --btn-padding-block: 0.625rem; /* 10px  デモボタン・コードボタンの上下 */
     --btn-demo-padding-inline: 0.875rem; /* 14px  デモボタンの左右 */
     --skip-link-card-offset: 1.5rem; /* 24px  カード内のスキップ導線を白い窓の内側へ寄せる距離 */
+    --tab-padding-inline: 0.875rem; /* 14px  モーダルのタブ左右 */
+    --copy-padding-inline: 1.125rem; /* 18px  コピーボタン左右 */
+    --code-fade-height: 1.375rem; /* 22px  コード枠下端のフェード帯。行送り 13px × 1.7 を超えない */
+    --modal-outer-gap: 2rem; /* 32px  モーダルの外側に残す余白（左右・上下とも 16px ずつ） */
 
     /* ── 角丸 ── px のまま（利用者のフォント設定で角丸が膨らむのは意図しない） */
     --radius-xs: 3px;
@@ -448,6 +466,35 @@
    ========================================================================== */
 
 @layer component {
+  /* ===========================================================================
+     ホバーの規則（実装が出揃った時点でまとめて決めたもの）
+     ---------------------------------------------------------------------------
+     規則1 … control / control-hover の面に載る文字・記号は ink に戻す。
+             ink-muted は control 上 3.94:1 / control-hover 上 3.06:1 で AA を割る。
+             対象 = ドロップダウン項目 / ドロワー項目 / コードボタンのセグメント /
+                    モーダルの閉じる・タブ。
+
+     規則2 … ホバーで変えるのは「面色・罫線・下線・記号の明度」だけにする。
+             位置・大きさ・影は動かさない（カードは中の iframe ごと揺れる）。
+             ⚠️ ホバーで内容を出し入れしない。開閉はすべて「押す」操作で行う。
+
+     規則3 … @media (any-hover: hover) and (pointer: fine) で囲わない。
+             ⚠️ 掲載パーツ 004_hamburger-overlay は囲っているが、外殻は囲わない。
+             理由 = 規則2 により、ホバーが担っているのは見た目の応答だけである。
+             タッチ端末で押した後にホバー状態が残っても、**操作できなくなるものが無い**
+             （ホバーでしか出ない導線・ホバーでしか押せないボタンを1つも持たない）。
+             残るのは面色が1段明るいまま残ることだけで、次に別の場所を触れば解ける。
+             ⚠️ 逆に囲うと、ホバーを持つ環境と持たない環境で規則が2本に割れる。
+             ⚠️ ★この前提は「ホバーで内容を出し入れしない」に依存している。
+                ホバーで出るものを1つでも作るなら、規則3 は成り立たなくなる。
+
+     規則4 … 押した状態（aria-pressed / aria-selected）を持つ要素は、
+             押した状態の指定をホバーより後ろに置き、詳細度で勝たせる。
+             ⚠️ 押した直後はホバーが残るため、順序を誤ると「押したのに見た目が戻る」。
+             実装 = .c-tag は :not([aria-pressed="true"]):hover で除外し、
+                    .c-stop-toggle / .c-modal__tab は押した状態を後ろに置く。
+     =========================================================================== */
+
   /* ── スキップ導線 ──
      既定では高さを占有しない。フォーカスが当たったときだけ可視になる。
      白いプレビュー窓の上に重なっても読めるよう、常に暗いチップとして描く。 */
@@ -666,13 +713,12 @@
     color: var(--ink);
   }
 
-  /* control の面の上に載せる文字は ink だけにする */
-  /* ⚠️ .c-dropdown__item 側は現時点で .c-ext を持たないため書いていない。
-     ドロップダウンの項目に外部リンクの記号やコードボタンを足すときは、
-     このセレクタに .c-dropdown__item:hover .c-ext を並べる。
-     ink-muted のまま control の面へ載せると 3.94:1 で AA を割る。
-     ⚠️ 押した先の見た目（ホバー・フォーカスの当たり方）は実装が出揃った時点で
-        まとめて見直す。上の1行もその見直しに含めて判断する。 */
+  /* ★control / control-hover の面に載る弱い文字・記号は、必ず ink に戻す（ホバーの規則1）。
+     ink-muted のまま載せると control 上 3.94:1 / control-hover 上 3.06:1 で AA(4.5:1) を割る。
+     ⚠️ .c-dropdown__item は現時点で .c-ext を持たないが、先に書いておく。
+        ドロップダウンに外部リンクを1つ足した時点で必要になり、
+        そのとき「足りない」ことは画面から分からない（薄い記号が薄いまま出るだけである）。 */
+  .c-dropdown__item:hover .c-ext,
   .c-nav-drawer__item:hover .c-ext {
     color: var(--ink);
   }
@@ -1499,6 +1545,429 @@
       padding-block: var(--space-section) var(--space-section-sp);
     }
   }
+
+  /* ── 記号（→ / 別タブの ↗ は .c-ext） ──
+     どちらもラベルより一段弱く出し、ホバーで ink に上がる。 */
+  .c-arrow {
+    color: var(--ink-muted);
+    margin-inline-start: var(--space-xs);
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  /* ===========================================================================
+     コードモーダル（<dialog>）
+     ---------------------------------------------------------------------------
+     ⚠️ .c-modal に display を書かない。開いていないときに隠すのはブラウザ既定の
+        `dialog:not([open]) { display: none }` であり、ここで display を書くと
+        それに勝って常に見えてしまう。開閉の見た目は [open] の側だけで作る。
+     ⚠️ 内側余白は .c-modal__inner が持ち、<dialog> 自身は 0 にする。
+        こうすると「背景を押したら閉じる」の判定（押した対象が <dialog> 自身か）が
+        余白の押下と混ざらない。
+     ⚠️ 影を持ってよい面はここだけである。他の面へ広げない。
+     =========================================================================== */
+  .c-modal {
+    width: calc(100% - var(--modal-outer-gap));
+    max-width: var(--modal-max);
+    /* はみ出させないための上限。高さの確保ではない（min-height / height を使わない）。 */
+    max-height: calc(100vh - var(--modal-outer-gap));
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--surface-raised);
+    color: var(--ink);
+    border: var(--border-hairline) solid var(--hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+  }
+
+  .c-modal[open] {
+    animation: c-modal-in var(--duration) var(--easing);
+  }
+
+  /* 不透明度だけを動かす（位置・大きさを動かさない）。
+     動きを減らす設定では、末尾の @media が duration ごと 0.01ms に落とす。 */
+  @keyframes c-modal-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .c-modal::backdrop {
+    background-color: var(--scrim);
+  }
+
+  .c-modal__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    /* 中身が長いときはモーダルの内側で送る。ページ本体は動かさない。 */
+    max-height: calc(100vh - var(--modal-outer-gap));
+    padding: var(--space-lg);
+    overflow-y: auto;
+    /* 横に送る枠ではないが、中に絶対配置の子を足したときの包含ブロックをここに固定する。 */
+    position: relative;
+  }
+
+  .c-modal__head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+
+  .c-modal__title {
+    font-size: var(--fs-h2);
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    font-feature-settings: "palt" 1, "kern" 1;
+  }
+
+  .c-modal__close {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--control-min-height);
+    min-height: var(--control-min-height);
+    background-color: transparent;
+    color: var(--ink-secondary);
+    border: var(--border-control) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    transition:
+      background-color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing),
+      color var(--duration-fast) var(--easing);
+  }
+
+  /* ホバーの規則1 — control の面に載るので文字を ink に戻す（ink-secondary のままだと 5.63:1）。 */
+  .c-modal__close:hover {
+    background-color: var(--control);
+    color: var(--ink);
+    border-color: var(--ink-muted);
+  }
+
+  /* ── タブ（そのパーツが持つ言語だけ出す） ──
+     アクティブは「下線 ＋ 文字色の明度差 ＋ 太字」で示す。
+     ⚠️ 塗りの反転を使わない。白の塗りは2箇所（アクティブなタグ / コピーボタン）限定であり、
+        同じモーダルの中でコピーボタンと競合させない。 */
+  .c-modal__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: var(--border-hairline) solid var(--hairline);
+  }
+
+  .c-modal__tab {
+    min-height: var(--item-min-height);
+    padding: var(--btn-padding-block) var(--tab-padding-inline);
+    background-color: transparent;
+    color: var(--ink-secondary);
+    border-bottom: var(--ring-width) solid transparent;
+    font-family: var(--font-mono);
+    font-size: var(--fs-button-mono);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    transition:
+      color var(--duration-fast) var(--easing),
+      border-color var(--duration-fast) var(--easing);
+  }
+
+  .c-modal__tab:hover {
+    color: var(--ink);
+    border-bottom-color: var(--hairline-strong);
+  }
+
+  /* ホバーの規則4 — 押した状態をホバーより後ろに置く（押した直後にホバーが残るため）。 */
+  .c-modal__tab[aria-selected="true"] {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* ── ファイルパス行 ＋ コピーボタン ──
+     貼り先が分かるようにパスを出す。「CSS」だけでは、どのファイルとして保存するか伝わらない。 */
+  .c-modal__filerow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block: var(--space-sm);
+  }
+
+  .c-modal__path {
+    min-width: 0;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: var(--fs-code);
+    line-height: 1.7;
+    /* パスは折り返してよい。1行に押し込むと狭い幅で枠を押し広げる。 */
+    overflow-wrap: anywhere;
+  }
+
+  /* ★白の塗りを許す2箇所目。3箇所目を作らない。 */
+  .c-copy {
+    flex-shrink: 0;
+    min-height: var(--control-min-height);
+    padding: var(--btn-padding-block) var(--copy-padding-inline);
+    background-color: var(--ink);
+    color: var(--on-inverse);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-button);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    font-feature-settings: "palt" 1, "kern" 1;
+    transition: background-color var(--duration-fast) var(--easing);
+  }
+
+  .c-copy:hover {
+    background-color: var(--copy-hover);
+  }
+
+  /* ⚠️ フォーカスリングは base 層の :focus-visible（白 2px ＋ offset 2px）をそのまま使う。
+     ここで上書きしない。⚠️ 特に offset を 0 にしないこと — 白い塗りの上では
+     白いリングが 1.10:1 で消える。offset があるからリングは塗りの外側、
+     つまりモーダル面（surface-raised）の上に立ち、16.14:1 で見える。 */
+
+  /* タブが指す面。中身はコード枠か、出せなかったときのメッセージのどちらか一方である。
+     ⚠️ 見た目を持たせない。ここに余白や罫線を足すと、コード枠と二重の額になる。
+     ⚠️ 縦 flex ＋ min-height: 0 にする。ここを外すと、画面が低いときに
+        コード枠が縮まなくなり、上限（SP 320px）のぶんだけモーダルの中身が下へ伸びる。
+        器を1枚挟んだだけで見た目が変わらないよう、外側の縮み方をそのまま引き継がせる。 */
+  .c-modal__panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* ── コード枠 ──
+     モーダル面より沈める。読む面を落ち着かせ、周囲の UI と分離する。 */
+  .c-code {
+    /* 額。フェード帯の包含ブロックをここに作る（帯が中身と一緒にスクロールしないため）。 */
+    position: relative;
+    overflow: hidden;
+    background-color: var(--surface-code);
+    border: var(--border-hairline) solid var(--hairline);
+    border-radius: var(--radius-sm);
+  }
+
+  /* 横に送るのはこの枠の内側だけである。ページ本体を横に動かさない。
+     ⚠️ overflow の枠には position: relative を付ける。付けないと、枠の中に置いた
+        絶対配置の子の包含ブロックが枠の外側になり、はみ出しがページへ出る。 */
+  .c-code__scroll {
+    position: relative;
+    max-height: var(--codeblock-max-height);
+    padding: var(--space-lg);
+    overflow: auto;
+  }
+
+  /* ⚠️ リングを内側へ描く（オフセットを外に出すと、枠の overflow: hidden で切れる）。 */
+  .c-code__scroll:focus-visible {
+    outline: var(--ring-width) solid var(--ring);
+    outline-offset: calc(var(--ring-offset) * -1);
+  }
+
+  .c-code__pre {
+    color: var(--code-plain);
+    font-family: var(--font-mono);
+    font-size: var(--fs-code);
+    line-height: 1.7;
+    /* ⚠️ コードに字間・字詰め・合字を当てない（記号の並びが変わって読み違える）。 */
+    letter-spacing: 0;
+    font-feature-settings: normal;
+    font-variant-ligatures: none;
+    tab-size: 2;
+    white-space: pre;
+  }
+
+  /* 選択したときの背景。コピーに失敗したときは、ここを選択状態にして手でコピーさせる。
+     ⚠️ 文字色を 1色に潰さない。base 層の ::selection は色を ink に揃えているが、
+        コード枠だけは currentColor に戻して 8色をそのまま残す。
+        （8色は選択中も 4.5:1 以上を保つ値で選んである。最小はコメントの 4.59:1。
+        これ以上暗くしない。色相が判別を担っているので、選択中だけ単色になると
+        「選択したら別のコードに見える」状態になる） */
+  .c-code ::selection,
+  .c-code::selection {
+    background-color: var(--code-selection);
+    color: currentColor;
+  }
+
+  /* 上限に達して切り詰められたときだけ出す「まだ下に続く」の合図。
+     ⚠️ 高さは行送り（13px × 1.7 ≒ 22px）を超えない。超えると帯の下に2行が入り、
+        帯の下でしか見られない行が生まれる。
+     ⚠️ 最下部まで送りきったら消す（JS 側で判定する）。 */
+  .c-code__fade {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    height: var(--code-fade-height);
+    background-image: linear-gradient(to bottom, transparent, var(--surface-code));
+    pointer-events: none;
+  }
+
+  /* ── 取得できなかったとき ──
+     ★空のモーダルにしない。何が起きたかと、デモページへの導線を出す。 */
+  .c-modal__message {
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+  }
+
+  .c-modal__message .c-modal__link {
+    margin-inline-start: var(--space-sm);
+  }
+
+  /* ── 注記（最大3項目・言い切り） ──
+     マーカーは短い横罫にする（• を使わない / 記号の種類を増やさない）。 */
+  .c-modal__notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .c-modal__note {
+    display: flex;
+    gap: var(--space-sm);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+  }
+
+  .c-modal__note::before {
+    content: "";
+    flex-shrink: 0;
+    width: var(--space-md);
+    height: 0;
+    margin-block-start: 0.9em;
+    border-top: var(--border-hairline) solid var(--hairline-strong);
+  }
+
+  /* ── 検証行 ──
+     ★述べるのは掲載基準4項目の充足と実測日である。ブラウザの動作確認に置き換えない。
+        掲載基準を表明する面はこの1行しかない（帯は画面から外し、規範ページも作らない）。 */
+  .c-modal__verify {
+    color: var(--ink-secondary);
+    font-size: var(--fs-caption);
+    line-height: 1.7;
+  }
+
+  .c-modal__date {
+    margin-inline-start: var(--space-sm);
+    color: var(--ink-muted);
+    font-feature-settings: "tnum" 1;
+  }
+
+  .c-modal__unmet {
+    display: block;
+    color: var(--ink-secondary);
+  }
+
+  /* ── 最下部のテキストリンク（最大2本） ──
+     左「解説記事へ →」／ 右「デモを別タブで開く ↗」。記号で行き先の性質を分ける。
+     ⚠️ 記事が無いパーツでは左を出さない。非活性にしない。
+     ⚠️ ここに GitHub リンクと「全文を表示」を置かない（廃止済み）。 */
+  .c-modal__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block-start: var(--space-sm);
+    border-top: var(--border-hairline) solid var(--hairline);
+  }
+
+  .c-modal__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-min-height);
+    color: var(--ink-secondary);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--easing);
+  }
+
+  /* ⚠️ 記事リンクが無いパーツでも、デモへの導線は右端のままにする。
+     space-between だけに任せると、左が消えた瞬間に右のリンクが左へ動く
+     （同じ導線がパーツによって左右に現れ、利用者は同じ場所を2度探すことになる）。 */
+  .c-modal__link--demo {
+    margin-inline-start: auto;
+  }
+
+  .c-modal__link:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .c-modal__link:hover .c-ext,
+  .c-modal__link:hover .c-arrow {
+    color: var(--ink);
+  }
+
+  /* ── 「コピーしました」の一時表示 ──
+     モーダルの内側スクロールに乗せない（送っても同じ場所に出る）。 */
+  .c-modal__toast {
+    position: absolute;
+    inset-inline: var(--space-lg);
+    inset-block-end: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
+    background-color: var(--control);
+    color: var(--ink);
+    border: var(--border-hairline) solid var(--hairline-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-small);
+    line-height: 1.8;
+    text-align: center;
+    /* 出ていないときは場所を取らず、読み上げの対象にもしない。
+       ⚠️ display で出し入れしない（utility 層の汎用クラスに層順で負ける形を作らない）。 */
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity var(--duration-fast) var(--easing),
+      visibility 0s var(--duration-fast);
+  }
+
+  .c-modal__toast.is-visible {
+    visibility: visible;
+    opacity: 1;
+    /* ⚠️ visibility は「時間0 ＋ 遅延なし」で切り替える。長さのある transition を当てると、
+       算出値がまだ hidden のまま次の処理へ進む。 */
+    transition:
+      opacity var(--duration-fast) var(--easing),
+      visibility 0s;
+  }
+
+  /* ── コードの着色（彩度を持ってよい唯一の領域） ──
+     8色だけ。UI 側の色をここへ持ち込まない。ここの色を UI へ流用しない。 */
+  .c-code__tok--punct {
+    color: var(--code-punct);
+  }
+
+  .c-code__tok--comment {
+    color: var(--code-comment);
+    font-style: italic;
+  }
+
+  .c-code__tok--keyword {
+    color: var(--code-keyword);
+  }
+
+  .c-code__tok--name {
+    color: var(--code-name);
+  }
+
+  .c-code__tok--attr {
+    color: var(--code-attr);
+  }
+
+  .c-code__tok--string {
+    color: var(--code-string);
+  }
+
+  .c-code__tok--number {
+    color: var(--code-number);
+  }
 }
 
 /* =============================================================================
@@ -1532,9 +2001,11 @@
     display: block;
   }
 
-  /* ドロワーが開いている間は背面をスクロールさせない。
-     ドロワー自身は overflow-y: auto を持つので、中身が長ければドロワーの内側で送れる。 */
-  .is-nav-open {
+  /* ドロワー・モーダルが開いている間は背面をスクロールさせない。
+     どちらも自分の内側に overflow-y: auto を持つので、中身が長ければその中で送れる。
+     ⚠️ overflow: hidden は現在のスクロール位置を保つ。閉じたら元の位置のまま戻る。 */
+  .is-nav-open,
+  .is-modal-open {
     overflow: hidden;
   }
 
@@ -1549,7 +2020,11 @@
   .no-js [data-tagfilter],
   /* 動画の全停止トグルは今のところ [data-tagfilter] の内側にあり、上の行で既に下がる。
      それでも独立して列挙する — 置き場所を動かしたときに規約から外れて網から漏れるため。 */
-  .no-js [data-stop-videos] {
+  .no-js [data-stop-videos],
+  /* コードモーダルは JS が開く面である。JS 無効では <dialog> が既定で隠れているが、
+     規約の側に載せておく — 隠れる理由がブラウザ既定だけだと、
+     この面が「規約から外れた操作要素」として網から漏れていることに気づけない。 */
+  .no-js [data-code-modal] {
     display: none;
   }
 

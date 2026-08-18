@@ -62,6 +62,32 @@ export function tagOrder(tag) {
   return index === -1 ? TAGS.length : index;
 }
 
+/**
+ * 掲載基準の4項目（モーダルの検証行が述べる内容）。
+ *
+ * ★ラベルは CODING-RULES.md「1. 掲載基準（4項目）」の表と同じ文言にする。
+ *   片方だけ直すと、公開している基準と画面の表示が食い違う。
+ *
+ * ⚠️ ここはブラウザの動作確認（Chrome / Safari / Firefox …）を述べる場所ではない。
+ *    掲載基準の帯は画面から外してあり、基準を表明する面はモーダルの検証行1本しかない。
+ *    ブラウザ動作確認を出したくなったら、この4項目を**置き換えるのではなく足す**。
+ *
+ * ⚠️ key はデータ（site/data/{カテゴリ}.json の verification）が使う。
+ *    ここに無い key を書いたら tools/build.mjs が生成を止める。
+ */
+export const VERIFICATION_ITEMS = [
+  { key: 'progressive-enhancement', label: 'プログレッシブエンハンスメント' },
+  { key: 'reduced-motion', label: '動きの軽減に対応' },
+  { key: 'keyboard', label: 'キーボード操作' },
+  { key: 'measured', label: '実挙動の実測' },
+];
+
+/** 検証の実測日の書式（データの verifiedOn）。 */
+export const VERIFIED_ON = /^\d{4}-\d{2}-\d{2}$/;
+
+/** 注記の上限。これを超えるならパーツの設計が複雑すぎる（増やす前に設計を見直す）。 */
+export const NOTES_MAX = 3;
+
 /** プレビュー方式の語彙（カテゴリ単位で1つに揃える）。 */
 export const PREVIEWS = ['dom', 'video'];
 
