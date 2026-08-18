@@ -13,15 +13,14 @@
         <p class="p-section__text">
           高さアニメーション付きのアコーディオンです。<code>grid-template-rows: 0fr → 1fr</code> を使い、
           パネルの開閉時に <strong>200ms ease-out</strong> でなめらかに高さがトランジションします。
-          骨格は snippet 001 / 004 / 005 と同じ <code>aria-expanded</code> + <code>hidden</code> パターンを継承し、
+          骨格は JS で開閉する基本形・複数同時オープン型・排他制御型と同じ <code>aria-expanded</code> + <code>hidden</code> パターンを継承し、
           開く時は「<code>hidden</code>除去 → <code>aria-expanded="true"</code> → 高さアニメ開始」、
           閉じる時は「<code>aria-expanded="false"</code> → 高さアニメ → 完了後に<code>hidden</code>付与」という順序で
           支援技術と視覚表現を一致させています。
         </p>
 
-        <!-- スニペットここから -->
+        <!-- snippet:start -->
         <div class="c-accordion" data-accordion id="c-accordion-animation">
-          <!-- 項目 1 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -55,7 +54,6 @@
             </div>
           </div>
 
-          <!-- 項目 2 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -88,7 +86,6 @@
             </div>
           </div>
 
-          <!-- 項目 3 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -121,7 +118,6 @@
             </div>
           </div>
 
-          <!-- 項目 4 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -131,7 +127,7 @@
                 aria-controls="c-accordion-animation-panel-4"
                 id="c-accordion-animation-header-4"
               >
-                <span class="c-accordion__title">snippet 001 / 004 / 005 との違いは？</span>
+                <span class="c-accordion__title">JS で開閉する他の実装との違いは？</span>
                 <span class="c-accordion__icon" aria-hidden="true"></span>
               </button>
             </h2>
@@ -143,8 +139,8 @@
               <div class="c-accordion__content">
                 <p>
                   HTML 構造・FLOCSS 命名（<code>c-accordion</code> / <code>__header</code> / <code>__icon</code> / <code>__body</code> / <code>__content</code>）・
-                  JS シグネチャ（<code>setItemState(header, open)</code> / <code>collectHeaders(root)</code> / <code>bindAccordion(root)</code>）は
-                  すべて 001 / 004 / 005 と同一です。
+                  JS シグネチャは <code>bindAccordion(root)</code> が JS で開閉する基本形・複数同時オープン型・排他制御型と、
+                  <code>setItemState(header, open)</code> が複数同時オープン型・排他制御型と同一です。
                 </p>
                 <p>
                   違いは <strong>CSS の <code>__body</code> に <code>display: grid</code> + <code>grid-template-rows: 0fr/1fr</code> のアニメーションを当てた点</strong>と、
@@ -155,7 +151,7 @@
             </div>
           </div>
         </div>
-        <!-- スニペットここまで -->
+        <!-- snippet:end -->
       </section>
     </main>
 

@@ -1,0 +1,4 @@
+{
+  "description": "掲載基準4項目を実測で確かめたパーツの記録。ここに無いパーツは、カード定義に verification を持てない（tools/check-verification.mjs が生成と検査の両方で落とす）。",
+  "cleared": {}
+}

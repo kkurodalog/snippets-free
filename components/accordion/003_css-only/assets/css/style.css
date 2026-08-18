@@ -1,30 +1,4 @@
 /* ================================================
-   カスタムプロパティ
-   001_js-toggle / 002_details-basic と同一のトークン定義を再掲する。
-   シリーズ全 snippet で色・サイズを揃えるための共有
-   トークンであり、各 snippet がスタンドアロンで動く
-   ようにここで一元定義する（値は改変しない）。
-   ================================================ */
-:root {
-  --accordion-color-text:        #2b2b2b;
-  --accordion-color-text-muted:  #555;
-  --accordion-color-border:      #e0e0e0;
-  --accordion-color-bg:          #ffffff;
-  --accordion-color-bg-hover:    #f5f7fa;
-  --accordion-color-bg-active:   #eef3fa;
-  --accordion-color-accent:      #0066cc;
-  --accordion-color-focus-ring:  #0066cc;
-
-  --accordion-radius:            8px;
-  --accordion-header-padding-y:  16px;
-  --accordion-header-padding-x:  20px;
-  --accordion-body-padding-y:    16px;
-  --accordion-body-padding-x:    20px;
-
-  --accordion-transition:        0.2s ease;
-}
-
-/* ================================================
    ベースリセット（デモページ用）
    ================================================ */
 *,
@@ -37,7 +11,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
     "Hiragino Sans", "Noto Sans JP", sans-serif;
-  color: var(--accordion-color-text);
+  color: #2b2b2b;
   background-color: #fafafa;
   line-height: 1.7;
 }
@@ -67,7 +41,7 @@ code {
 
 .p-section__text {
   margin: 0 0 24px;
-  color: var(--accordion-color-text-muted);
+  color: #555;
 }
 
 @media (min-width: 768px) {
@@ -76,32 +50,43 @@ code {
   }
 }
 
-/* ================================================
-   c-accordion: アコーディオン本体
-   001 / 002 と同一のコンテナスタイル
-   ================================================ */
+/* snippet:start */
+.c-accordion {
+  --accordion-color-text:        #2b2b2b;
+  --accordion-color-border:      #e0e0e0;
+  --accordion-color-bg:          #ffffff;
+  --accordion-color-bg-hover:    #f5f7fa;
+  --accordion-color-bg-active:   #eef3fa;
+  --accordion-color-accent:      #0066cc;
+  --accordion-color-focus-ring:  #0066cc;
+
+  --accordion-radius:            8px;
+  --accordion-header-padding-y:  16px;
+  --accordion-header-padding-x:  20px;
+  --accordion-body-padding-y:    16px;
+  --accordion-body-padding-x:    20px;
+
+  --accordion-transition:        0.2s ease;
+}
+
+.c-accordion,
+.c-accordion *,
+.c-accordion *::before,
+.c-accordion *::after {
+  box-sizing: border-box;
+}
+
 .c-accordion {
   border: 1px solid var(--accordion-color-border);
   border-radius: var(--accordion-radius);
   background-color: var(--accordion-color-bg);
-  overflow: hidden; /* 角丸を子要素にも適用するため */
+  overflow: hidden;
 }
 
-/* 項目間の区切り線 */
 .c-accordion__item + .c-accordion__item {
   border-top: 1px solid var(--accordion-color-border);
 }
 
-/* ================================================
-   c-accordion__toggle: チェックボックス本体（003 で新登場）
-   sr-only パターンで視覚的にだけ隠す。
-   - display: none を使うと Tab フォーカスが失われ a11y が退化する
-   - position: absolute + clip で「画面に見えないが
-     フォーカスは受け付ける」状態を作る
-   フォーカス時は ~ セレクタで .c-accordion__header 側に
-   フォーカスリングを表示することで、キーボード操作時に
-   フォーカス位置がわかるようにする。
-   ================================================ */
 .c-accordion__toggle {
   position: absolute;
   width: 1px;
@@ -114,89 +99,47 @@ code {
   border: 0;
 }
 
-/* ================================================
-   c-accordion__header: <label> 要素（クリック対象）
-   001 では <button>、002 では <summary> だったが、
-   003 では <label for> でチェックボックスに関連付けた
-   <label> がクリック対象になる。
-   要素は変わるがクラス名は揃え、シリーズ間で BEM 構造を
-   一貫させる。
-   ================================================ */
 .c-accordion__header {
-  /* レイアウト */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   width: 100%;
-  min-height: 44px; /* タップ領域の最低保証（モバイルアクセシビリティ）。
-                       padding を変更してもこの最低高さは崩れない。 */
+  min-height: 44px;
   padding: var(--accordion-header-padding-y) var(--accordion-header-padding-x);
-
-  /* テキスト */
   text-align: left;
   font-size: 16px;
   font-weight: 600;
   color: inherit;
-
-  /* インタラクション
-     <label> は for で関連付いたチェックボックスの状態を
-     クリックで切り替える。CSS としてはカーソルだけ手の形にする。 */
   cursor: pointer;
-  user-select: none; /* ラベル連打時のテキスト選択を抑制 */
-
-  /* 状態遷移
-     001 / 002 と挙動を合わせ、background-color と color を
-     トランジション対象に含める。
-     高さアニメーションはこの snippet では入れない（snippet 006 animation で対応）。 */
+  user-select: none;
   background-color: var(--accordion-color-bg);
   transition:
     background-color var(--accordion-transition),
     color var(--accordion-transition);
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用
-   001 / 002 と同じ media query で揃える */
 @media (any-hover: hover) and (pointer: fine) {
   .c-accordion__header:hover {
     background-color: var(--accordion-color-bg-hover);
   }
 }
 
-/* キーボードフォーカス時のフォーカスリング
-   フォーカスを受けるのは sr-only で隠した <input> 側。
-   見た目は隣接する <label>（= __header）にリングを表示することで、
-   キーボード操作時のフォーカス位置がわかるようにする。
-   ~（一般兄弟）セレクタを使うのは、HTML 構造上 __toggle と
-   __header が直接の隣接（+）関係でない可能性に備えた汎用形。 */
 .c-accordion__toggle:focus-visible ~ .c-accordion__header {
   outline: 2px solid var(--accordion-color-focus-ring);
   outline-offset: 2px;
 }
 
-/* 開いている項目のヘッダーは背景色とアクセントカラーで強調
-   001 では [aria-expanded="true"]、002 では [open] セレクタだったが、
-   003 では :checked 兄弟セレクタで同等の状態表現を行う。
-   :has() を使わず兄弟セレクタ（~）に留めることで、互換性を最大化する。 */
 .c-accordion__toggle:checked ~ .c-accordion__header {
   background-color: var(--accordion-color-bg-active);
   color: var(--accordion-color-accent);
 }
 
-/* ================================================
-   c-accordion__title: ヘッダー内のタイトルテキスト
-   001 / 002 と同一
-   ================================================ */
 .c-accordion__title {
   flex: 1;
-  min-width: 0; /* テキストが長い場合に折り返せるようにする */
+  min-width: 0;
 }
 
-/* ================================================
-   c-accordion__icon: 開閉インジケータ（▼）
-   001 / 002 と同じシェブロンを CSS のみで描画。
-   :checked の有無に応じて回転させ開閉状態を視覚化する。
-   ================================================ */
 .c-accordion__icon {
   flex-shrink: 0;
   display: inline-block;
@@ -204,23 +147,15 @@ code {
   height: 12px;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);            /* 閉じている状態: ▼ */
+  transform: rotate(45deg);
   transform-origin: center;
   transition: transform var(--accordion-transition);
 }
 
 .c-accordion__toggle:checked ~ .c-accordion__header .c-accordion__icon {
-  transform: rotate(-135deg);          /* 開いている状態: ▲ */
+  transform: rotate(-135deg);
 }
 
-/* ================================================
-   c-accordion__body: 本文パネル
-   003 では :checked による表示/非表示を CSS で行う。
-   - デフォルトは display: none で非表示
-   - :checked 時に display: block で表示
-   <input> 側に hidden 属性は付けない（display:none 同等になり
-   フォーカス不能になるため）。
-   ================================================ */
 .c-accordion__body {
   display: none;
   background-color: var(--accordion-color-bg);
@@ -230,10 +165,6 @@ code {
   display: block;
 }
 
-/* ================================================
-   c-accordion__content: 本文の余白を持つ内側ラッパー
-   001 / 002 と同一の2層構造を維持し、シリーズ間の BEM 整合を保つ。
-   ================================================ */
 .c-accordion__content {
   padding: var(--accordion-body-padding-y) var(--accordion-body-padding-x);
   color: var(--accordion-color-text);
@@ -256,17 +187,10 @@ code {
   margin-bottom: 0;
 }
 
-/* ================================================
-   prefers-reduced-motion: 動きを減らす設定への配慮
-   アイコン回転トランジションを無効化する。
-   高さアニメーションはこの snippet では実装していないため
-   対象外（snippet 006 animation で本格対応）。
-   001 / 002 と同等の指定（003 では __header 側のトランジションは
-   color/background のみで動きが弱いため、__icon を主対象とする）。
-   ================================================ */
 @media (prefers-reduced-motion: reduce) {
   .c-accordion__header,
   .c-accordion__icon {
     transition: none;
   }
 }
+/* snippet:end */

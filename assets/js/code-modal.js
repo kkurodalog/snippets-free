@@ -42,6 +42,13 @@ const cache = new Map();
 const TOAST_MS = { short: 2400, long: 6000 };
 
 /**
+ * コピー成功のとき、ボタンのラベルを「コピーしました」に留める時間。
+ * ⚠️ 成功のトーストと同じ 2400ms にしてある（同じ「結果の報告」だからである）。
+ *    ★失敗の 6000ms と揃えない。失敗は**手順の指示**であり、読み終える時間が要る。
+ */
+const COPIED_MS = TOAST_MS.short;
+
+/**
  * ファイルを取得してマーカー間を取り出す。
  * @returns {Promise<{ok: true, code: string} | {ok: false, reason: 'fetch'|'none'|'marker'}>}
  */
@@ -99,12 +106,14 @@ export class CodeModal {
       article: $('article'),
       demo: $('demo'),
       toast: $('toast'),
+      announce: $('announce'),
     };
 
     this.meta = readPartsMeta();
     this.opener = null;
     this.current = null; // { slug, name, dir, files: [{kind, url}], activeKind }
     this.toastTimer = 0;
+    this.copiedTimer = 0;
     // 取得の前後で開き直しが起きたことを判定する連番（render() が使う）。
     this.renderToken = 0;
     this.pressedBackdrop = false;
@@ -198,6 +207,9 @@ export class CodeModal {
   afterClose() {
     document.documentElement.classList.remove('is-modal-open');
     this.clearToast();
+    this.clearCopied();
+    // ⚠️ 読み上げ用の面も空にする。残しておくと、次に開いたときの通知が読み直されないことがある。
+    this.el.announce.textContent = '';
     if (this.hooks.onClose) this.hooks.onClose();
     // ★呼び出し元のボタンへ戻す。どのカードから開いたか分からなくなるのを防ぐ。
     if (this.opener && this.opener.isConnected) this.opener.focus();
@@ -298,6 +310,9 @@ export class CodeModal {
     }
     this.el.panel.setAttribute('aria-labelledby', `code-modal-tab-${file.kind}`);
     this.el.path.textContent = stripLeadingDot(file.href);
+    // ⚠️ 別のファイルへ切り替えたら「コピーしました」を消す。
+    //    残すと、まだコピーしていないファイルに対して成功の表示が出たままになる。
+    this.clearCopied();
 
     this.render(file);
   }
@@ -374,19 +389,42 @@ export class CodeModal {
     if (!this.code) return;
     try {
       await navigator.clipboard.writeText(this.code);
-      this.toast('コピーしました');
+      // ★成功はボタン自身のラベルで見せる（★代表指示 / 2026-08-18）。
+      //    ⚠️ 最下部のトーストで出すと、真下の「デモを別タブで開く」を覆う。
+      this.markCopied();
     } catch {
       // ★失敗を隠さない。コードを選択状態にして、手で（キーボードで）コピーさせる。
       selectContents(this.el.code);
       // ⚠️ 失敗のトーストは**手順の指示**である。読み終える前に消さない。
+      //    ⚠️ 失敗は成功と揃えない。ボタンのラベル1つでは手順を書ききれず、
+      //       書ききろうとするとボタンの幅が行を壊す。**面を分けているのは幅の都合ではなく役割の違いである。**
       this.toast('コピーできなかった。コードを選択した。キーボード操作でコピーする', TOAST_MS.long);
     }
+  }
+
+  /**
+   * コピーできたことを、ボタンのラベルの差し替えで示す。
+   * ⚠️ 幅は CSS 側で「長いほうのラベル」に固定してある。押しても行が動かない。
+   * ⚠️ 読み上げへは role="status" が通知する。ラベルの差し替えだけに任せない
+   *    （フォーカスの当たっている要素の名前が変わったときの読み方は実装によって違う）。
+   */
+  markCopied() {
+    window.clearTimeout(this.copiedTimer);
+    this.el.copy.classList.add('is-copied');
+    this.announce('コピーしました');
+    this.copiedTimer = window.setTimeout(() => this.clearCopied(), COPIED_MS);
+  }
+
+  clearCopied() {
+    window.clearTimeout(this.copiedTimer);
+    this.el.copy.classList.remove('is-copied');
   }
 
   toast(text, duration = TOAST_MS.short) {
     this.clearToast();
     this.el.toast.textContent = text;
     this.el.toast.classList.add('is-visible');
+    this.announce(text);
     this.toastTimer = window.setTimeout(() => this.clearToast(), duration);
   }
 
@@ -394,6 +432,15 @@ export class CodeModal {
     window.clearTimeout(this.toastTimer);
     this.el.toast.classList.remove('is-visible');
     this.el.toast.textContent = '';
+  }
+
+  /**
+   * 読み上げへの通知。
+   * ⚠️ 同じ文言を続けて入れても読み直されない実装があるため、必ず一度空にしてから入れる。
+   */
+  announce(text) {
+    this.el.announce.textContent = '';
+    this.el.announce.textContent = text;
   }
 
   onTabsKeydown(e) {

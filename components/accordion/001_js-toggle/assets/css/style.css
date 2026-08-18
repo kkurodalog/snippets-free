@@ -1,29 +1,4 @@
 /* ================================================
-   カスタムプロパティ
-   後続スニペット（004 multi-open / 005 single-open / 007 nested）
-   が同じトークンで色やサイズを揃えられるよう、
-   ここで一元管理する。
-   ================================================ */
-:root {
-  --accordion-color-text:        #2b2b2b;
-  --accordion-color-text-muted:  #555;
-  --accordion-color-border:      #e0e0e0;
-  --accordion-color-bg:          #ffffff;
-  --accordion-color-bg-hover:    #f5f7fa;
-  --accordion-color-bg-active:   #eef3fa;
-  --accordion-color-accent:      #0066cc;
-  --accordion-color-focus-ring:  #0066cc;
-
-  --accordion-radius:            8px;
-  --accordion-header-padding-y:  16px;
-  --accordion-header-padding-x:  20px;
-  --accordion-body-padding-y:    16px;
-  --accordion-body-padding-x:    20px;
-
-  --accordion-transition:        0.2s ease;
-}
-
-/* ================================================
    ベースリセット（デモページ用）
    ================================================ */
 *,
@@ -36,7 +11,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
     "Hiragino Sans", "Noto Sans JP", sans-serif;
-  color: var(--accordion-color-text);
+  color: #2b2b2b;
   background-color: #fafafa;
   line-height: 1.7;
 }
@@ -66,7 +41,7 @@ code {
 
 .p-section__text {
   margin: 0 0 24px;
-  color: var(--accordion-color-text-muted);
+  color: #555;
 }
 
 @media (min-width: 768px) {
@@ -75,102 +50,93 @@ code {
   }
 }
 
-/* ================================================
-   c-accordion: アコーディオン本体
-   ================================================ */
+/* snippet:start */
+.c-accordion {
+  --accordion-color-text:        #2b2b2b;
+  --accordion-color-border:      #e0e0e0;
+  --accordion-color-bg:          #ffffff;
+  --accordion-color-bg-hover:    #f5f7fa;
+  --accordion-color-bg-active:   #eef3fa;
+  --accordion-color-accent:      #0066cc;
+  --accordion-color-focus-ring:  #0066cc;
+
+  --accordion-radius:            8px;
+  --accordion-header-padding-y:  16px;
+  --accordion-header-padding-x:  20px;
+  --accordion-body-padding-y:    16px;
+  --accordion-body-padding-x:    20px;
+
+  --accordion-transition:        0.2s ease;
+}
+
+.c-accordion,
+.c-accordion *,
+.c-accordion *::before,
+.c-accordion *::after {
+  box-sizing: border-box;
+}
+
 .c-accordion {
   border: 1px solid var(--accordion-color-border);
   border-radius: var(--accordion-radius);
   background-color: var(--accordion-color-bg);
-  overflow: hidden; /* 角丸を子要素にも適用するため */
+  overflow: hidden;
 }
 
-/* 項目間の区切り線 */
 .c-accordion__item + .c-accordion__item {
   border-top: 1px solid var(--accordion-color-border);
 }
 
-/* ================================================
-   c-accordion__heading: 見出し要素のリセット
-   <h2> をボタンのラッパーに使うため、見出しのデフォルト
-   余白・サイズを打ち消す。
-   ================================================ */
 .c-accordion__heading {
   margin: 0;
   font-size: inherit;
   font-weight: inherit;
 }
 
-/* ================================================
-   c-accordion__header: 開閉ボタン（クリック対象）
-   ================================================ */
 .c-accordion__header {
-  /* ボタンリセット */
   appearance: none;
   background: none;
   border: none;
   font: inherit;
   color: inherit;
   cursor: pointer;
-
-  /* レイアウト */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   width: 100%;
-  min-height: 44px; /* タップ領域の最低保証（モバイルアクセシビリティ）。
-                       padding を変更してもこの最低高さは崩れない。 */
+  min-height: 44px;
   padding: var(--accordion-header-padding-y) var(--accordion-header-padding-x);
-
-  /* テキスト */
   text-align: left;
   font-size: 16px;
   font-weight: 600;
-
-  /* 状態遷移 */
   background-color: var(--accordion-color-bg);
   transition:
     background-color var(--accordion-transition),
     color var(--accordion-transition);
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用 */
 @media (any-hover: hover) and (pointer: fine) {
   .c-accordion__header:hover {
     background-color: var(--accordion-color-bg-hover);
   }
 }
 
-/* キーボードフォーカス時のフォーカスリング
-   outline を消さず、視認性の高いリングで上書きする
-   outline-offset は正値（外側）にして、開いた項目の背景色
-   （--accordion-color-bg-active）に埋没しないようにする。 */
 .c-accordion__header:focus-visible {
   outline: 2px solid var(--accordion-color-focus-ring);
   outline-offset: 2px;
 }
 
-/* 開いている項目のヘッダーは背景色を変えて視認性を上げる
-   後続スニペット（004/005/007）も同じセレクタで状態表現できる */
 .c-accordion__header[aria-expanded="true"] {
   background-color: var(--accordion-color-bg-active);
   color: var(--accordion-color-accent);
 }
 
-/* ================================================
-   c-accordion__title: ヘッダー内のタイトルテキスト
-   ================================================ */
 .c-accordion__title {
   flex: 1;
-  min-width: 0; /* テキストが長い場合に折り返せるようにする */
+  min-width: 0;
 }
 
-/* ================================================
-   c-accordion__icon: 開閉インジケータ（▼）
-   CSSのみでシェブロンを描画。aria-expanded の値に応じて
-   回転させることで開閉状態を視覚的に伝える。
-   ================================================ */
 .c-accordion__icon {
   flex-shrink: 0;
   display: inline-block;
@@ -178,32 +144,19 @@ code {
   height: 12px;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);            /* 閉じている状態: ▼ */
+  transform: rotate(45deg);
   transform-origin: center;
   transition: transform var(--accordion-transition);
 }
 
 .c-accordion__header[aria-expanded="true"] .c-accordion__icon {
-  transform: rotate(-135deg);          /* 開いている状態: ▲ */
+  transform: rotate(-135deg);
 }
 
-/* ================================================
-   c-accordion__body: 本文パネル
-   閉じている状態は <div hidden> 属性で非表示にする。
-   （CSS の display:none と同等の振る舞いだが、
-    HTMLとして閉状態が読み取れるため可視性が高い）
-   ================================================ */
 .c-accordion__body {
   background-color: var(--accordion-color-bg);
 }
 
-/* ================================================
-   c-accordion__content: 本文の余白を持つ内側ラッパー
-   後続スニペット007（animation）で grid-template-rows
-   アニメーションを実装する際、外側の __body は
-   コンテナ、内側の __content がコンテンツとして
-   分離できるよう2層構造にしている。
-   ================================================ */
 .c-accordion__content {
   padding: var(--accordion-body-padding-y) var(--accordion-body-padding-x);
   color: var(--accordion-color-text);
@@ -226,16 +179,10 @@ code {
   margin-bottom: 0;
 }
 
-/* ================================================
-   prefers-reduced-motion: 動きを減らす設定への配慮
-   前庭機能障害等で OS の「視差効果を減らす」を有効に
-   しているユーザーに対し、transition を無効化する。
-   後続スニペット 007（animation）でも同じメディアクエリを
-   採用するため、軸となる 001 で先行して導入する。
-   ================================================ */
 @media (prefers-reduced-motion: reduce) {
   .c-accordion__header,
   .c-accordion__icon {
     transition: none;
   }
 }
+/* snippet:end */

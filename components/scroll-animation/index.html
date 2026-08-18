@@ -86,10 +86,10 @@
         <div class="c-tagfilter" data-tagfilter>
           <h2 class="u-sr-only">タグでしぼり込む・プレビューを停止</h2>
           <ul class="c-tagfilter__list">
-            <li><button type="button" class="c-tag" data-tag="" aria-pressed="true"><span class="c-tag__check" aria-hidden="true">✓</span><span class="c-tag__label">すべて</span><span class="c-tag__count">6<span class="u-sr-only">件</span></span></button></li>
-            <li><button type="button" class="c-tag" data-tag="JS必要" aria-pressed="false"><span class="c-tag__check" aria-hidden="true">✓</span><span class="c-tag__label">JS必要</span><span class="c-tag__count">6<span class="u-sr-only">件</span></span></button></li>
-            <li><button type="button" class="c-tag" data-tag="scroll-driven CSS" aria-pressed="false"><span class="c-tag__check" aria-hidden="true">✓</span><span class="c-tag__label">scroll-driven CSS</span><span class="c-tag__count">3<span class="u-sr-only">件</span></span></button></li>
-            <li><button type="button" class="c-tag" data-tag="画像素材あり" aria-pressed="false"><span class="c-tag__check" aria-hidden="true">✓</span><span class="c-tag__label">画像素材あり</span><span class="c-tag__count">2<span class="u-sr-only">件</span></span></button></li>
+            <li><button type="button" class="c-tag" data-tag="" aria-pressed="true"><span class="c-tag__label">すべて</span><span class="c-tag__count">6<span class="u-sr-only">件</span></span></button></li>
+            <li><button type="button" class="c-tag" data-tag="JS必要" aria-pressed="false"><span class="c-tag__label">JS必要</span><span class="c-tag__count">6<span class="u-sr-only">件</span></span></button></li>
+            <li><button type="button" class="c-tag" data-tag="scroll-driven CSS" aria-pressed="false"><span class="c-tag__label">scroll-driven CSS</span><span class="c-tag__count">3<span class="u-sr-only">件</span></span></button></li>
+            <li><button type="button" class="c-tag" data-tag="画像素材あり" aria-pressed="false"><span class="c-tag__label">画像素材あり</span><span class="c-tag__count">2<span class="u-sr-only">件</span></span></button></li>
           </ul>
             <button type="button" class="c-stop-toggle" data-stop-videos aria-pressed="false" hidden><span class="c-stop-toggle__check" aria-hidden="true">✓</span><span>プレビューを停止</span></button>
         </div>
@@ -198,7 +198,10 @@
 
         <div class="c-modal__filerow">
           <span class="c-modal__path" data-modal-path></span>
-          <button type="button" class="c-copy" data-modal-copy hidden>コピー</button>
+          <button type="button" class="c-copy" data-modal-copy hidden>
+            <span class="c-copy__label" data-copy-idle>コピー</span>
+            <span class="c-copy__label c-copy__label--done" data-copy-done><span class="c-copy__check" aria-hidden="true">✓</span>コピーしました</span>
+          </button>
         </div>
 
         <div class="c-modal__panel" id="code-modal-panel" role="tabpanel" data-modal-panel hidden>
@@ -220,7 +223,8 @@
           <a class="c-modal__link c-modal__link--demo" target="_blank" rel="noopener" data-modal-demo>デモを別タブで開く<span class="c-ext" aria-hidden="true">↗</span></a>
         </div>
       </div>
-      <p class="c-modal__toast" role="status" data-modal-toast></p>
+      <p class="c-modal__toast" data-modal-toast></p>
+      <p class="u-sr-only" role="status" data-modal-announce></p>
     </dialog>
     <footer class="l-footer">
       <div class="l-container">

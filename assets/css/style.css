@@ -161,7 +161,6 @@
     --border-control: 1px;
     --ring-width: 2px;
     --ring-offset: 2px;
-    --bar-current-width: 2px; /* 現在地を示す左端の縦バー */
 
     /* ── 影 ── 影を持つ面はモーダル1つだけ。距離は px のまま ── */
     --shadow-modal: 0 32px 64px -24px rgba(0, 0, 0, 0.8);
@@ -493,6 +492,16 @@
              ⚠️ 押した直後はホバーが残るため、順序を誤ると「押したのに見た目が戻る」。
              実装 = .c-tag は :not([aria-pressed="true"]):hover で除外し、
                     .c-stop-toggle / .c-modal__tab は押した状態を後ろに置く。
+
+     ★例外は1つだけある（2026-08-18 / ★代表指示）
+             ロゴ（.c-logo）のホバーは **不透明度 0.7** で示す。下線は出さない。
+             ⚠️ 上の4規則は面色・罫線色・下線・記号の明度で組んであり、不透明度はその語彙に無い。
+                だから**規則を書き換えるのではなく、例外として記録する**。
+             ⚠️ 他のリンクへ広げない。⚠️ 規則2（ホバーで内容を出し入れしない）は崩れていない。
+                0.7 は「消す」ではなく「弱める」であり、導線もボタンもホバー前と同じだけ到達できる。
+             ⚠️ 機械の歯止め = tools/check-design.sh の (2d)。
+                **セレクタと値の両方を一致させて外してある**（`.c-logo:hover { opacity: 0.7 }` のみ）。
+             ⚠️ 例外を増やすときは★代表判断。
      =========================================================================== */
 
   /* ── スキップ導線 ──
@@ -576,10 +585,19 @@
     font-feature-settings: "palt" 1, "kern" 1;
     text-decoration: none;
     white-space: normal;
+    /* ★ホバーは不透明度で示す（★代表指示 / 2026-08-18）。⚠️ 下線に戻さない。
+       ⚠️ 動きを減らす設定では、末尾の @media (prefers-reduced-motion: reduce) が
+          transition-duration を 0.01ms に落とす。ここに個別の打ち消しを書かない
+          （2箇所で同じことを決めると、片方だけ直したときに食い違う）。 */
+    transition: opacity var(--duration-fast) var(--easing);
   }
 
+  /* ⚠️ ロゴだけの例外である。他のリンクのホバーは文字色・下線のままにする
+     （ホバーの規則1〜4 は面と文字色で組んであり、不透明度はそこに無い語彙である）。
+     ⚠️ 0.7 は★代表指示の値。実効色 #adaeb0 が canvas 上で 8.81:1 であり AA を満たす
+        （計算は design-notes.md §1-4）。**勝手に下げない**（下げるとコントラストが落ちる）。 */
   .c-logo:hover {
-    text-decoration: underline;
+    opacity: 0.7;
   }
 
   @media (min-width: 900px) {
@@ -687,15 +705,13 @@
     inset-inline-end: 0;
   }
 
-  /* 左の padding は縦バーの幅 2px を差し引いて、視覚的な内側余白を 12px に揃える。 */
   .c-dropdown__item,
   .c-nav-drawer__item {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
     min-height: var(--item-min-height);
-    padding-inline: calc(var(--space-md) - var(--bar-current-width)) var(--space-md);
-    border-inline-start: var(--bar-current-width) solid transparent;
+    padding-inline: var(--space-md);
     border-radius: var(--radius-sm);
     color: var(--ink-secondary);
     font-size: var(--fs-small);
@@ -703,13 +719,15 @@
     text-decoration: none;
     transition:
       color var(--duration-fast) var(--easing),
-      background-color var(--duration-fast) var(--easing),
-      border-color var(--duration-fast) var(--easing);
+      background-color var(--duration-fast) var(--easing);
   }
 
+  /* ⚠️ ホバーの面を control-hover へ1段上げてある。現在地が control の面を持つようになり
+     （下の .is-current）、ホバーを control のままにすると**現在地とホバーが同じ見え方**になる。
+     ⚠️ 上げたのは「ホバーを目立たせたかった」からではない。**現在地と重ならない段を確保するため**である。 */
   .c-dropdown__item:hover,
   .c-nav-drawer__item:hover {
-    background-color: var(--control);
+    background-color: var(--control-hover);
     color: var(--ink);
   }
 
@@ -723,12 +741,25 @@
     color: var(--ink);
   }
 
-  /* 現在地は「太字 ＋ 左の縦バー ＋ 文字色」の3手段で示す。白の塗りを使わない。 */
+  /* 現在地は「面の段差 ＋ 太字 ＋ 文字色」の3手段で示す。白の塗りを使わない（R-3）。
+     ★左の 2px 縦バーは 2026-08-18 に廃止した（★代表指示）。
+     ⚠️ 覆されたのは「縦バーで示す」側である。**戻さない。**
+     ⚠️ 面色 control は 05_design/internal/mock-top.review.html の項目の実測値 #3b424b と同じ。
+        値の正本は DESIGN.md であり、モックからコードは流用していない（見え方だけを参照した）。
+     ⚠️ ink / control = 9.22:1（AA 通過 / design-notes.md §1）。
+     ⚠️ aria-current="page" は残す。見た目を変えても支援技術への通知は変えない。 */
   .c-dropdown__item.is-current,
   .c-nav-drawer__item.is-current {
-    border-inline-start-color: var(--ink);
+    background-color: var(--control);
     color: var(--ink);
     font-weight: 700;
+  }
+
+  /* ⚠️ 現在地もリンクである。ホバーで応答しないと「押せない」ように見えるので1段上げる。
+     詳細度 (0,3,0) で上の2規則に勝たせる。 */
+  .c-dropdown__item.is-current:hover,
+  .c-nav-drawer__item.is-current:hover {
+    background-color: var(--control-hover);
   }
 
   /* ── ハンバーガー（〜599px） ──
@@ -1104,8 +1135,10 @@
       border-color var(--duration-fast) var(--easing);
   }
 
-  /* ✓ は常に場所を取り、見え方だけを切り替える。押すたびに幅が跳ねない。 */
-  .c-tag__check,
+  /* ✓ は常に場所を取り、見え方だけを切り替える。押すたびに幅が跳ねない。
+     ★タグ chip の ✓ は 2026-08-18 に廃止した（★代表指示）。ここに .c-tag__check を戻さない。
+     ⚠️ 全停止トグルの ✓ は別物である。**こちらは残す**
+        （トグルは白の塗りを使えないため、押した状態を面の明度差と ✓ の2手段で示している）。 */
   .c-stop-toggle__check {
     visibility: hidden;
   }
@@ -1121,15 +1154,14 @@
     border-color: var(--ink-muted);
   }
 
+  /* ★アクティブは「白の塗りの反転 ＋ 太字」で示す（✓ は 2026-08-18 に廃止 / ★代表指示）。
+     ⚠️ 状態そのものは aria-pressed が持つ。見た目は補助であり、消したのは記号1つである。
+     ⚠️ 白の塗りは R-3 により2箇所限定。ここが1つ目である。 */
   .c-tag[aria-pressed="true"] {
     background-color: var(--ink);
     color: var(--on-inverse);
     border-color: var(--ink);
     font-weight: 700;
-  }
-
-  .c-tag[aria-pressed="true"] .c-tag__check {
-    visibility: visible;
   }
 
   .c-tag__count {
@@ -1705,8 +1737,18 @@
     overflow-wrap: anywhere;
   }
 
-  /* ★白の塗りを許す2箇所目。3箇所目を作らない。 */
+  /* ★白の塗りを許す2箇所目。3箇所目を作らない。
+     ★コピーの成功は、ボタン自身のラベルの差し替えで示す（★代表指示 / 2026-08-18）。
+       ⚠️ 覆されたのは「最下部のトーストで出す」側である。**戻さない。**
+          真下の「デモを別タブで開く」を覆っており、そこにしか無い導線が消えていた。
+     ⚠️ 2つのラベルを**同じマス目に重ねる**（grid の 1行1列に両方を置く）。
+        ボタンの幅は常に長いほう（コピーしました）で決まるため、押しても行が動かない。
+        ⚠️ 幅を min-width の数値で押さえない。文字幅は既定フォントの大きさで変わるため、
+           固定値では大きい設定のときにはみ出す。**中身で決めさせる。** */
   .c-copy {
+    display: grid;
+    align-items: center;
+    justify-items: center;
     flex-shrink: 0;
     min-height: var(--control-min-height);
     padding: var(--btn-padding-block) var(--copy-padding-inline);
@@ -1719,6 +1761,31 @@
     letter-spacing: 0.04em;
     font-feature-settings: "palt" 1, "kern" 1;
     transition: background-color var(--duration-fast) var(--easing);
+  }
+
+  /* 2つのラベルを同じマス目へ重ねる。場所を取るのは常に両方で、見え方だけを切り替える。 */
+  .c-copy__label {
+    grid-area: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    white-space: nowrap;
+  }
+
+  /* ⚠️ visibility で切り替える。読み上げの対象からも同時に外れるため、
+     ボタンの読み上げ名は「いま見えているラベル」と必ず一致する
+     （見えている文字と読み上げ名が食い違う状態を作らない）。
+     ⚠️ opacity や色で消さない。消えたつもりのラベルが読み上げ名に残る。 */
+  .c-copy__label--done {
+    visibility: hidden;
+  }
+
+  .c-copy.is-copied .c-copy__label:not(.c-copy__label--done) {
+    visibility: hidden;
+  }
+
+  .c-copy.is-copied .c-copy__label--done {
+    visibility: visible;
   }
 
   .c-copy:hover {

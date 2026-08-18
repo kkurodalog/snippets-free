@@ -12,19 +12,12 @@
         <h1 class="p-section__title">004_multi-open</h1>
         <p class="p-section__text">
           複数項目を同時に開ける挙動はバニラJS実装の自然な振る舞いですが、項目数が増えると「全部見たい／全部畳みたい」というニーズが出ます。
-          本スニペットは snippet 001 をベースに、<strong>「すべて開く／すべて閉じる」一括操作ボタン</strong>を追加した実装です。
+          本スニペットは JS で開閉する基本形をベースに、<strong>「すべて開く／すべて閉じる」一括操作ボタン</strong>を追加した実装です。
           個別開閉と一括操作は <code>aria-expanded</code> を真実の源として共有し、状態が常に一致します。
           一括操作後はスクリーンリーダーへ状態変化を通知し、全開／全閉時は対応するボタンを無効化して状態を視覚化します。
         </p>
 
-        <!-- スニペットここから -->
-        <!-- 一括操作コントロール
-             c-accordion の外側に置く（c-accordion 側の overflow:hidden に巻き込まれないため）
-             data-bulk-controls の値に対象 c-accordion の id を入れることで、
-             同一ページに複数アコーディオンが共存しても破綻しない設計にしている。
-             スクリーンリーダー向けライブリージョンも同じユニット内に置き、
-             JS 側で bulkRoot を起点にスコープ取得することで他アコーディオン用の
-             status 領域に書き込むのを防ぐ。 -->
+        <!-- snippet:start -->
         <div class="c-accordion__bulk-controls" data-bulk-controls="c-accordion-multi-open">
           <button
             type="button"
@@ -42,9 +35,6 @@
           >
             すべて閉じる
           </button>
-          <!-- スクリーンリーダー向けライブリージョン
-               一括操作の状態変化（全開／全閉）を画面外で通知する。
-               視覚的には sr-only パターンで隠している。 -->
           <div
             class="c-accordion__sr-status"
             role="status"
@@ -54,7 +44,6 @@
         </div>
 
         <div class="c-accordion" data-accordion id="c-accordion-multi-open">
-          <!-- 項目 1 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -79,13 +68,12 @@
                   たとえばFAQで複数の質問を見比べたい・設定パネルで複数セクションを並行して編集したい等のユースケースです。
                 </p>
                 <p>
-                  逆に「読ませたい順序がある」「画面領域を1項目分しか確保できない」場合は排他制御型（snippet 005 single-open）が向いています。
+                  逆に「読ませたい順序がある」「画面領域を1項目分しか確保できない」場合は排他制御型が向いています。
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- 項目 2 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -118,7 +106,6 @@
             </div>
           </div>
 
-          <!-- 項目 3 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -152,7 +139,6 @@
             </div>
           </div>
 
-          <!-- 項目 4 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -185,7 +171,7 @@
             </div>
           </div>
         </div>
-        <!-- スニペットここまで -->
+        <!-- snippet:end -->
       </section>
     </main>
 

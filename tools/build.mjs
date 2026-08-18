@@ -30,9 +30,11 @@ import { readFile, writeFile, mkdir, readdir, access } from 'node:fs/promises';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { checkLinks, reportLinks } from './check-links.mjs';
+import { verificationErrors } from './check-verification.mjs';
 import {
   loadSite,
   loadCategory,
+  loadClearance,
   publishedCategories,
   partDir,
   partFile,
@@ -170,7 +172,7 @@ async function exists(rel) {
  *   「押したら空」または「あるのにボタンが出ない」が直接起きる。
  *   どちらも保留にする理由が無い（後続工程を待って解決する類の食い違いではない）。
  */
-async function checkCategoryData(category) {
+async function checkCategoryData(category, clearance) {
   const errors = [];
   const where = `site/data/${category.slug}.json`;
 
@@ -240,6 +242,10 @@ async function checkCategoryData(category) {
       if (!VERIFIED_ON.test(part.verifiedOn)) errors.push(`${id}: verifiedOn は YYYY-MM-DD で書く`);
       if (!part.verification) errors.push(`${id}: verifiedOn があるのに verification が無い`);
     }
+
+    // ★検証行は掲載基準を満たしたと画面で述べる。述べる根拠（実測の記録）と一致しない値は書き出さない。
+    //   判定は tools/check-verification.mjs の1本。生成と検査で同じ関数を呼ぶ。
+    errors.push(...verificationErrors(category.slug, part, clearance, id));
 
     // files[] と実ファイルを両方向で突き合わせる。
     // 片方向だけだと「宣言したのに無い」か「あるのに出していない」のどちらかを見逃す。
@@ -331,7 +337,8 @@ async function main() {
   }
 
   // (2) カード定義と実ファイルの突合
-  for (const category of categories) errors.push(...(await checkCategoryData(category)));
+  const clearance = await loadClearance(ROOT);
+  for (const category of categories) errors.push(...(await checkCategoryData(category, clearance)));
 
   // (3) 収録シナリオの欠落
   const scenarios = await checkScenarios(categories);

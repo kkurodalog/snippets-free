@@ -79,3 +79,13 @@ export function topMediaFiles(categorySlug, partSlug) {
     poster: `media/${categorySlug}/${partSlug}/top.jpg`,
   };
 }
+
+/**
+ * 掲載基準4項目の確認済み記録。
+ * ⚠️ カード定義（site/data/{カテゴリ}.json）とは別ファイルに置く。
+ *    同じファイルに置くと「表示したい」と「確かめた」が1回の編集で同時に動き、
+ *    確かめずに表示だけ足すことを機械で止められない。
+ */
+export async function loadClearance(root) {
+  return JSON.parse(await readFile(join(root, 'site/data/verification-clearance.json'), 'utf8'));
+}

@@ -29,6 +29,23 @@
  *   ⚠️ スクロールする枠（`.c-code__scroll`）は面とは別に `tabindex="0"` を持つ。
  *      キーボードでコードを送る手段であり、面と一緒にしない。
  *
+ * ★コピーの成否は「ボタン自身のラベル」で見せる（★代表指示 / 2026-08-18）。
+ *   ⚠️ 成功を最下部のトーストで出すと、真下の「デモを別タブで開く」を覆う。
+ *      覆われたのは**そこにしか無い導線**である。**戻さない。**
+ *   ⚠️ 2つのラベルを同じマス目に重ねて置き、見え方だけを切り替える（`.c-copy__label`）。
+ *      ボタンの幅は常に長いほうで決まるため、押しても行が動かない。
+ *   ⚠️ 読み上げへは `role="status"` の面（`data-modal-announce`）が通知する。
+ *      ラベルの差し替えだけに任せない。
+ *
+ * ★トーストは**失敗のときだけ**出す。
+ *   ⚠️ 失敗の文言は結果の報告ではなく**手順の指示**であり、読み終える前に消えると
+ *      案内した操作にたどり着けない（滞留6秒）。**成功でここを使わない。**
+ *   ⚠️ `role="status"` をトースト自身に置かない。可視のトーストと読み上げの通知を別の要素に分け、
+ *      成功（ラベルだけ）と失敗（トーストあり）のどちらでも**1回だけ**読ませる。
+ *
+ * ⚠️ **この説明を HTML コメントで書かない。** 生成された HTML はそのまま公開され、
+ *    社内の記法（`★`）と内部の議論が公開物に載る。説明はこの JSDoc に置く。
+ *
  * ★注記の `<ul>` に `role="list"` を明示する。
  *   ⚠️ `list-style: none` を当てると、環境によってはリストとして読まれなくなる。
  *      見た目のために意味を落とさない。
@@ -47,7 +64,10 @@ export function codeModal() {
 
         <div class="c-modal__filerow">
           <span class="c-modal__path" data-modal-path></span>
-          <button type="button" class="c-copy" data-modal-copy hidden>コピー</button>
+          <button type="button" class="c-copy" data-modal-copy hidden>
+            <span class="c-copy__label" data-copy-idle>コピー</span>
+            <span class="c-copy__label c-copy__label--done" data-copy-done><span class="c-copy__check" aria-hidden="true">✓</span>コピーしました</span>
+          </button>
         </div>
 
         <div class="c-modal__panel" id="code-modal-panel" role="tabpanel" data-modal-panel hidden>
@@ -69,6 +89,7 @@ export function codeModal() {
           <a class="c-modal__link c-modal__link--demo" target="_blank" rel="noopener" data-modal-demo>デモを別タブで開く<span class="c-ext" aria-hidden="true">↗</span></a>
         </div>
       </div>
-      <p class="c-modal__toast" role="status" data-modal-toast></p>
+      <p class="c-modal__toast" data-modal-toast></p>
+      <p class="u-sr-only" role="status" data-modal-announce></p>
     </dialog>`;
 }

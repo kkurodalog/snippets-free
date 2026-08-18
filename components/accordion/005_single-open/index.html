@@ -13,12 +13,11 @@
         <p class="p-section__text">
           排他制御型のアコーディオンです。ある項目を開くと、それ以外の項目は自動的に閉じられ、<strong>常に最大1つの項目だけが開いている状態</strong>を保ちます。
           開いている項目をもう一度クリックすれば閉じられるため、全項目が閉じている状態も許容します。
-          実装は snippet 001 / 004 と同じ <code>aria-expanded</code> + <code>hidden</code> パターンを継承し、JavaScript側で「他項目を全クローズしてから対象項目をトグル」する制御を加えています。
+          実装は JS で開閉する基本形・複数同時オープン型と同じ <code>aria-expanded</code> + <code>hidden</code> パターンを継承し、JavaScript側で「他項目を全クローズしてから対象項目をトグル」する制御を加えています。
         </p>
 
-        <!-- スニペットここから -->
+        <!-- snippet:start -->
         <div class="c-accordion" data-accordion id="c-accordion-single-open">
-          <!-- 項目 1 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -43,13 +42,12 @@
                   たとえばモバイルのFAQ・サイドメニュー・ステップ式のチュートリアル等、ユーザーの注意を1箇所に集中させたい設計に有効です。
                 </p>
                 <p>
-                  逆に、複数項目を見比べたい・並行して情報を参照したい用途では複数同時オープン型（snippet 004 multi-open）の方が向きます。
+                  逆に、複数項目を見比べたい・並行して情報を参照したい用途では複数同時オープン型の方が向きます。
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- 項目 2 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -80,7 +78,6 @@
             </div>
           </div>
 
-          <!-- 項目 3 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -105,13 +102,12 @@
                   WAI-ARIA Authoring Practices の Accordion パターンも、排他制御に関する追加通知（<code>aria-live</code> 等）を要求していません。
                 </p>
                 <p>
-                  そのため本スニペットでは snippet 004 の一括操作のような <code>role="status"</code> + <code>aria-live="polite"</code> 領域は設けず、個別 <code>aria-expanded</code> の切替だけでアクセシビリティ要件を満たす設計にしています。
+                  そのため本スニペットでは複数同時オープン型の一括操作のような <code>role="status"</code> + <code>aria-live="polite"</code> 領域は設けず、個別 <code>aria-expanded</code> の切替だけでアクセシビリティ要件を満たす設計にしています。
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- 項目 4 -->
           <div class="c-accordion__item">
             <h2 class="c-accordion__heading">
               <button
@@ -121,7 +117,7 @@
                 aria-controls="c-accordion-single-panel-4"
                 id="c-accordion-single-header-4"
               >
-                <span class="c-accordion__title">snippet 004 multi-open との使い分けは？</span>
+                <span class="c-accordion__title">複数同時オープン型との使い分けは？</span>
                 <span class="c-accordion__icon" aria-hidden="true"></span>
               </button>
             </h2>
@@ -143,7 +139,7 @@
             </div>
           </div>
         </div>
-        <!-- スニペットここまで -->
+        <!-- snippet:end -->
       </section>
     </main>
 

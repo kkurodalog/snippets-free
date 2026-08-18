@@ -68,7 +68,10 @@ function stopToggle({ category }) {
  * タグフィルタ。
  * - 実在するタグだけを出す（0件のタグを出さない）
  * - 状態は `aria-pressed`。単一選択
- * - アクティブは「塗りの反転 ＋ 太字 ＋ ✓」。白の塗りを使ってよい箇所の1つ
+ * - アクティブは「塗りの反転 ＋ 太字」。白の塗りを使ってよい箇所の1つ
+ *   ★✓ は 2026-08-18 に廃止した（★代表指示 =「一覧画面のタグフィルターの ✓ マークは不要」）。
+ *   ⚠️ 状態そのものは `aria-pressed` が持つ。**戻さない。**
+ *   ⚠️ 全停止トグルの ✓ は別物であり、そちらは残す（白の塗りを使えないため手段が1つ減らせない）。
  *
  * ★並び順は「すべて」を左端に固定し、以降は**必要な要素が少ないものから左へ**並べる。
  *   順序の正本は `site/partials/parts.mjs` の `TAGS`（語彙と同じ1本）。
@@ -104,7 +107,6 @@ function tagFilter({ category }) {
   const chip = (label, value, count, active) =>
     `            <li><button type="button" class="c-tag" data-tag="${esc(value)}"` +
     ` aria-pressed="${active ? 'true' : 'false'}">` +
-    `<span class="c-tag__check" aria-hidden="true">✓</span>` +
     `<span class="c-tag__label">${esc(label)}</span>` +
     `<span class="c-tag__count">${count}<span class="u-sr-only">件</span></span></button></li>`;
 
