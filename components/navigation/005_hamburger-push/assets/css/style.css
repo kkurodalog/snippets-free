@@ -1,16 +1,19 @@
-/* ================================================
-   カスタムプロパティ
-   ================================================ */
-:root {
-  --header-height-sp: 60px;
-  --header-height-pc: 72px;
-  --push-nav-width: 280px;
-  --push-transition: 0.3s ease;
-
-  /* ===== z-index 階層管理 ===== */
-  --z-header: 20; /* ヘッダー背景 */
-  --z-drawer: 40; /* プッシュナビ（ドロワーと同等の階層） */
-}
+/**
+ * 005_hamburger-push
+ * ナビゲーションが右から出ると同時に、ページの内容が左へ押し出される形。
+ *
+ * 決めごと
+ * - 押し出す対象は c-push-wrapper である。ページの内容をこの中に置く
+ * - ヘッダーは wrapper の外に置き、押し出しても動かない位置に固定する
+ * - c-push-cover は押し出されている間だけ前面に出る膜である。
+ *   中のリンクやボタンの誤操作を防ぎ、押されたら閉じる役をまとめて持つ
+ * - 768px 以上では押し出しを無効にする（カバーも出さない）
+ *
+ * このファイルの前半はデモページの体裁である。貼って使う範囲はマーカーの内側だけ。
+ * ホバーの指定は any-hover: hover かつ pointer: fine のときだけ当てている
+ * （タッチ操作で当たったままになるのを避けるため）。
+ * z-index はカスタムプロパティにまとめ、階層を名前で読めるようにしてある。
+ */
 
 /* ================================================
    ベースレイアウト（スニペット共通）
@@ -51,11 +54,34 @@
   color: #555;
 }
 
-/* ================================================
-   c-push-nav: プッシュナビゲーション（右からスライドイン）
-   ================================================ */
+/* snippet:start */
+.c-header,
+.c-push-wrapper,
 .c-push-nav {
-  /* 初期状態: 画面右外に待機（固定配置） */
+  --header-height-sp: 60px;
+  --header-height-pc: 72px;
+  --push-nav-width: 280px;
+  --push-transition: 0.3s ease;
+  --z-header: 20;
+  --z-drawer: 40;
+}
+
+.c-header,
+.c-header *,
+.c-header *::before,
+.c-header *::after,
+.c-push-wrapper,
+.c-push-wrapper *,
+.c-push-wrapper *::before,
+.c-push-wrapper *::after,
+.c-push-nav,
+.c-push-nav *,
+.c-push-nav *::before,
+.c-push-nav *::after {
+  box-sizing: border-box;
+}
+
+.c-push-nav {
   position: fixed;
   top: 0;
   right: 0;
@@ -66,33 +92,26 @@
   transform: translateX(100%);
   transition: transform var(--push-transition);
 
-  /* パネル境界を明確化するための影（画面外側から差し込む光の逆側に落とす） */
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.24);
 
-  /* ナビ内スクロール対応 */
   overflow-y: auto;
 }
 
-/* is-open クラスでスライドイン（画面内に表示） */
 .c-push-nav.is-open {
   transform: translateX(0);
 }
 
 @media (min-width: 768px) {
-  /* PCでは非表示 */
   .c-push-nav {
     display: none;
   }
 }
 
-/* ================================================
-   c-push-nav__list / item / link: プッシュナビメニューリスト
-   ================================================ */
 .c-push-nav__list {
   list-style: none;
   margin: 0;
   padding: 0;
-  padding-block-start: var(--header-height-sp); /* ヘッダーの高さ分だけ上に余白を取り、コンテンツとの視覚的な整合性を保つ */
+  padding-block-start: var(--header-height-sp);
 }
 
 .c-push-nav__item {
@@ -114,22 +133,16 @@
   transition: background-color 0.2s ease;
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-push-nav__link:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
 }
 
-/* ================================================
-   c-push-wrapper: ページコンテンツラッパー
-   push時に左にスライドする要素（main のみを包む）
-   固定ヘッダー分の padding-top を確保し、ヘッダーは wrapper の外側で独立して固定表示される
-   ================================================ */
 .c-push-wrapper {
   position: relative;
   min-height: 100vh;
-  padding-top: var(--header-height-sp); /* 固定ヘッダーの高さ分の余白 */
+  padding-top: var(--header-height-sp);
   transition: transform var(--push-transition);
 }
 
@@ -139,26 +152,17 @@
   }
 }
 
-/* is-pushed クラスでコンテンツを左に押し出す */
 .c-push-wrapper.is-pushed {
   transform: translateX(calc(-1 * var(--push-nav-width)));
 }
 
 @media (min-width: 768px) {
-  /* PCではpush動作を無効化 */
   .c-push-wrapper {
     transform: none !important;
   }
 }
 
-/* ================================================
-   c-push-cover: プッシュ時の全面カバー
-   is-pushed 状態のときのみ前面に重ね、クリックでメニューを閉じるための透明レイヤー。
-   wrapper 全体に click を張ると内部のインタラクティブ要素が誤動作するため、
-   専用のカバー要素として分離する。
-   ================================================ */
 .c-push-cover {
-  /* 通常時は非表示かつ干渉しない */
   display: none;
   position: absolute;
   inset: 0;
@@ -166,24 +170,17 @@
   pointer-events: none;
 }
 
-/* is-pushed 時のみ全面カバーを有効化 */
 .c-push-wrapper.is-pushed .c-push-cover {
   display: block;
   pointer-events: auto;
 }
 
 @media (min-width: 768px) {
-  /* PCではpush動作しないためカバー不要 */
   .c-push-cover {
     display: none !important;
   }
 }
 
-/* ================================================
-   c-header: ヘッダー全体（固定配置）
-   c-push-wrapper の外側に配置することで、wrapper の transform の影響を受けず、
-   push 時もビューポート上部に常に固定される。
-   ================================================ */
 .c-header {
   position: fixed;
   top: 0;
@@ -227,11 +224,7 @@
   }
 }
 
-/* ================================================
-   c-hamburger: ハンバーガーボタン
-   ================================================ */
 .c-hamburger {
-  /* ボタンリセット */
   appearance: none;
   background: none;
   border: none;
@@ -239,7 +232,6 @@
   padding: 8px;
   margin: -8px;
 
-  /* 3本線を縦に並べるレイアウト */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -250,13 +242,11 @@
 }
 
 @media (min-width: 768px) {
-  /* PCでは非表示 */
   .c-hamburger {
     display: none;
   }
 }
 
-/* ハンバーガーの1本線 */
 .c-hamburger__line {
   display: block;
   width: 24px;
@@ -269,36 +259,23 @@
     opacity 0.3s ease;
 }
 
-/* ×（バツ）アニメーション */
-/* is-active クラスが付いたとき、3本線 → ×に変形 */
-
-/* 1本目: 右上がりの斜線 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(1) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(7px) rotate(45deg);
 }
 
-/* 2本目: 非表示 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(2) {
   opacity: 0;
 }
 
-/* 3本目: 右下がりの斜線 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(3) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ================================================
-   c-nav: PCナビゲーション（横並び）
-   ================================================ */
 .c-nav {
-  /* モバイル: 非表示 */
   display: none;
 }
 
 @media (min-width: 768px) {
-  /* PC: 常に表示（横並び） */
   .c-nav {
     display: block;
   }
@@ -328,9 +305,9 @@
   transition: color 0.2s ease;
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-nav__link:hover {
     color: #0066cc;
   }
 }
+/* snippet:end */

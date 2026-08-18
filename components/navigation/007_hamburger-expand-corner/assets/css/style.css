@@ -1,117 +1,21 @@
-/* ================================================
-   カスタムプロパティ
-   ================================================ */
-:root {
-  --header-height-sp: 60px;
-  --header-height-pc: 72px;
-
-  /* FABボタン */
-  --fab-size: 56px;
-  --fab-offset: 24px; /* 右下からのオフセット */
-  --fab-bg: #1a1a1a;
-  --fab-bg-active: #1a1a1a;
-
-  /* 展開背景 */
-  --expand-bg: #1a1a1a;
-  --expand-transition-bg: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  --expand-transition-nav: 0.4s ease;
-  --expand-item-delay: 0.08s;
-
-  /* ===== z-index 階層管理 ===== */
-  --z-header:     20; /* ヘッダー背景 */
-  --z-overlay:    30; /* 展開背景（オーバーレイとして機能） */
-  --z-drawer:     40; /* 展開ナビゲーション */
-  --z-floating:   50; /* FABボタン（常に最前面） */
-}
-
-/* ================================================
-   c-header: ヘッダー全体
-   ================================================ */
-.c-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-header);
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-.c-header__inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: calc(1200px + 20px * 2);
-  margin-inline: auto;
-  padding-inline: 20px;
-  height: var(--header-height-sp);
-}
-
-@media (min-width: 768px) {
-  .c-header__inner {
-    padding-inline: 40px;
-    height: var(--header-height-pc);
-  }
-}
-
-.c-header__logo {
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  text-decoration: none;
-  letter-spacing: 0.05em;
-}
-
-@media (min-width: 768px) {
-  .c-header__logo {
-    font-size: 24px;
-  }
-}
-
-/* ================================================
-   c-nav: PCナビゲーション（横並び）
-   ================================================ */
-.c-nav {
-  /* モバイル: 非表示 */
-  display: none;
-}
-
-@media (min-width: 768px) {
-  /* PC: 常に表示（横並び） */
-  .c-nav {
-    display: block;
-  }
-}
-
-.c-nav__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-@media (min-width: 768px) {
-  .c-nav__list {
-    display: flex;
-    gap: 32px;
-  }
-}
-
-.c-nav__link {
-  display: block;
-  padding: 0;
-  color: #333;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  transition: color 0.2s ease;
-}
-
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
-@media (any-hover: hover) and (pointer: fine) {
-  .c-nav__link:hover {
-    color: #0066cc;
-  }
-}
+/**
+ * 007_hamburger-expand-corner
+ * 右下の丸いボタンから、暗い背景が円形に広がってメニューが出る形。
+ *
+ * 決めごと
+ * - 円形の広がりは背景要素の scale で作る。中心を右下のボタンに合わせるため、
+ *   bottom / right と transform-origin をボタンの中心位置に揃えてある
+ * - 閉じるときは is-closing を使い、開くときとは別の時間で縮ませる
+ * - 項目の出現は transition-delay を1つずつずらして作る
+ * - 768px 以上でも丸いボタンを出したままにしている。画面が広いときも
+ *   同じ操作で開ける形を意図した選択である。隠す場合は、この範囲に
+ *   768px 以上で display: none にする指定を足す
+ *
+ * このファイルの前半はデモページの体裁である。貼って使う範囲はマーカーの内側だけ。
+ * ホバーの指定は any-hover: hover かつ pointer: fine のときだけ当てている
+ * （タッチ操作で当たったままになるのを避けるため）。
+ * z-index はカスタムプロパティにまとめ、階層を名前で読めるようにしてある。
+ */
 
 /* ================================================
    ベースレイアウト（スニペット共通）
@@ -152,22 +56,136 @@
   color: #555;
 }
 
-/* ================================================
-   c-fab: FABスタイル ハンバーガーボタン（右下固定）
-   ================================================ */
+/* snippet:start */
+.c-header,
+.c-expand-bg,
+.c-expand-nav,
 .c-fab {
-  /* ボタンリセット */
+  --header-height-sp: 60px;
+  --header-height-pc: 72px;
+  --fab-size: 56px;
+  --fab-offset: 24px;
+  --fab-bg: #1a1a1a;
+  --fab-bg-active: #1a1a1a;
+  --expand-bg: #1a1a1a;
+  --expand-transition-bg: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --expand-transition-nav: 0.4s ease;
+  --expand-item-delay: 0.08s;
+  --z-header:     20;
+  --z-overlay:    30;
+  --z-drawer:     40;
+  --z-floating:   50;
+}
+
+.c-header,
+.c-header *,
+.c-header *::before,
+.c-header *::after,
+.c-expand-bg,
+.c-expand-bg *,
+.c-expand-bg *::before,
+.c-expand-bg *::after,
+.c-expand-nav,
+.c-expand-nav *,
+.c-expand-nav *::before,
+.c-expand-nav *::after,
+.c-fab,
+.c-fab *,
+.c-fab *::before,
+.c-fab *::after {
+  box-sizing: border-box;
+}
+
+.c-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.c-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: calc(1200px + 20px * 2);
+  margin-inline: auto;
+  padding-inline: 20px;
+  height: var(--header-height-sp);
+}
+
+@media (min-width: 768px) {
+  .c-header__inner {
+    padding-inline: 40px;
+    height: var(--header-height-pc);
+  }
+}
+
+.c-header__logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+@media (min-width: 768px) {
+  .c-header__logo {
+    font-size: 24px;
+  }
+}
+
+.c-nav {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .c-nav {
+    display: block;
+  }
+}
+
+.c-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .c-nav__list {
+    display: flex;
+    gap: 32px;
+  }
+}
+
+.c-nav__link {
+  display: block;
+  padding: 0;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease;
+}
+
+@media (any-hover: hover) and (pointer: fine) {
+  .c-nav__link:hover {
+    color: #0066cc;
+  }
+}
+
+.c-fab {
   appearance: none;
   border: none;
   cursor: pointer;
 
-  /* 右下に固定配置 */
   position: fixed;
   bottom: var(--fab-offset);
   right: var(--fab-offset);
-  z-index: var(--z-floating); /* FABは常に最前面 */
+  z-index: var(--z-floating);
 
-  /* 円形FABスタイル */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -186,7 +204,6 @@
     transform 0.3s ease;
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-fab:hover {
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.32);
@@ -194,13 +211,11 @@
   }
 }
 
-/* メニュー展開時: FABの背景色を変更 */
 .c-fab.is-active {
   background-color: var(--fab-bg-active);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-/* FABの1本線 */
 .c-fab__line {
   display: block;
   width: 22px;
@@ -213,57 +228,31 @@
     opacity 0.3s ease;
 }
 
-/* ×（バツ）アニメーション */
-/* is-active クラスが付いたとき、3本線 → × に変形 */
-
-/* 1本目: 右上がりの斜線 */
 .c-fab.is-active .c-fab__line:nth-child(1) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(7px) rotate(45deg);
 }
 
-/* 2本目: 非表示 */
 .c-fab.is-active .c-fab__line:nth-child(2) {
   opacity: 0;
 }
 
-/* 3本目: 右下がりの斜線 */
 .c-fab.is-active .c-fab__line:nth-child(3) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* PCでもFABを表示する（ポートフォリオ向けのクリエイティブUIとして） */
-/* 必要に応じて以下のコメントを外してPCでは非表示にできる */
-/*
-@media (min-width: 768px) {
-  .c-fab {
-    display: none;
-  }
-}
-*/
-
-/* ================================================
-   c-expand-bg: 展開背景（右下から円形に広がるアニメーション）
-   第1段階: ボタン位置から円形に広がるダーク背景
-   ================================================ */
 .c-expand-bg {
   position: fixed;
   z-index: var(--z-overlay);
-  pointer-events: none; /* 背景自体はクリック不可 */
+  pointer-events: none;
 
-  /* FABボタンの中心を起点に配置 */
-  /* bottom / right はFABボタンの中心位置に合わせる */
   bottom: calc(var(--fab-offset) + var(--fab-size) / 2);
   right: calc(var(--fab-offset) + var(--fab-size) / 2);
 
-  /* 初期状態: 小さな円（FABボタンサイズ） */
   width: 0;
   height: 0;
   border-radius: 50%;
   background-color: var(--expand-bg);
 
-  /* transformで拡大。中心を右下に固定するためtranslateで調整 */
   transform: translate(50%, 50%) scale(0);
   transition:
     transform var(--expand-transition-bg),
@@ -273,16 +262,13 @@
   opacity: 0;
 }
 
-/* 第1段階: 円形背景が画面全体に広がる */
 .c-expand-bg.is-expanding {
-  /* 画面の対角線の2倍以上の大きさにして画面全体をカバー */
   width: 300vmax;
   height: 300vmax;
   transform: translate(50%, 50%) scale(1);
   opacity: 1;
 }
 
-/* 閉じるとき: 逆順で縮小 */
 .c-expand-bg.is-closing {
   width: 300vmax;
   height: 300vmax;
@@ -293,10 +279,6 @@
     opacity 0.1s ease 0.4s;
 }
 
-/* ================================================
-   c-expand-nav: 展開型ナビゲーション
-   第2段階: リンクがフェードイン + スタッガードアニメーション
-   ================================================ */
 .c-expand-nav {
   position: fixed;
   inset: 0;
@@ -306,7 +288,6 @@
   align-items: center;
   justify-content: center;
 
-  /* 初期状態: 非表示 */
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -315,26 +296,12 @@
     visibility var(--expand-transition-nav);
 }
 
-/* 第2段階: ナビリンクがフェードイン */
 .c-expand-nav.is-open {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
 
-@media (min-width: 768px) {
-  /* PCでも展開ナビを使用可能にする（ポートフォリオ向け） */
-  /* PCで非表示にしたい場合は以下のコメントを外す */
-  /*
-  .c-expand-nav {
-    display: none;
-  }
-  */
-}
-
-/* ================================================
-   c-expand-nav__list / item / link: メニューリスト
-   ================================================ */
 .c-expand-nav__list {
   list-style: none;
   margin: 0;
@@ -342,24 +309,21 @@
   text-align: center;
 }
 
-/* 各リンクの初期状態（非表示・下にずれた位置） */
 .c-expand-nav__item {
   opacity: 0;
   transform: translateY(30px);
   transition:
     opacity var(--expand-transition-nav),
     transform var(--expand-transition-nav);
-  /* 閉じるときは遅延なしで即座にフェードアウト */
+
   transition-delay: 0s;
 }
 
-/* is-open 時: 表示（元の位置に戻る） */
 .c-expand-nav.is-open .c-expand-nav__item {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* 各アイテムに遅延を付けてスタッガードアニメーションにする */
 .c-expand-nav.is-open .c-expand-nav__item:nth-child(1) {
   transition-delay: calc(var(--expand-item-delay) * 1);
 }
@@ -398,9 +362,9 @@
   }
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-expand-nav__link:hover {
     color: #6eb5ff;
   }
 }
+/* snippet:end */

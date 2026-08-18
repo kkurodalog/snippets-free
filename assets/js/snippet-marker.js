@@ -79,9 +79,12 @@ function dedent(lines) {
  *
  * @param {string} text ファイルの中身
  * @returns {{status: string, code: string, startLine: number, endLine: number,
- *            commentLines: {line: number, text: string}[]}}
+ *            trimmedTop: number, commentLines: {line: number, text: string}[]}}
  *   - status = 'ok' のときだけ code が意味を持つ
  *   - startLine / endLine は1始まり。異常時は 0
+ *   - trimmedTop は範囲の先頭から落とした空行の数。
+ *     code の i 行目が実ファイルの何行目かは startLine + 1 + trimmedTop + i で求まる
+ *     （⚠️ 整形は表示側の処理であり、実ファイルの行位置とは別物であるため）
  *   - commentLines は範囲内にある「行頭コメント」で日本語を含むもの（規約違反の候補）
  */
 export function extractSnippet(text) {
@@ -121,7 +124,11 @@ export function extractSnippet(text) {
 
   // 前後の空行は落とす（マーカーの直後・直前の改行はコピー範囲に含めない）
   const trimmed = [...inner];
-  while (trimmed.length > 0 && trimmed[0].trim() === '') trimmed.shift();
+  let trimmedTop = 0;
+  while (trimmed.length > 0 && trimmed[0].trim() === '') {
+    trimmed.shift();
+    trimmedTop += 1;
+  }
   while (trimmed.length > 0 && trimmed[trimmed.length - 1].trim() === '') trimmed.pop();
 
   return {
@@ -129,6 +136,7 @@ export function extractSnippet(text) {
     code: dedent(trimmed).join('\n'),
     startLine: openAt + 1,
     endLine: closeAt + 1,
+    trimmedTop,
     commentLines,
   };
 }

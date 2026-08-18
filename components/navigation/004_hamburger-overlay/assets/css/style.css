@@ -1,18 +1,19 @@
-/* ================================================
-   カスタムプロパティ
-   ================================================ */
-:root {
-  --header-height-sp: 60px;
-  --header-height-pc: 72px;
-  --drawer-width: 280px;
-  --overlay-color: rgba(0, 0, 0, 0.5);
-  --drawer-transition: 0.3s ease;
-
-  /* ===== z-index 階層管理 ===== */
-  --z-header:  20; /* ヘッダー背景 */
-  --z-overlay: 30; /* オーバーレイ（半透明背景） */
-  --z-drawer:  40; /* ドロワー */
-}
+/**
+ * 004_hamburger-overlay
+ * 右から出るドロワーと、背面を暗くするオーバーレイの組み合わせ。
+ *
+ * 決めごと
+ * - オーバーレイは opacity と visibility の2つで消す。visibility を併せて切ることで、
+ *   透明なだけの膜がクリックを奪う状態を作らない（pointer-events も閉じている間は none）
+ * - ドロワーは幅を --drawer-width で持ち、画面の右外（translateX(100%)）で待つ
+ * - ドロワーの中身が長いときのために overflow-y: auto を持たせる
+ * - 閉じるボタンの × は疑似要素2本で描く。画像を使わない
+ *
+ * このファイルの前半はデモページの体裁である。貼って使う範囲はマーカーの内側だけ。
+ * ホバーの指定は any-hover: hover かつ pointer: fine のときだけ当てている
+ * （タッチ操作で当たったままになるのを避けるため）。
+ * z-index はカスタムプロパティにまとめ、階層を名前で読めるようにしてある。
+ */
 
 /* ================================================
    ベースレイアウト（スニペット共通）
@@ -53,9 +54,35 @@
   color: #555;
 }
 
-/* ================================================
-   c-header: ヘッダー全体
-   ================================================ */
+/* snippet:start */
+.c-header,
+.c-overlay,
+.c-drawer {
+  --header-height-sp: 60px;
+  --header-height-pc: 72px;
+  --drawer-width: 280px;
+  --overlay-color: rgba(0, 0, 0, 0.5);
+  --drawer-transition: 0.3s ease;
+  --z-header:  20;
+  --z-overlay: 30;
+  --z-drawer:  40;
+}
+
+.c-header,
+.c-header *,
+.c-header *::before,
+.c-header *::after,
+.c-overlay,
+.c-overlay *,
+.c-overlay *::before,
+.c-overlay *::after,
+.c-drawer,
+.c-drawer *,
+.c-drawer *::before,
+.c-drawer *::after {
+  box-sizing: border-box;
+}
+
 .c-header {
   position: sticky;
   top: 0;
@@ -96,11 +123,7 @@
   }
 }
 
-/* ================================================
-   c-hamburger: ハンバーガーボタン
-   ================================================ */
 .c-hamburger {
-  /* ボタンリセット */
   appearance: none;
   background: none;
   border: none;
@@ -108,7 +131,6 @@
   padding: 8px;
   margin: -8px;
 
-  /* 3本線を縦に並べるレイアウト */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -119,13 +141,11 @@
 }
 
 @media (min-width: 768px) {
-  /* PCでは非表示 */
   .c-hamburger {
     display: none;
   }
 }
 
-/* ハンバーガーの1本線 */
 .c-hamburger__line {
   display: block;
   width: 24px;
@@ -138,36 +158,23 @@
     opacity 0.3s ease;
 }
 
-/* ×（バツ）アニメーション */
-/* is-active クラスが付いたとき、3本線 → ×に変形 */
-
-/* 1本目: 右上がりの斜線 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(1) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(7px) rotate(45deg);
 }
 
-/* 2本目: 非表示 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(2) {
   opacity: 0;
 }
 
-/* 3本目: 右下がりの斜線 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(3) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ================================================
-   c-nav: PCナビゲーション（横並び）
-   ================================================ */
 .c-nav {
-  /* モバイル: 非表示 */
   display: none;
 }
 
 @media (min-width: 768px) {
-  /* PC: 常に表示（横並び） */
   .c-nav {
     display: block;
   }
@@ -197,42 +204,32 @@
   transition: color 0.2s ease;
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-nav__link:hover {
     color: #0066cc;
   }
 }
 
-/* ================================================
-   c-overlay: オーバーレイ（ドロワー開放時の背景暗幕）
-   ================================================ */
 .c-overlay {
-  /* 初期状態: 非表示 */
   position: fixed;
   inset: 0;
   z-index: var(--z-overlay);
   background-color: var(--overlay-color);
   opacity: 0;
   visibility: hidden;
-  pointer-events: none; /* 非表示状態はクリック無効 */
+  pointer-events: none;
   transition:
     opacity var(--drawer-transition),
     visibility var(--drawer-transition);
 }
 
-/* is-visible クラスで表示 */
 .c-overlay.is-visible {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto; /* 表示中のみクリック有効 */
+  pointer-events: auto;
 }
 
-/* ================================================
-   c-drawer: ドロワーナビゲーション（右スライドイン）
-   ================================================ */
 .c-drawer {
-  /* 初期状態: 画面右外に待機 */
   position: fixed;
   top: 0;
   right: 0;
@@ -244,45 +241,36 @@
   transform: translateX(100%);
   transition: transform var(--drawer-transition);
 
-  /* ドロワー内スクロール対応 */
   overflow-y: auto;
 }
 
-/* is-open クラスでスライドイン */
 .c-drawer.is-open {
   transform: translateX(0);
 }
 
 @media (min-width: 768px) {
-  /* PCでは非表示 */
   .c-drawer {
     display: none;
   }
 }
 
-/* ================================================
-   c-drawer__close: ドロワー内の閉じるボタン
-   ================================================ */
 .c-drawer__close {
-  /* ボタンリセット */
   appearance: none;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
 
-  /* ドロワー右上に配置 */
   display: flex;
   align-items: center;
   justify-content: center;
   width: 44px;
   height: 44px;
   margin-inline-start: auto;
-  margin-block: 8px; /* ドロワー上端からの縦余白: タッチターゲット確保のため最小 8px */
-  margin-inline-end: 12px; /* ドロワー右端からの余白: ドロワー内パディングと視覚的に揃える値 */
+  margin-block: 8px;
+  margin-inline-end: 12px;
 }
 
-/* ×アイコン（疑似要素で描画） */
 .c-drawer__close-icon {
   position: relative;
   display: block;
@@ -311,7 +299,6 @@
   transform: translateY(-50%) rotate(-45deg);
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-drawer__close:hover .c-drawer__close-icon::before,
   .c-drawer__close:hover .c-drawer__close-icon::after {
@@ -319,14 +306,11 @@
   }
 }
 
-/* ================================================
-   c-drawer__list / item / link: ドロワーメニューリスト
-   ================================================ */
 .c-drawer__list {
   list-style: none;
   margin: 0;
   padding: 0;
-  padding-block-start: 8px; /* 閉じるボタン下部とリスト上端の間隔: 視覚的な余白として 8px */
+  padding-block-start: 8px;
 }
 
 .c-drawer__item {
@@ -348,10 +332,10 @@
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-drawer__link:hover {
     color: #0066cc;
     background-color: #f5f8ff;
   }
 }
+/* snippet:end */

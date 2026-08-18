@@ -8,13 +8,11 @@
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
-    <!-- スニペットここから -->
+    <!-- snippet:start -->
     <header class="c-header">
       <div class="c-header__inner">
-        <!-- ロゴ -->
         <a href="#" class="c-header__logo">LOGO</a>
 
-        <!-- ナビゲーション（PC: 横並び表示） -->
         <nav class="c-nav" aria-label="グローバルナビゲーション">
           <ul class="c-nav__list">
             <li class="c-nav__item"><a href="#" class="c-nav__link">TOP</a></li>
@@ -26,6 +24,36 @@
         </nav>
       </div>
     </header>
+
+    <div class="c-expand-bg" aria-hidden="true"></div>
+
+    <nav
+      class="c-expand-nav"
+      id="c-expand-nav"
+      aria-label="展開型ナビゲーション"
+      aria-hidden="true"
+    >
+      <ul class="c-expand-nav__list">
+        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">TOP</a></li>
+        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">ABOUT</a></li>
+        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">WORKS</a></li>
+        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">BLOG</a></li>
+        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">CONTACT</a></li>
+      </ul>
+    </nav>
+
+    <button
+      class="c-fab"
+      type="button"
+      aria-label="メニューを開く"
+      aria-expanded="false"
+      aria-controls="c-expand-nav"
+    >
+      <span class="c-fab__line"></span>
+      <span class="c-fab__line"></span>
+      <span class="c-fab__line"></span>
+    </button>
+    <!-- snippet:end -->
 
     <main class="l-container">
       <section class="l-inner">
@@ -75,40 +103,6 @@
         </div>
       </section>
     </main>
-
-    <!-- 展開型ナビゲーション背景（右下から円形に広がる） -->
-    <div class="c-expand-bg" aria-hidden="true"></div>
-
-    <!-- 展開型ナビゲーション（第2段階: リンク表示） -->
-    <nav
-      class="c-expand-nav"
-      id="c-expand-nav"
-      aria-label="展開型ナビゲーション"
-      aria-hidden="true"
-    >
-      <ul class="c-expand-nav__list">
-        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">TOP</a></li>
-        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">ABOUT</a></li>
-        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">WORKS</a></li>
-        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">BLOG</a></li>
-        <li class="c-expand-nav__item"><a href="#" class="c-expand-nav__link">CONTACT</a></li>
-      </ul>
-    </nav>
-
-    <!-- FABハンバーガーボタン（右下固定） -->
-    <button
-      class="c-fab"
-      type="button"
-      aria-label="メニューを開く"
-      aria-expanded="false"
-      aria-controls="c-expand-nav"
-    >
-      <span class="c-fab__line"></span>
-      <span class="c-fab__line"></span>
-      <span class="c-fab__line"></span>
-    </button>
-
-    <!-- スニペットここまで -->
 
     <script src="./assets/js/script.js" defer></script>
   </body>

@@ -1,18 +1,20 @@
-/* ================================================
-   カスタムプロパティ
-   ================================================ */
-:root {
-  --header-height-sp: 60px;
-  --header-height-pc: 72px;
-  --fullscreen-bg: #1a1a1a;
-  --fullscreen-transition: 0.4s ease;
-  --fullscreen-item-delay: 0.06s;
-
-  /* ===== z-index 階層管理 ===== */
-  /* 003ではヘッダーをフルスクリーンメニュー上に配置するため --z-drawer を適用 */
-  --z-overlay: 30; /* フルスクリーンナビ（オーバーレイとして機能） */
-  --z-drawer:  40; /* ヘッダー（メニューより上に表示） */
-}
+/**
+ * 006_hamburger-fullscreen
+ * 画面全体を覆うメニュー。項目が順番に現れる。
+ *
+ * 決めごと
+ * - ヘッダーの階層に --z-drawer(40) を使い、メニューより上に置く。
+ *   覆っている間もハンバーガーボタンを押せる位置に保つため
+ * - 覆っている間はヘッダーの背景と枠線を透明にし、ロゴと3本線を白へ変える
+ *   （is-menu-open）。暗い背景の上で見えなくならないようにするため
+ * - 項目の出現は transition-delay を1つずつずらして作る。JavaScript で
+ *   時間を数えない
+ *
+ * このファイルの前半はデモページの体裁である。貼って使う範囲はマーカーの内側だけ。
+ * ホバーの指定は any-hover: hover かつ pointer: fine のときだけ当てている
+ * （タッチ操作で当たったままになるのを避けるため）。
+ * z-index はカスタムプロパティにまとめ、階層を名前で読めるようにしてある。
+ */
 
 /* ================================================
    ベースレイアウト（スニペット共通）
@@ -53,20 +55,39 @@
   color: #555;
 }
 
-/* ================================================
-   c-header: ヘッダー全体
-   ================================================ */
+/* snippet:start */
+.c-header,
+.c-fullscreen-nav {
+  --header-height-sp: 60px;
+  --header-height-pc: 72px;
+  --fullscreen-bg: #1a1a1a;
+  --fullscreen-transition: 0.4s ease;
+  --fullscreen-item-delay: 0.06s;
+  --z-overlay: 30;
+  --z-drawer:  40;
+}
+
+.c-header,
+.c-header *,
+.c-header *::before,
+.c-header *::after,
+.c-fullscreen-nav,
+.c-fullscreen-nav *,
+.c-fullscreen-nav *::before,
+.c-fullscreen-nav *::after {
+  box-sizing: border-box;
+}
+
 .c-header {
   position: sticky;
   top: 0;
-  z-index: var(--z-drawer); /* フルスクリーンメニューより上に表示し、ハンバーガーボタンを常にクリック可能にする */
+  z-index: var(--z-drawer);
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* フルスクリーンメニュー展開時: ヘッダー背景を透明にして×ボタン（白）を見せる */
 .c-header.is-menu-open {
   background-color: transparent;
   border-bottom-color: transparent;
@@ -108,11 +129,7 @@
   }
 }
 
-/* ================================================
-   c-hamburger: ハンバーガーボタン
-   ================================================ */
 .c-hamburger {
-  /* ボタンリセット */
   appearance: none;
   background: none;
   border: none;
@@ -120,7 +137,6 @@
   padding: 8px;
   margin: -8px;
 
-  /* 3本線を縦に並べるレイアウト */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -129,18 +145,15 @@
   width: 44px;
   height: 44px;
 
-  /* ヘッダー自体がメニューより上にいるのでボタン個別のz-indexは不要 */
   position: relative;
 }
 
 @media (min-width: 768px) {
-  /* PCでは非表示 */
   .c-hamburger {
     display: none;
   }
 }
 
-/* ハンバーガーの1本線 */
 .c-hamburger__line {
   display: block;
   width: 24px;
@@ -154,41 +167,27 @@
     background-color 0.3s ease;
 }
 
-/* メニューオープン時: 線の色を白に変更（フルスクリーン背景に対応） */
 .c-hamburger.is-active .c-hamburger__line {
   background-color: #fff;
 }
 
-/* ×（バツ）アニメーション */
-/* is-active クラスが付いたとき、3本線 → ×に変形 */
-
-/* 1本目: 右上がりの斜線 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(1) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(7px) rotate(45deg);
 }
 
-/* 2本目: 非表示 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(2) {
   opacity: 0;
 }
 
-/* 3本目: 右下がりの斜線 */
 .c-hamburger.is-active .c-hamburger__line:nth-child(3) {
-  /* 線の高さ(2px) + gap(5px) = 7px（中央線との距離） */
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ================================================
-   c-nav: PCナビゲーション（横並び）
-   ================================================ */
 .c-nav {
-  /* モバイル: 非表示 */
   display: none;
 }
 
 @media (min-width: 768px) {
-  /* PC: 常に表示（横並び） */
   .c-nav {
     display: block;
   }
@@ -218,29 +217,22 @@
   transition: color 0.2s ease;
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-nav__link:hover {
     color: #0066cc;
   }
 }
 
-/* ================================================
-   c-fullscreen-nav: フルスクリーンナビゲーション
-   ================================================ */
 .c-fullscreen-nav {
-  /* 初期状態: 非表示 */
   position: fixed;
   inset: 0;
   z-index: var(--z-overlay);
   background-color: var(--fullscreen-bg);
 
-  /* 中央配置 */
   display: flex;
   align-items: center;
   justify-content: center;
 
-  /* フェードイン/アウト制御 */
   opacity: 0;
   visibility: hidden;
   transition:
@@ -248,22 +240,17 @@
     visibility var(--fullscreen-transition);
 }
 
-/* is-open クラスでフルスクリーン表示 */
 .c-fullscreen-nav.is-open {
   opacity: 1;
   visibility: visible;
 }
 
 @media (min-width: 768px) {
-  /* PCでは非表示 */
   .c-fullscreen-nav {
     display: none;
   }
 }
 
-/* ================================================
-   c-fullscreen-nav__list / item / link: メニューリスト
-   ================================================ */
 .c-fullscreen-nav__list {
   list-style: none;
   margin: 0;
@@ -272,7 +259,6 @@
 }
 
 .c-fullscreen-nav__item {
-  /* 各リンクのフェードイン + スライドアップアニメーション */
   opacity: 0;
   transform: translateY(20px);
   transition:
@@ -280,13 +266,11 @@
     transform var(--fullscreen-transition);
 }
 
-/* is-open 時に各アイテムを順番にアニメーション表示 */
 .c-fullscreen-nav.is-open .c-fullscreen-nav__item {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* 各アイテムに遅延を付けてスタッガードアニメーションにする */
 .c-fullscreen-nav.is-open .c-fullscreen-nav__item:nth-child(1) {
   transition-delay: calc(var(--fullscreen-item-delay) * 1);
 }
@@ -307,7 +291,6 @@
   transition-delay: calc(var(--fullscreen-item-delay) * 5);
 }
 
-/* 閉じるときは遅延なしで即座にフェードアウト */
 .c-fullscreen-nav__item {
   transition-delay: 0s;
 }
@@ -323,9 +306,9 @@
   transition: color 0.2s ease;
 }
 
-/* マウス系デバイスかつホバー操作が可能な場合のみ適用（タッチデバイス・ハイブリッドのタッチ操作を除外） */
 @media (any-hover: hover) and (pointer: fine) {
   .c-fullscreen-nav__link:hover {
     color: #6eb5ff;
   }
 }
+/* snippet:end */

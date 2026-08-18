@@ -13,7 +13,23 @@
  *   - 1組そろっている                     = 合格
  *   - 片側だけ / 入れ子 / 2組以上         = 違反
  *   - マーカー範囲の中に日本語の行コメント = 違反（コピーした人に解説文が付いてくるため）
+ *   - マーカー範囲の中に「コメントを消した跡」 = 違反（下記）
  *   - マーカーが1つも無い                 = 保留（埋め込みは後続工程の作業）
+ *
+ * ★「コメントを消した跡」を見る理由
+ *   規約3（範囲の中に解説コメントを書かない）を満たすために消すと、
+ *   中身が空の規則・連続した空行・行末の空白が残ることがある。
+ *   ⚠️ 「コメントが無いこと」の検査だけでは、この跡は素通りする。
+ *      実例: コメントアウトされた宣言だけを中に持つ @media を消したところ、
+ *      中身が空の @media が掲載範囲に残り、貼った人のスタイルシートに入る状態になった。
+ *   ⚠️ 消したかどうかは問わない。**跡と同じ形のものが範囲内にあれば落とす**。
+ *      跡かどうかを字面から区別できないためであり、区別する必要もない
+ *      （中身の無い規則・連続した空行・行末の空白は、いずれも配る値打ちが無い）。
+ *
+ * ★この検査が捕らえられない範囲（宣言しておく）
+ *   - 中身が空でも、間に別の行を1つでも挟む規則（`{` の次の行が `}` でない形）は見ない
+ *   - 使われていないセレクタ・呼ばれない関数・到達しない分岐は見ない（意味の判定になるため）
+ *   - 範囲の外は見ない（デモページの体裁は対象外）
  *
  * ⚠️ 保留は逃げ道になりうる。そこで**保留が消える条件を先に書き、そこで違反へ自動格上げする**。
  *    条件 = そのカテゴリの中に1本でもマーカー入りのファイルが現れること。
@@ -64,6 +80,37 @@ async function exists(path) {
   }
 }
 
+/**
+ * ★コメントを消した跡を数える。
+ *
+ * 見るのは3つだけである。いずれも「貼った先に入っても意味を持たないもの」。
+ *   (1) 中身が空の規則   `{` の次の行が `}` だけ（@media・セレクタを問わない）
+ *   (2) 連続した空行     消した行のぶんだけ空きが残った形
+ *   (3) 行末の空白       行内コメントを消したあとに残る形
+ *
+ * ⚠️ 行番号は実ファイルのものを返す。extractSnippet は前後の空行を落とすため、
+ *    落とした行数を足して元の位置へ戻している（表示用の整形と実ファイルの位置を混ぜない）。
+ */
+function leftovers(result) {
+  const lines = result.code.split('\n');
+  const found = [];
+  const at = (i) => result.startLine + 1 + result.trimmedTop + i;
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    const next = lines[i + 1];
+    if (/\{\s*$/.test(line) && next !== undefined && /^\s*\}\s*$/.test(next)) {
+      found.push({ line: at(i), reason: `中身が空の規則がある — ${line.trim()} ${next.trim()}` });
+    }
+    if (line.trim() === '' && next !== undefined && next.trim() === '') {
+      found.push({ line: at(i), reason: '空行が2行以上続いている' });
+    }
+    if (/[ \t]+$/.test(line)) {
+      found.push({ line: at(i), reason: '行末に空白がある' });
+    }
+  }
+  return found;
+}
+
 export async function checkMarkers(root = DEFAULT_ROOT) {
   const ROOT = root;
   const site = await loadSite(ROOT);
@@ -99,6 +146,9 @@ export async function checkMarkers(root = DEFAULT_ROOT) {
       }
       for (const c of result.commentLines) {
         violations.push(`${target.rel}:${c.line}: マーカー範囲に日本語のコメントがある — ${c.text}`);
+      }
+      for (const r of leftovers(result)) {
+        violations.push(`${target.rel}:${r.line}: マーカー範囲に${r.reason}`);
       }
     }
   }
