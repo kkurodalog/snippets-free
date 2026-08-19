@@ -40,14 +40,12 @@
           OS の「視差効果を減らす」設定が有効な場合は、アニメーションを無効化して即時表示します。
         </p>
 
-        <!-- スニペットここから -->
-        <!--
-          data-fade-in: 監視対象であることを示すフック属性。
-          data-fade-direction: 出現方向（up / down / left / right / none）。
-            省略時は up（下から上）。CSS 側で初期 translate の向きを切り替える。
-            none は transform を使わず opacity だけで出現する「純フェード」。
-          data-fade-delay: 出現の遅延（ms）。子要素を時間差で出したいときに使う。
-        -->
+        <!-- snippet:start -->
+        <script>
+          document.documentElement.classList.remove("no-js");
+          document.documentElement.classList.add("js");
+        </script>
+
         <div class="c-fade">
           <div class="c-fade__item" data-fade-in>
             <h2 class="c-fade__heading">スクロールで出現するカード</h2>
@@ -108,7 +106,7 @@
             </p>
           </div>
         </div>
-        <!-- スニペットここまで -->
+        <!-- snippet:end -->
       </section>
     </main>
 

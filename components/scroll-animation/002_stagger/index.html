@@ -42,25 +42,13 @@
           OS の「視差効果を減らす」設定が有効な場合は、アニメーションを無効化して即時表示します。
         </p>
 
-        <!-- スニペットここから -->
-        <!--
-          data-stagger: 順次表示グループであることを示す親フック属性。
-            この要素の「直接の子」のうち、出現演出の対象になる子へ
-            連番遅延を自動配分する。
-          data-stagger-step: 子と子の間の遅延差（ms）。省略時は既定値（120ms）。
-            例 100 なら 1番目 0ms / 2番目 100ms / 3番目 200ms… と増えていく。
+        <!-- snippet:start -->
+        <script>
+          document.documentElement.classList.remove("no-js");
+          document.documentElement.classList.add("js");
+        </script>
 
-          data-fade-in: 出現演出の対象であることを示す子のフック属性。
-          data-fade-direction: 出現方向（up / down / left / right / none）。
-            省略時は up（下から上）。CSS 側で初期 translate の向きを切り替える。
-            none は transform を使わず opacity だけで出現する「純フェード」。
-            親（data-stagger）に付けると、配下の全子要素へ既定方向として効く。
-
-          遅延は親（data-stagger-step）から連番で配るため、子へ個別の
-          遅延属性を書く必要はない（手書きの遅延管理が不要になるのが本実装の主眼）。
-        -->
         <div class="c-stagger">
-          <!-- グループ1: 既定ステップ（120ms）/ 上方向フェード -->
           <h2 class="c-stagger__group-title">既定ステップで順番に出るカード一覧</h2>
           <ul class="c-stagger__list" data-stagger>
             <li class="c-stagger__item" data-fade-in>
@@ -93,7 +81,6 @@
             </li>
           </ul>
 
-          <!-- グループ2: ステップ大きめ（250ms）/ 左方向スライドイン -->
           <h2 class="c-stagger__group-title">ステップを広げて左から流すリスト</h2>
           <ul
             class="c-stagger__list"
@@ -124,7 +111,6 @@
             </li>
           </ul>
 
-          <!-- グループ3: グリッド + 純フェード -->
           <h2 class="c-stagger__group-title">グリッドで順次フェードするカード</h2>
           <div
             class="c-stagger__grid"
@@ -161,7 +147,7 @@
             </article>
           </div>
         </div>
-        <!-- スニペットここまで -->
+        <!-- snippet:end -->
       </section>
     </main>
 

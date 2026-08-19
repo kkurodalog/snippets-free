@@ -8,39 +8,110 @@
     {
       "slug": "001_fade-in",
       "name": "ふわっと出現する",
-      "tags": ["JS必要"],
-      "files": ["html", "css", "js"],
+      "tags": [
+        "JS必要"
+      ],
+      "notes": [
+        "掲載範囲の先頭にあるスクリプトが html 要素に js クラスを付ける。これが無いと初期状態を隠す指定が効かず、出現演出は起きない（要素は最初から表示されたままになる）。head に置ければそのほうが早い。",
+        "c-fade の padding-bottom: 60vh は、出現の様子を確かめられるスクロール量を作るための余白である。貼る側で不要なら外す。",
+        "方向は data-fade-direction（up / down / left / right / none）、遅延は data-fade-delay（ms）で指定する。属性を付けるだけで対象を増やせる。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ],
       "featured": true
     },
     {
       "slug": "002_stagger",
       "name": "順番に遅れて出る",
-      "tags": ["JS必要"],
-      "files": ["html", "css", "js"]
+      "tags": [
+        "JS必要"
+      ],
+      "notes": [
+        "掲載範囲の先頭にあるスクリプトが html 要素に js クラスを付ける。これが無いと初期状態を隠す指定が効かず、順次表示は起きない（要素は最初から表示されたままになる）。head に置ければそのほうが早い。",
+        "c-stagger の padding-bottom: 60vh は、出現の様子を確かめられるスクロール量を作るための余白である。貼る側で不要なら外す。",
+        "遅延差は親の data-stagger-step（ms・省略時 120）で決まる。対象は親の直接の子のうち data-fade-in を持つものだけである。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     },
     {
       "slug": "003_progress-bar",
       "name": "読了率のバー",
-      "tags": ["JS必要", "scroll-driven CSS"],
-      "files": ["html", "css", "js"]
+      "tags": [
+        "JS必要",
+        "scroll-driven CSS"
+      ],
+      "notes": [
+        "バーはページ全体のスクロール進捗に連動する。ページに送れる高さが無いと動かない（掲載範囲だけを素のページへ貼ると、送れる量が 0px でバーは伸びない）。",
+        "動きを減らす設定でも追従は止めない。読了率は情報の提示であり、満タン固定や非表示にすると誤った情報になる。切るのは補間の transition だけである。",
+        "対応ブラウザは CSS だけで動き、非対応ブラウザだけ JavaScript が動く。判定キー animation-timeline: scroll() は CSS の @supports と JavaScript の CSS.supports() の両方にある。片方だけ変えない。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     },
     {
       "slug": "004_parallax",
       "name": "奥行きのある視差",
-      "tags": ["JS必要", "scroll-driven CSS", "画像素材あり"],
-      "files": ["html", "css", "js"]
+      "tags": [
+        "JS必要",
+        "scroll-driven CSS",
+        "画像素材あり"
+      ],
+      "notes": [
+        "画像は MIT の対象外である。掲載範囲の CSS が指す ../img/ のパスは、貼る先の構成に合わせて差し替える。",
+        "ステージの overflow を hidden にすると視差が止まる。hidden はスクロールコンテナを作り、レイヤーが基準にするスクロールポートがページではなくステージ自身になるためである。clip のまま使う。",
+        "レイヤーが動く量は、そのレイヤーの --parallax-shift（既定 220px）で決まる。小さいほど遠く、大きいほど近くに見える。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     },
     {
       "slug": "005_count-up",
       "name": "数字を数え上げる",
-      "tags": ["JS必要"],
-      "files": ["html", "css", "js"]
+      "tags": [
+        "JS必要"
+      ],
+      "notes": [
+        "各数値のテキストには整形済みの最終値を書いておく。JavaScript が動く環境だけ 0 から数え上げ、動かない環境ではそのテキストがそのまま残る。",
+        "data-count-to は 0 以上の有限数だけを受け付ける。それ以外の値では初期化も監視も行わず、書いてあるテキストを残す。",
+        "c-count の padding-bottom: 40vh は、画面に入る瞬間を確かめられるスクロール量を作るための余白である。貼る側で不要なら外す。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     },
     {
       "slug": "006_blur",
       "name": "スクロールでぼかす",
-      "tags": ["JS必要", "scroll-driven CSS", "画像素材あり"],
-      "files": ["html", "css", "js"]
+      "tags": [
+        "JS必要",
+        "scroll-driven CSS",
+        "画像素材あり"
+      ],
+      "notes": [
+        "画像は MIT の対象外である。掲載範囲の CSS が指す ../img/ のパスは、貼る先の構成に合わせて差し替える。",
+        "ぼかしはページ先頭の 1 画面分（0 〜 100vh）のスクロールで最大になる。ページにその高さが無いとぼけきらない。",
+        "ステージは width: 100vw と margin-inline: calc(50% - 50vw) で、幅に制限のある親を突き抜けてビューポート全幅になる。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     }
   ]
 }

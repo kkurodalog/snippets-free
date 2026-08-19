@@ -1,22 +1,7 @@
 /* ================================================
-   カスタムプロパティ
-   出現演出系スニペットと同じトークンの考え方で、
-   配色・余白をここで一元管理する。
-   ================================================ */
-:root {
-  --count-color-text:        #2b2b2b;
-  --count-color-text-muted:  #555;
-  --count-color-border:      #e0e0e0;
-  --count-color-bg:          #ffffff;
-  --count-color-accent:      #3ba9e0;
-
-  --count-radius:            8px;
-  --count-card-padding-y:    28px;
-  --count-card-padding-x:    24px;
-}
-
-/* ================================================
-   ベースリセット（デモページ用）
+   デモページの体裁（掲載範囲の外）
+   掲載範囲だけを貼れば動くよう、ページ全体に当たる
+   指定はすべてこの区画に置く。
    ================================================ */
 *,
 *::before,
@@ -28,7 +13,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
     "Hiragino Sans", "Noto Sans JP", sans-serif;
-  color: var(--count-color-text);
+  color: #2b2b2b;
   background-color: #fafafa;
   line-height: 1.7;
 }
@@ -41,9 +26,6 @@ code {
   border-radius: 4px;
 }
 
-/* ================================================
-   l-main / p-section: デモページのレイアウト
-   ================================================ */
 .l-main {
   max-width: 720px;
   margin-inline: auto;
@@ -58,28 +40,27 @@ code {
 
 .p-section__text {
   margin: 0 0 24px;
-  color: var(--count-color-text-muted);
+  color: #555;
 }
 
 /* スクロールで発火する様子を確認するための前置きコンテンツ。
    カウンター群を画面下に押し下げ、発火タイミングを見やすくする。 */
 .p-section__lead {
   margin: 0 0 70vh;
-  color: var(--count-color-text-muted);
+  color: #555;
 }
 
-/* デモ専用クローム: カウント演出を見直すための再読み込みボタン。
-   スニペット本体ではなくデモページの利便機能。 */
+/* デモ専用クローム: カウント演出を見直すための再読み込みボタン。 */
 .p-section__reload {
   display: inline-block;
   margin: 0 0 20px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--count-color-bg);
-  background-color: var(--count-color-accent);
-  border: 1px solid var(--count-color-accent);
-  border-radius: var(--count-radius);
+  color: #ffffff;
+  background-color: #3ba9e0;
+  border: 1px solid #3ba9e0;
+  border-radius: 8px;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
@@ -89,7 +70,7 @@ code {
 }
 
 .p-section__reload:focus-visible {
-  outline: 2px solid var(--count-color-accent);
+  outline: 2px solid #3ba9e0;
   outline-offset: 2px;
 }
 
@@ -100,19 +81,38 @@ code {
 }
 
 /* ================================================
-   c-count: 実績／KPI をカード状に並べるリスト
-   モバイル幅では 1 列、768px 以上で 2 列。
+   ここから下が掲載範囲（c-count）。
+
+   トークンはパーツのルート要素 .c-count に置く。
+   :root に置くと、貼った先の最上位を書き換えてしまう。
+
+
+   .c-count は実績／KPI をカード状に並べるリストである。
+   モバイル幅では 1 列、768px 以上で 2 列にする。
+   padding-bottom: 40vh は、カウンター群が画面に入る瞬間を
+   確認しやすくするための余白である。貼る側で不要なら外す。
+
+   .c-count__value は等幅数字（tabular-nums）にしている。
+   カウント中に桁が入れ替わっても横ブレせず、数値が安定して読める。
    ================================================ */
+
+/* snippet:start */
 .c-count {
+  --count-color-text-muted: #555;
+  --count-color-border: #e0e0e0;
+  --count-color-bg: #ffffff;
+  --count-color-accent: #3ba9e0;
+
+  --count-radius: 8px;
+  --count-card-padding-y: 28px;
+  --count-card-padding-x: 24px;
+
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
   margin: 0;
   padding: 0;
   list-style: none;
-
-  /* カウンター群の下にも余白を確保し、
-     スクロールで画面に入る瞬間を確認しやすくする。 */
   padding-bottom: 40vh;
 }
 
@@ -122,9 +122,6 @@ code {
   }
 }
 
-/* ================================================
-   c-count__item: 1 つの数値カード
-   ================================================ */
 .c-count__item {
   display: flex;
   flex-direction: column;
@@ -138,11 +135,6 @@ code {
   border-radius: var(--count-radius);
 }
 
-/* ================================================
-   c-count__value: カウント表示される数値本体
-   等幅数字（tabular-nums）でカウント中の桁の
-   横ブレを抑え、数値が安定して読めるようにする。
-   ================================================ */
 .c-count__value {
   font-size: 40px;
   font-weight: 700;
@@ -161,3 +153,4 @@ code {
   font-size: 14px;
   color: var(--count-color-text-muted);
 }
+/* snippet:end */

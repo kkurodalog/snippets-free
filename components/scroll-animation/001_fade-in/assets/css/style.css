@@ -1,32 +1,7 @@
 /* ================================================
-   カスタムプロパティ
-   後続のスクロールアニメーション系スニペット
-   （stagger / count-up 等）が同じトークンで
-   出現演出の距離・時間を揃えられるよう、ここで
-   一元管理する。
-   ================================================ */
-:root {
-  --fade-color-text:        #2b2b2b;
-  --fade-color-text-muted:  #555;
-  --fade-color-border:      #e0e0e0;
-  --fade-color-bg:          #ffffff;
-  --fade-color-accent:      #3ba9e0;
-
-  --fade-radius:            8px;
-  --fade-card-padding-y:    24px;
-  --fade-card-padding-x:    24px;
-
-  /* 出現演出のトークン
-     --fade-distance: 初期位置のずらし量（スライド距離）
-     --fade-duration: フェード/スライドの所要時間
-     --fade-easing:   減速して止まる自然なイージング */
-  --fade-distance:          24px;
-  --fade-duration:          0.6s;
-  --fade-easing:            cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ================================================
-   ベースリセット（デモページ用）
+   デモページの体裁（掲載範囲の外）
+   ここから下の掲載範囲だけを貼れば動くよう、
+   ページ全体に当たる指定はすべてこの区画に置く。
    ================================================ */
 *,
 *::before,
@@ -38,7 +13,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
     "Hiragino Sans", "Noto Sans JP", sans-serif;
-  color: var(--fade-color-text);
+  color: #2b2b2b;
   background-color: #fafafa;
   line-height: 1.7;
 }
@@ -51,9 +26,6 @@ code {
   border-radius: 4px;
 }
 
-/* ================================================
-   l-main / p-section: デモページのレイアウト
-   ================================================ */
 .l-main {
   max-width: 720px;
   margin-inline: auto;
@@ -68,21 +40,20 @@ code {
 
 .p-section__text {
   margin: 0 0 24px;
-  color: var(--fade-color-text-muted);
+  color: #555;
 }
 
-/* デモ専用クローム: 出現演出を見直すための再読み込みボタン。
-   スニペット本体ではなくデモページの利便機能。 */
+/* デモ専用クローム: 出現演出を見直すための再読み込みボタン。 */
 .p-section__reload {
   display: inline-block;
   margin: 0 0 20px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--fade-color-bg);
-  background-color: var(--fade-color-accent);
-  border: 1px solid var(--fade-color-accent);
-  border-radius: var(--fade-radius);
+  color: #ffffff;
+  background-color: #3ba9e0;
+  border: 1px solid #3ba9e0;
+  border-radius: 8px;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
@@ -92,7 +63,7 @@ code {
 }
 
 .p-section__reload:focus-visible {
-  outline: 2px solid var(--fade-color-accent);
+  outline: 2px solid #3ba9e0;
   outline-offset: 2px;
 }
 
@@ -103,23 +74,58 @@ code {
 }
 
 /* ================================================
-   c-fade: 出現演出するカードのリスト
-   縦に並べ、十分なスクロール量を確保することで
-   デモページ上で出現タイミングを確認できる。
+   ここから下が掲載範囲（c-fade）。
+
+   トークンはパーツのルート要素 .c-fade に置く。
+   :root に置くと、貼った先の最上位を書き換えてしまう。
+     --fade-distance  初期位置のずらし量（スライド距離）
+     --fade-duration  フェード/スライドの所要時間
+     --fade-easing    減速して止まる自然なイージング
+
+
+   .c-fade の padding-bottom: 60vh は、出現の様子を確かめられる
+   スクロール量を確保するための余白である。貼る側で不要なら外す。
+
+   出現演出の本体（.js スコープ）— プログレッシブエンハンスメント:
+   - JavaScript が動く環境では html に js クラスが付く。このときだけ
+     初期状態を「透明＋ずらした位置」にし、is-visible が付くまで隠す。
+   - JavaScript 無効・スクリプトが届かない環境では js クラスが付かず、
+     下記ルールが効かないため要素は最初から表示される（内容が消えない）。
+   - 掲載範囲の HTML 先頭にある1行のスクリプトが、この js クラスを付ける。
+     head に置ければそのほうが早く、初期状態のちらつきも出ない。
+
+   方向の切り替えは初期位置のずらし方向だけを変える。
+   direction="none" は transform を当てず opacity だけで出現する。
+
+   最終状態（.is-visible）では translate を 0 に戻し、
+   will-change を auto に戻して合成レイヤーを残さない。
+   状態は is-visible の1クラスに集約している。
+
+   prefers-reduced-motion: reduce では、出現演出を行わず
+   即時に最終状態（表示）で見せる。
    ================================================ */
+
+/* snippet:start */
 .c-fade {
+  --fade-color-text-muted: #555;
+  --fade-color-border: #e0e0e0;
+  --fade-color-bg: #ffffff;
+  --fade-color-accent: #3ba9e0;
+
+  --fade-radius: 8px;
+  --fade-card-padding-y: 24px;
+  --fade-card-padding-x: 24px;
+
+  --fade-distance: 24px;
+  --fade-duration: 0.6s;
+  --fade-easing: cubic-bezier(0.16, 1, 0.3, 1);
+
   display: flex;
   flex-direction: column;
   gap: 24px;
-
-  /* スクロールで出現する様子を確認できるよう、
-     ビューポートより縦に長くなる余白を確保する。 */
   padding-bottom: 60vh;
 }
 
-/* ================================================
-   c-fade__item: 出現演出の対象カード
-   ================================================ */
 .c-fade__item {
   padding: var(--fade-card-padding-y) var(--fade-card-padding-x);
   background-color: var(--fade-color-bg);
@@ -128,12 +134,6 @@ code {
   border-radius: var(--fade-radius);
 }
 
-/* ================================================
-   c-fade__row: カードを横一列に並べるラッパー
-   モバイル幅では縦積み、768px 以上で 3 列に切り替える。
-   遅延差（data-fade-delay）の効果を「同じ方向・同じ位置関係」で
-   見比べられるよう、行内のカードは出現方向を揃える前提で使う。
-   ================================================ */
 .c-fade__row {
   display: grid;
   grid-template-columns: 1fr;
@@ -157,29 +157,16 @@ code {
   color: var(--fade-color-text-muted);
 }
 
-/* ================================================
-   出現演出の本体
-   プログレッシブエンハンスメント:
-   - JS が動く環境では html.js が付与される。
-     このときだけ初期状態を「透明＋ずらした位置」にし、
-     .is-visible が付くまで隠す。
-   - JS 無効・このスクリプトが届かない環境では html.no-js の
-     ままになり、下記ルールが効かないため、要素は最初から
-     通常表示される（コンテンツが消えない）。
-   ================================================ */
 .js .c-fade__item[data-fade-in] {
   opacity: 0;
   transform: translateY(var(--fade-distance));
   transition:
     opacity var(--fade-duration) var(--fade-easing),
     transform var(--fade-duration) var(--fade-easing);
-  /* 不可視の間はクリック/フォーカス対象にしない（透明な要素の誤操作を防ぐ）。
-     レイアウトは確保したまま、表示後に pointer-events を auto へ戻す。 */
   pointer-events: none;
   will-change: opacity, transform;
 }
 
-/* 出現方向の切り替え（初期位置のずらし方向だけを変える） */
 .js .c-fade__item[data-fade-direction="down"] {
   transform: translateY(calc(var(--fade-distance) * -1));
 }
@@ -192,46 +179,26 @@ code {
   transform: translateX(var(--fade-distance));
 }
 
-/* 純フェード（動きなし）: transform を一切当てず、opacity だけで出現させる。
-   初期状態は opacity: 0 のみ。translate を打ち消すのではなく最初から付与
-   しないため、transition も opacity だけにして無駄な合成を避ける。 */
 .js .c-fade__item[data-fade-direction="none"] {
   transform: none;
   transition: opacity var(--fade-duration) var(--fade-easing);
   will-change: opacity;
 }
 
-/* ビューポート進入後に付与される最終状態
-   どの方向指定でも translate を 0 に戻し、本来の位置へ。
-   will-change はワンショット表示の都合上、出現後はもう不要になる。
-   CSS 側の最終状態で auto に戻すことで、表示後も合成レイヤーが残り
-   続けるのを防ぐ（要素数が多いページでのメモリ常駐を回避）。
-   状態管理を JS に分散させず .is-visible に集約できるため、後続の
-   出現演出系スニペットも同じ作法で踏襲しやすい。 */
 .js .c-fade__item.is-visible {
   opacity: 1;
   transform: translate(0, 0);
-  /* 表示されたら操作可能に戻す。 */
   pointer-events: auto;
   will-change: auto;
 }
 
-/* ================================================
-   prefers-reduced-motion: 動きを減らす設定への配慮
-   前庭機能障害等で OS の「視差効果を減らす」を有効に
-   しているユーザーには、フェード/スライドを行わず
-   即時に最終状態（表示）で見せる。
-   出現演出を中核とする本シリーズでは、全パターン共通の
-   前提として軸となるこのスニペットで先行導入する。
-   ================================================ */
 @media (prefers-reduced-motion: reduce) {
   .js .c-fade__item[data-fade-in] {
     opacity: 1;
     transform: none;
     transition: none;
-    /* 即時表示されるため、表示と同時に操作可能にする
-       （可視なのに操作不可になる不整合を防ぐ）。 */
     pointer-events: auto;
     will-change: auto;
   }
 }
+/* snippet:end */

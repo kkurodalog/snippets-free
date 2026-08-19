@@ -1,34 +1,7 @@
 /* ================================================
-   カスタムプロパティ
-   視差（パララックス）専用のトークン名（--parallax-*）でまとめる。
-   出現演出系（--fade-*）・進捗バー系（--progress-*）とは別系統のため、
-   同じページに複数を同居させてもトークンが衝突しない。
-   ================================================ */
-:root {
-  --parallax-color-text:        #2b2b2b;
-  --parallax-color-text-muted:  #51596b;
-  --parallax-color-bg:          #ffffff;
-  --parallax-color-border:      #d9dde6;
-  --parallax-color-accent:      #5c6b8a;
-  --parallax-color-accent-soft: #8b97b3;
-
-  --parallax-radius:            10px;
-
-  /* 視差のトークン
-     --parallax-shift: レイヤーが視差で動く総移動量（px）。ここ（:root）の値は
-                       既定値で、各レイヤー側で modifier クラスから個別に
-                       上書きできる（例: 遠景は小さく＝ゆっくり、近景は
-                       大きく＝速く）。移動量が小さいほど「遠く」、大きいほど
-                       「近く」に見える。view() 経路・JS 経路のどちらもこの値を
-                       使い、両経路で見た目の振れ幅を揃える。
-     --parallax-y:     JS フォールバックが書き込む現在の縦移動量（px）。
-                       CSS の view() 経路では使わない（CSS が直接動かす）。 */
-  --parallax-shift:             220px;
-  --parallax-y:                 0px;
-}
-
-/* ================================================
-   ベースリセット（デモページ用）
+   デモページの体裁（掲載範囲の外）
+   掲載範囲だけを貼れば動くよう、ページ全体に当たる
+   指定はすべてこの区画に置く。
    ================================================ */
 *,
 *::before,
@@ -40,7 +13,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
     "Hiragino Sans", "Noto Sans JP", sans-serif;
-  color: var(--parallax-color-text);
+  color: #2b2b2b;
   background-color: #f4f6fa;
   line-height: 1.7;
 }
@@ -53,29 +26,144 @@ code {
   border-radius: 4px;
 }
 
-/* ================================================
-   視差レイヤー本体
-   ステージ（.c-parallax）の中に背景（__bg）と前景（__fg）を重ね、
-   背景だけをスクロール進捗に連動してゆっくり動かす。
-   ================================================ */
+.l-main {
+  max-width: 880px;
+  margin-inline: auto;
+  padding: 40px 20px;
+}
 
-/* 視差ステージ。前景と背景を重ねる枠。
+.p-intro__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.p-intro__text {
+  margin: 0 0 24px;
+  color: #51596b;
+}
+
+/* デモ専用クローム: 視差の動きを最初から見直すための再読み込みボタン。 */
+.p-intro__reload {
+  display: inline-block;
+  margin: 0 0 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #5c6b8a;
+  border: 1px solid #5c6b8a;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.p-intro__reload:hover {
+  opacity: 0.85;
+}
+
+.p-intro__reload:focus-visible {
+  outline: 2px solid #5c6b8a;
+  outline-offset: 2px;
+}
+
+.p-outro {
+  padding: 32px 24px;
+  background-color: #ffffff;
+  border: 1px solid #d9dde6;
+  border-radius: 10px;
+}
+
+.p-outro__text {
+  margin: 0;
+  color: #51596b;
+}
+
+@media (min-width: 768px) {
+  .p-intro__title {
+    font-size: 28px;
+  }
+}
+
+/* ================================================
+   ここから下が掲載範囲（c-parallax）。
+
+   トークンはパーツのルート要素 .c-parallax に置く。
+   :root に置くと、貼った先の最上位を書き換えてしまう。
+     --parallax-shift  レイヤーが視差で動く総移動量（px）。ルート要素の
+                       値は既定値で、レイヤー側の modifier クラスから
+                       個別に上書きできる（遠景は小さく＝ゆっくり、
+                       近景は大きく＝速く）。移動量が小さいほど「遠く」、
+                       大きいほど「近く」に見える。CSS の view() 経路・
+                       JS 経路のどちらもこの値を使い、振れ幅を揃える。
+     --parallax-y      JS フォールバックが書き込む現在の縦移動量（px）。
+                       CSS の view() 経路では使わない。
+
+   .c-parallax, .c-parallax * のボックスモデル指定は、貼る先に
+   リセットCSS が無くても崩れないよう範囲内に持たせている。
+
+   ステージ（.c-parallax）は前景と背景を重ねる枠である。
    position: relative で背景を内部に絶対配置できるようにし、
    overflow: clip で背景のはみ出し（移動分）を切り取る。
-
    ここで overflow: hidden を使ってはいけない。hidden はスクロール
    コンテナを生成するため、内部の背景レイヤーから見た「最も近い
-   スクロールポート」がページ（document）ではなくこのステージ自身に
-   なってしまう。すると背景はステージ内でスクロールせず、スクロール
-   連動アニメーション（要素の通過進捗を使う方式）の進捗が一定値に
-   張り付き、視差がまったく動かなくなる。
-   overflow: clip は hidden と同じくはみ出しを切り取るが、スクロール
-   コンテナを作らないため、背景の基準スクロールポートが document に
-   戻り、ページスクロールに連動して進捗が進む。
-   （clip は Chrome 90+ / Firefox 81+ / Safari 16+ で利用可。） */
+   スクロールポート」がページではなくステージ自身になる。すると背景は
+   ステージ内でスクロールせず、要素の通過進捗が一定値に張り付き、
+   視差がまったく動かなくなる。clip は hidden と同じくはみ出しを
+   切り取るが、スクロールコンテナを作らないため進捗が進む。
+   min-height: 90vh は、速度差を体感できる高さを確保するための値である。
+
+   視差で動かすレイヤー（__bg / 任意の中間層 __layer）は、ステージ
+   いっぱいに広げ、上下にそのレイヤーの --parallax-shift 分の余白を
+   持たせる。移動しても天地に隙間ができない。
+   フックは data-parallax（出現演出・進捗バーとは別系統）。
+
+   パターン 1 の背景は外部画像に依存せず、グラデーションと半透明の円
+   だけで自己完結させている。パターン 2 は 1 枚の画像を丸ごと動かす。
+   パターン 3 は遠景（画像・移動量 100px）と近景（図形・移動量 240px）を
+   別々の速度で動かして段階的な奥行きを作る。
+   画像レイヤーは装飾のため HTML 側で aria-hidden を固定している。
+   前景テキストの可読性のため、画像の上に半透明の暗色オーバーレイを
+   ::after で重ねている。
+
+   前景（__fg）は視差で動かさず、通常のスクロール速度で流れる。
+   この前景と背景の速度差が「視差」として知覚される。
+
+   第一実装 — CSS だけで視差を成立させる:
+   view() は対象要素（背景レイヤー）がビューポートを通過する進捗を
+   0%→100% のタイムラインとして割り当てる。slide キーフレームを貼ると、
+   要素が画面下から入って上へ抜けるまでの間に、背景が +shift から
+   -shift へゆっくり動く。
+   似た効果を出す background-attachment: fixed は、モバイルで非対応・
+   ガクつきの難があるため採用していない。
+
+   JS フォールバック — animation-timeline 非対応ブラウザ向け:
+   非対応環境では上の @supports ブロックが無効になり、背景は静止する。
+   JavaScript が各レイヤーの視差量を計算して --parallax-y（px）を更新し、
+   CSS 側がそれを translateY に反映する。
+   判定キー（animation-timeline: view()）は JavaScript 側の
+   CSS.supports() と完全に一致させる。片方だけ変えると二重駆動が起きる。
+
+   prefers-reduced-motion: reduce の扱い:
+   視差は装飾的な演出であり、画面酔いを誘発しやすい。進捗バーのような
+   情報提示ではないため、reduce 時は速度差を完全に止めて通常フロー
+   表示にする。CSS 経路は animation を none にし、JS 経路のぶんも
+   transform を none に固定して二重に止める。
+   ================================================ */
+
+/* snippet:start */
 .c-parallax {
+  --parallax-color-bg: #ffffff;
+  --parallax-color-border: #d9dde6;
+  --parallax-color-accent: #5c6b8a;
+  --parallax-color-accent-soft: #8b97b3;
+
+  --parallax-radius: 10px;
+
+  --parallax-shift: 220px;
+  --parallax-y: 0px;
+
   position: relative;
-  /* 速度差を体感できるよう、各ステージを縦に長く取る。 */
   min-height: 90vh;
   margin: 0 0 24px;
   overflow: clip;
@@ -84,21 +172,20 @@ code {
   background-color: var(--parallax-color-bg);
 }
 
-/* 視差で動かすレイヤー（背景 __bg ／ 任意の中間層 __layer 共通）。
-   ステージいっぱいに広げ、上下に余白（-shift〜+shift 分）を持たせて、
-   移動しても途切れないよう天地を広めに確保する。
-   余白はそのレイヤーの --parallax-shift を参照するため、レイヤーごとに
-   移動量が違っても、その移動量に見合った余白が確保される。
-   フックは data-parallax（出現演出・進捗バーとは別系統）。 */
+.c-parallax,
+.c-parallax *,
+.c-parallax *::before,
+.c-parallax *::after {
+  box-sizing: border-box;
+}
+
 .c-parallax__bg,
 .c-parallax__layer {
   position: absolute;
   inset-inline: 0;
-  /* 移動しても隙間ができないよう、上下にそのレイヤーの shift 分の余白を確保。 */
   inset-block: calc(var(--parallax-shift) * -1) calc(var(--parallax-shift) * -1);
 }
 
-/* 背景レイヤーは最背面（z 0）。中間層（近景）はその上（z 1）。 */
 .c-parallax__bg {
   z-index: 0;
 }
@@ -107,8 +194,6 @@ code {
   z-index: 1;
 }
 
-/* パターン 1 の背景: 装飾図形を散らすための土台グラデーション。
-   外部画像は使わず CSS だけで自己完結させる。 */
 .c-parallax--a .c-parallax__bg {
   background-image: linear-gradient(
     160deg,
@@ -117,8 +202,6 @@ code {
   );
 }
 
-/* パターン 2 の背景: 1 枚の画像を敷いて丸ごと視差で動かす（単層）。
-   画像は装飾（aria-hidden）。cover で全面を覆い、center で中央寄せ。 */
 .c-parallax--b .c-parallax__bg {
   background-image: url("../img/parallax-bg.jpg");
   background-repeat: no-repeat;
@@ -126,8 +209,6 @@ code {
   background-size: cover;
 }
 
-/* パターン 2 の前景テキストの可読性を確保するため、画像の上に
-   半透明の暗色グラデーションを重ねる（前景より下・画像より上）。 */
 .c-parallax--b .c-parallax__bg::after {
   content: "";
   position: absolute;
@@ -139,10 +220,7 @@ code {
   );
 }
 
-/* パターン 3 の遠景レイヤー: 画像（装飾）。移動量を小さくしてゆっくり
-   動かす ＝ 遠くに見える。前景テキストの可読性のため暗色オーバーレイを重ねる。 */
 .c-parallax--c .c-parallax__bg--far {
-  /* 遠景は移動量を小さく＝ゆっくり＝遠く見える。 */
   --parallax-shift: 100px;
   background-image: url("../img/parallax-far.jpg");
   background-repeat: no-repeat;
@@ -161,14 +239,10 @@ code {
   );
 }
 
-/* パターン 3 の近景レイヤー: 半透明の装飾図形。移動量を大きくして速く
-   動かす ＝ 近くに見える。背景は透明（図形だけを重ねる）。 */
 .c-parallax--c .c-parallax__layer--near {
-  /* 近景は移動量を大きく＝速く＝近く見える。遠景との速度差が奥行きになる。 */
   --parallax-shift: 240px;
 }
 
-/* 背景に散らす装飾図形（外部画像を使わず CSS だけで奥行きの手がかりを作る）。 */
 .c-parallax__shape {
   position: absolute;
   display: block;
@@ -206,9 +280,6 @@ code {
   background-color: rgba(255, 255, 255, 0.16);
 }
 
-/* 前景コンテンツ。背景の上（z-index 上）に通常フローで重ねる。
-   前景は視差で動かさず、通常のスクロール速度で流れる。
-   この前景と背景の速度差が「視差」として知覚される。 */
 .c-parallax__fg {
   position: relative;
   z-index: 1;
@@ -231,21 +302,12 @@ code {
   text-shadow: 0 1px 6px rgba(35, 48, 77, 0.4);
 }
 
-/* ------------------------------------------------
-   第一実装: CSS だけで視差を成立させる（animation-timeline: view()）
-   対応ブラウザ（Chrome / Edge 系）では、JS を一切使わずに背景が
-   スクロールに連動して動く。
-   view() は対象要素（背景レイヤー）がビューポートを通過する進捗を
-   0%→100% のタイムラインとして割り当てる。slide キーフレームを
-   貼ることで、要素が画面下から入って上へ抜けるまでの間に、背景が
-   下方向（+shift）から上方向（-shift）へゆっくり動く。前景は動かない
-   ため、両者の速度差が視差になる。
+@media (min-width: 768px) {
+  .c-parallax__heading {
+    font-size: 28px;
+  }
+}
 
-   補足: CSS のみで似た効果を出す手段として background-attachment: fixed
-   もあるが、モバイル（iOS Safari 等）で非対応・ガクつきの難があるため、
-   本実装では採用しない。視差は view() ＋（フォールバックの）rAF
-   translateY の両建てで成立させる。
-   ------------------------------------------------ */
 @keyframes c-parallax-slide {
   from {
     transform: translateY(var(--parallax-shift));
@@ -259,22 +321,11 @@ code {
   .c-parallax__bg[data-parallax],
   .c-parallax__layer[data-parallax] {
     animation: c-parallax-slide linear;
-    /* レイヤー自身がビューポートを通過する進捗をタイムラインに使う。 */
     animation-timeline: view();
-    /* スクロールタイムラインでは duration はタイムラインの全長に
-       マッピングされるため秒数は意味を持たないが、ショートハンドの
-       省略時挙動のばらつきを避けるため明示しておく。 */
     animation-duration: auto;
   }
 }
 
-/* ------------------------------------------------
-   JS フォールバック: animation-timeline 非対応ブラウザ向け
-   （Safari / Firefox 等）
-   非対応環境では上の @supports ブロックが無効化され、背景は静止する。
-   JS が各背景レイヤーの視差量を計算し、要素ごとに --parallax-y（px）を
-   更新する。CSS 側はそれを translateY に反映する。
-   ------------------------------------------------ */
 @supports not (animation-timeline: view()) {
   .c-parallax__bg[data-parallax],
   .c-parallax__layer[data-parallax] {
@@ -282,16 +333,6 @@ code {
   }
 }
 
-/* ================================================
-   prefers-reduced-motion: 動きを減らす設定への配慮
-   視差（パララックス）は装飾的な演出であり、画面酔いを誘発しやすい。
-   進捗バーのような「情報提示」ではないため、reduce 時は速度差を
-   完全に止め、背景を固定して通常フロー表示にする。
-   - CSS 経路（view()）: animation を none にして視差アニメを止める。
-   - JS 経路: 念のため transform も none に固定する（JS 側でも更新を
-     止めるが、CSS でも二重に固定して取りこぼしを防ぐ）。
-   両経路とも translateY を初期位置に固定し、視差が無効になる。
-   ================================================ */
 @media (prefers-reduced-motion: reduce) {
   .c-parallax__bg[data-parallax],
   .c-parallax__layer[data-parallax] {
@@ -299,70 +340,4 @@ code {
     transform: none;
   }
 }
-
-/* ================================================
-   l-main / p-intro / p-outro: デモページのレイアウト
-   ================================================ */
-.l-main {
-  max-width: 880px;
-  margin-inline: auto;
-  padding: 40px 20px;
-}
-
-.p-intro__title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 16px;
-}
-
-.p-intro__text {
-  margin: 0 0 24px;
-  color: var(--parallax-color-text-muted);
-}
-
-/* デモ専用クローム: 視差の動きを最初から見直すための再読み込みボタン。
-   スニペット本体ではなくデモページの利便機能。 */
-.p-intro__reload {
-  display: inline-block;
-  margin: 0 0 20px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--parallax-color-bg);
-  background-color: var(--parallax-color-accent);
-  border: 1px solid var(--parallax-color-accent);
-  border-radius: var(--parallax-radius);
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.p-intro__reload:hover {
-  opacity: 0.85;
-}
-
-.p-intro__reload:focus-visible {
-  outline: 2px solid var(--parallax-color-accent);
-  outline-offset: 2px;
-}
-
-.p-outro {
-  padding: 32px 24px;
-  background-color: var(--parallax-color-bg);
-  border: 1px solid var(--parallax-color-border);
-  border-radius: var(--parallax-radius);
-}
-
-.p-outro__text {
-  margin: 0;
-  color: var(--parallax-color-text-muted);
-}
-
-@media (min-width: 768px) {
-  .p-intro__title {
-    font-size: 28px;
-  }
-
-  .c-parallax__heading {
-    font-size: 28px;
-  }
-}
+/* snippet:end */

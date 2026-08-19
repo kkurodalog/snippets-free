@@ -26,22 +26,7 @@
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
-    <!-- スニペットここから -->
-    <!--
-      スクロール進捗バー本体。
-      ページ最上部に position: fixed で固定し、ページの読了率
-      （スクロール進捗 0%→100%）に連動して左から右へ伸びる。
-
-      data-scroll-progress: 進捗バーであることを示すフック属性。
-        出現演出（data-fade-in）とは別系統の独立した属性にしているため、
-        同じページに出現演出を同居させても互いに干渉しない。
-
-      role="progressbar" / aria-* : 読了率を支援技術へ伝えるためのロール。
-        値（aria-valuenow）の更新は JS フォールバック時のみ行う
-        （CSS だけで動く対応ブラウザでは視覚的な進捗が主目的で、
-        スクロール位置自体はブラウザ/支援技術が把握しているため、
-        値の常時更新は必須ではない）。
-    -->
+    <!-- snippet:start -->
     <div
       class="c-progress"
       data-scroll-progress
@@ -53,7 +38,7 @@
     >
       <span class="c-progress__bar"></span>
     </div>
-    <!-- スニペットここまで -->
+    <!-- snippet:end -->
 
     <main class="l-main">
       <section class="p-section">

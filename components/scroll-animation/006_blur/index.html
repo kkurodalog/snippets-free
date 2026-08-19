@@ -46,27 +46,12 @@
         </p>
       </section>
 
-      <!--
-        スニペットここから
-
-        背景ぼかしステージの基本構造。
-          .c-blur          : 背景画像を画面に貼り付けるステージ（sticky・100vh）。
-                             ビューポート全幅（100vw）に突き抜ける。
-          .c-blur__overlay : 背景の上に重ねるぼかしオーバーレイ。backdrop-filter で
-                             直下の背景をぼかす。ぼかし量はこのレイヤーが担う。
-
-        data-scroll-blur   : ぼかしを駆動する対象（オーバーレイ）を示すフック属性。
-          他のスクロール系スニペットと別系統の独立した属性にしているため、
-          同じページに同居しても互いに干渉しない。
-
-        ぼかしは純粋な装飾的エンハンスメント。CSS も JS も効かない環境では
-        背景はシャープに表示され、テキストは通常どおり読める（情報欠落なし）。
-      -->
+      <!-- snippet:start -->
       <section class="c-blur">
         <div class="c-blur__bg" aria-hidden="true"></div>
         <div class="c-blur__overlay" data-scroll-blur aria-hidden="true"></div>
       </section>
-      <!-- スニペットここまで -->
+      <!-- snippet:end -->
 
       <!--
         第2セクション: ビューポート進入でフェードインする見出し。
