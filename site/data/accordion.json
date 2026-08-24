@@ -8,64 +8,109 @@
     {
       "slug": "001_js-toggle",
       "name": "JS で開閉する基本形",
-      "tags": ["JS必要"],
-      "notes": [
-        "同じページに複数置くときは、id と aria-controls の組を一意にする。"
+      "tags": [
+        "JS必要"
       ],
-      "files": ["html", "css", "js"]
+      "notes": [
+        "同じページに複数置くときは、本文の id を一意にする。ボタンの aria-controls はその id から作られる。",
+        "先頭のスクリプトは、開いた状態が一瞬見えるのを防ぐためのもの。外しても開閉は動く。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     },
     {
       "slug": "002_details-basic",
       "name": "details 要素で作る",
-      "tags": ["CSSのみ"],
-      "files": ["html", "css"]
+      "tags": [
+        "CSSのみ"
+      ],
+      "files": [
+        "html",
+        "css"
+      ]
     },
     {
       "slug": "003_css-only",
       "name": "CSS だけで開閉する",
-      "tags": ["CSSのみ"],
+      "tags": [
+        "CSSのみ"
+      ],
       "notes": [
         "同じページに複数置くときは、input の id と label の for を一意にする。"
       ],
-      "files": ["html", "css"]
+      "files": [
+        "html",
+        "css"
+      ]
     },
     {
       "slug": "004_multi-open",
       "name": "すべて開く・すべて閉じる",
-      "tags": ["JS必要"],
-      "notes": [
-        "同じページに複数置くときは、id と aria-controls の組を一意にする。",
-        "一括操作の対象は data-bulk-controls の値で決まる。アコーディオン本体の id と揃える。"
+      "tags": [
+        "JS必要"
       ],
-      "files": ["html", "css", "js"]
+      "notes": [
+        "同じページに複数置くときは、本文の id を一意にする。ボタンの aria-controls はその id から作られる。",
+        "一括操作の対象は data-bulk-controls の値で決まる。アコーディオン本体の id と揃える。",
+        "先頭のスクリプトは、開いた状態が一瞬見えるのを防ぐためのもの。外しても開閉は動く。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     },
     {
       "slug": "005_single-open",
       "name": "1つだけ開く",
-      "tags": ["JS必要"],
-      "notes": [
-        "同じページに複数置くときは、id と aria-controls の組を一意にする。"
+      "tags": [
+        "JS必要"
       ],
-      "files": ["html", "css", "js"]
+      "notes": [
+        "同じページに複数置くときは、本文の id を一意にする。ボタンの aria-controls はその id から作られる。",
+        "先頭のスクリプトは、開いた状態が一瞬見えるのを防ぐためのもの。外しても開閉は動く。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     },
     {
       "slug": "006_animation",
       "name": "高さがなめらかに動く",
-      "tags": ["JS必要"],
-      "notes": [
-        "同じページに複数置くときは、id と aria-controls の組を一意にする。"
+      "tags": [
+        "JS必要"
       ],
-      "files": ["html", "css", "js"],
+      "notes": [
+        "同じページに複数置くときは、本文の id を一意にする。ボタンの aria-controls はその id から作られる。",
+        "先頭のスクリプトは、開いた状態が一瞬見えるのを防ぐためのもの。外しても開閉は動く。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ],
       "featured": true
     },
     {
       "slug": "007_nested",
       "name": "入れ子にする",
-      "tags": ["JS必要"],
-      "notes": [
-        "同じページに複数置くときは、親と子の id と aria-controls の組を一意にする。"
+      "tags": [
+        "JS必要"
       ],
-      "files": ["html", "css", "js"]
+      "notes": [
+        "同じページに複数置くときは、親と子の本文の id を一意にする。ボタンの aria-controls はその id から作られる。",
+        "先頭のスクリプトは、開いた状態が一瞬見えるのを防ぐためのもの。外しても開閉は動く。"
+      ],
+      "files": [
+        "html",
+        "css",
+        "js"
+      ]
     }
   ]
 }

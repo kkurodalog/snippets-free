@@ -8,118 +8,85 @@
   </head>
   <body>
     <main class="l-main">
-      <section class="p-section">
-        <h1 class="p-section__title">003_css-only</h1>
-        <p class="p-section__text">
-          <code>&lt;input type="checkbox"&gt;</code> と <code>:checked</code> 擬似クラス、兄弟セレクタ <code>~</code> を組み合わせた
-          いわゆる「チェックボックスハック」によるアコーディオン実装です。
-          JavaScript を1行も書かずに開閉が動作します。
-          同一ページに複数配置する場合は <code>input</code> の <code>id</code> と <code>label</code> の <code>for</code> をインスタンス毎に一意化してください。
-        </p>
-
-        <!-- snippet:start -->
-        <div class="c-accordion">
-          <div class="c-accordion__item">
-            <input
-              type="checkbox"
-              id="c-accordion-toggle-1"
-              class="c-accordion__toggle"
-            />
-            <label for="c-accordion-toggle-1" class="c-accordion__header">
-              <span class="c-accordion__title">チェックボックスハックとは何か？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </label>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  <code>&lt;input type="checkbox"&gt;</code> の <code>:checked</code> 状態を兄弟セレクタ（<code>~</code> や <code>+</code>）で参照し、
-                  別の要素のスタイルを切り替えるテクニックです。
-                  <code>&lt;label&gt;</code> をチェックボックスに <code>for</code> 属性で関連付ければ、ラベルのクリックでチェック状態が反転するため、
-                  これを開閉トリガーとして使えます。
-                </p>
-                <p>
-                  JavaScript を読み込まずにアコーディオンの開閉が成立するため、JS が無効化された環境や JS の読み込みに失敗した状況でも動作します。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="c-accordion__item">
-            <input
-              type="checkbox"
-              id="c-accordion-toggle-2"
-              class="c-accordion__toggle"
-            />
-            <label for="c-accordion-toggle-2" class="c-accordion__header">
-              <span class="c-accordion__title">アクセシビリティ上の注意点は？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </label>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  実体は <code>&lt;input type="checkbox"&gt;</code> なので、スクリーンリーダーには「チェックボックス」として読み上げられます。
-                  「展開可能なボタン」とは伝わらない点が、本来のアコーディオン UI からの逸脱です。
-                </p>
-                <p>
-                  また、チェックボックス本体を <code>display: none</code> で隠すと Tab フォーカスも失われて操作不能になります。
-                  本スニペットでは <code>position: absolute</code> + <code>clip</code> による sr-only パターンで視覚的にだけ隠し、フォーカス可能性を維持しています。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="c-accordion__item">
-            <input
-              type="checkbox"
-              id="c-accordion-toggle-3"
-              class="c-accordion__toggle"
-            />
-            <label for="c-accordion-toggle-3" class="c-accordion__header">
-              <span class="c-accordion__title"><code>&lt;details&gt;</code> との違いと使い分けは？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </label>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  <code>&lt;details&gt;</code> はブラウザに「折りたたみ要素」として認識され、支援技術にも展開状態が標準で伝わります。
-                  JS なしで開閉したい場合の<strong>第一選択は <code>&lt;details&gt;</code></strong> です。
-                </p>
-                <p>
-                  チェックボックスハックは、<code>&lt;details&gt;</code> 標準のマーカー / 開閉アニメーション制限を超えて
-                  「自由なスタイリング・兄弟要素との組み合わせ」を行いたい時の代替手段として位置づけるのが穏当です。
-                  代償としてセマンティクスが弱くなる点は把握しておく必要があります。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="c-accordion__item">
-            <input
-              type="checkbox"
-              id="c-accordion-toggle-4"
-              class="c-accordion__toggle"
-            />
-            <label for="c-accordion-toggle-4" class="c-accordion__header">
-              <span class="c-accordion__title">複数同時に開ける？1つずつしか開けない？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </label>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  各項目が独立した <code>&lt;input type="checkbox"&gt;</code> を持つため、<strong>複数同時に開ける</strong>挙動になります。
-                  チェックボックスは互いに状態を干渉せず、それぞれ個別に ON/OFF できるためです。
-                </p>
-                <p>
-                  「1つだけ開いて他は閉じる」排他制御を CSS のみで実装したい場合は、
-                  チェックボックスではなく <code>&lt;input type="radio"&gt;</code> を同一 <code>name</code> でグルーピングする方法があります。
-                  ただし「同じラジオを再クリックしても閉じない」など挙動上のクセがあるため、別スニペットで扱います。
-                </p>
-              </div>
+      <!-- snippet:start -->
+      <div class="c-accordion">
+        <div class="c-accordion__item">
+          <input
+            type="checkbox"
+            id="c-accordion-toggle-1"
+            class="c-accordion__toggle"
+          />
+          <label for="c-accordion-toggle-1" class="c-accordion__header">
+            <span class="c-accordion__title">ご利用の流れ</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </label>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                お申し込みからご利用開始までの流れをまとめています。手順ごとに、必要なものと用意しておくとよい情報を記載します。
+              </p>
             </div>
           </div>
         </div>
-        <!-- snippet:end -->
-      </section>
+
+        <div class="c-accordion__item">
+          <input
+            type="checkbox"
+            id="c-accordion-toggle-2"
+            class="c-accordion__toggle"
+          />
+          <label for="c-accordion-toggle-2" class="c-accordion__header">
+            <span class="c-accordion__title">お支払い方法</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </label>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                ご利用いただけるお支払い方法と、支払いのタイミングをまとめています。手続きの締め切りは方法によって異なります。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-accordion__item">
+          <input
+            type="checkbox"
+            id="c-accordion-toggle-3"
+            class="c-accordion__toggle"
+          />
+          <label for="c-accordion-toggle-3" class="c-accordion__header">
+            <span class="c-accordion__title">配送と受け取り</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </label>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                お届けまでの目安と、受け取り方法の選び方をまとめています。日時の指定や再配達の手続きについても案内します。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-accordion__item">
+          <input
+            type="checkbox"
+            id="c-accordion-toggle-4"
+            class="c-accordion__toggle"
+          />
+          <label for="c-accordion-toggle-4" class="c-accordion__header">
+            <span class="c-accordion__title">返品と交換</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </label>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                返品と交換を受け付ける条件と、手続きの手順をまとめています。商品の状態によっては対応できない場合があります。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- snippet:end -->
     </main>
   </body>
 </html>

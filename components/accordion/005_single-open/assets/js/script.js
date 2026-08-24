@@ -5,7 +5,11 @@
  * 解説はこのファイルの冒頭に置き、範囲の中には書かない（貼った先にコメントを持ち込まないため）。
  *
  * 設計
+ * - HTML は「見出しと本文がそのまま読める」状態で書き、開閉のボタンは JS が組み立てる。
+ *   JS が動かない環境では本文がすべて読め、押しても何も起きないボタンも残らない。
  * - 個別の開閉は基本形と同じ。ルート要素へのイベント委譲・aria-expanded・hidden の3点を踏襲する。
+ * - 仕掛け終えたルート要素に data-accordion-ready を付ける。CSS はこれが付くまでの間だけ
+ *   本文を隠し、閉じた初期状態のちらつきを防ぐ（.js スコープ）。
  * - 排他制御は「対象以外を先に閉じてから、対象を1回だけトグルする」順で行う。
  *   対象自身を forEach の対象から外すため、閉じてから開き直す二重操作にならない。
  * - 開いている項目を押し直せば閉じられる（全部閉じた状態を許す）。
@@ -22,6 +26,32 @@
   const accordionRoots = document.querySelectorAll(".c-accordion[data-accordion]");
 
   if (accordionRoots.length === 0) return;
+
+  function buildHeader(item) {
+    const heading = item.querySelector(":scope > .c-accordion__heading");
+    const panel = item.querySelector(":scope > .c-accordion__body");
+
+    if (!heading || !panel || !panel.id) return;
+    if (heading.querySelector(".c-accordion__header")) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "c-accordion__header";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", panel.id);
+
+    while (heading.firstChild) {
+      button.appendChild(heading.firstChild);
+    }
+
+    const icon = document.createElement("span");
+    icon.className = "c-accordion__icon";
+    icon.setAttribute("aria-hidden", "true");
+    button.appendChild(icon);
+
+    heading.appendChild(button);
+    panel.setAttribute("hidden", "");
+  }
 
   function setItemState(header, open) {
     const panelId = header.getAttribute("aria-controls");
@@ -60,6 +90,8 @@
   }
 
   function bindAccordion(root) {
+    root.querySelectorAll(":scope > .c-accordion__item").forEach(buildHeader);
+
     root.addEventListener("click", function (event) {
       const header = event.target.closest(".c-accordion__header");
       if (!header) return;
@@ -68,6 +100,8 @@
 
       toggleItem(header, root);
     });
+
+    root.setAttribute("data-accordion-ready", "");
   }
 
   accordionRoots.forEach(bindAccordion);

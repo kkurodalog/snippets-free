@@ -8,95 +8,65 @@
   </head>
   <body>
     <main class="l-main">
-      <section class="p-section">
-        <h1 class="p-section__title">002_details-basic</h1>
-        <p class="p-section__text">
-          <code>&lt;details&gt;</code> / <code>&lt;summary&gt;</code> を使ったブラウザネイティブのアコーディオン実装です。
-          JavaScript なしで開閉・キーボード操作・フォーカス移動が動作します。
-          複数項目を同時に開けるベース実装です。
-        </p>
-
-        <!-- snippet:start -->
-        <div class="c-accordion">
-          <details class="c-accordion__item">
-            <summary class="c-accordion__header">
-              <span class="c-accordion__title"><code>&lt;details&gt;</code> 要素とは何か？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </summary>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  <code>&lt;details&gt;</code> は HTML5 で標準化された折りたたみ要素です。
-                  最初の子要素として <code>&lt;summary&gt;</code> を置き、それ以降の子要素が開閉される本文になります。
-                </p>
-                <p>
-                  ブラウザが開閉トグルをネイティブで処理するため、JavaScript を1行も書かずにアコーディオン UI を構築できます。
-                </p>
-              </div>
+      <!-- snippet:start -->
+      <div class="c-accordion">
+        <details class="c-accordion__item">
+          <summary class="c-accordion__header">
+            <span class="c-accordion__title">ご利用の流れ</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                お申し込みからご利用開始までの流れをまとめています。手順ごとに、必要なものと用意しておくとよい情報を記載します。
+              </p>
             </div>
-          </details>
+          </div>
+        </details>
 
-          <details class="c-accordion__item">
-            <summary class="c-accordion__header">
-              <span class="c-accordion__title"><code>open</code> 属性の使い方は？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </summary>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  <code>&lt;details open&gt;</code> のように <code>open</code> 属性を付けると、初期状態で本文が開いた状態になります。
-                  属性を外せば閉じた状態が初期表示です。
-                </p>
-                <p>
-                  ユーザーが開閉操作するたびにブラウザが <code>open</code> 属性を自動で付け外しするため、
-                  CSS では <code>details[open]</code> セレクタで「開いている状態」のスタイルを書けます。
-                </p>
-              </div>
+        <details class="c-accordion__item">
+          <summary class="c-accordion__header">
+            <span class="c-accordion__title">お支払い方法</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                ご利用いただけるお支払い方法と、支払いのタイミングをまとめています。手続きの締め切りは方法によって異なります。
+              </p>
             </div>
-          </details>
+          </div>
+        </details>
 
-          <details class="c-accordion__item">
-            <summary class="c-accordion__header">
-              <span class="c-accordion__title">JS 不要実装の利点と限界は？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </summary>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  <strong>利点</strong>: JS を読み込まずに動作するため軽量で、JS が落ちた場合も問題なく機能します。
-                  キーボード操作・スクリーンリーダー対応もブラウザが標準で処理してくれます。
-                </p>
-                <p>
-                  <strong>限界</strong>: 高さアニメーションは標準ではサポートされず、
-                  「1つだけ開く（排他制御）」のような独自挙動には JS が必要になります。
-                  シンプルな開閉で十分な場面に向いています。
-                </p>
-              </div>
+        <details class="c-accordion__item">
+          <summary class="c-accordion__header">
+            <span class="c-accordion__title">配送と受け取り</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                お届けまでの目安と、受け取り方法の選び方をまとめています。日時の指定や再配達の手続きについても案内します。
+              </p>
             </div>
-          </details>
+          </div>
+        </details>
 
-          <details class="c-accordion__item">
-            <summary class="c-accordion__header">
-              <span class="c-accordion__title">アクセシビリティはどう担保される？</span>
-              <span class="c-accordion__icon" aria-hidden="true"></span>
-            </summary>
-            <div class="c-accordion__body">
-              <div class="c-accordion__content">
-                <p>
-                  <code>&lt;summary&gt;</code> はネイティブにフォーカス可能な要素として扱われ、
-                  Tab キーでフォーカス移動・Enter / Space キーで開閉という挙動をブラウザが処理します。
-                  そのため <code>tabindex</code> や <code>aria-expanded</code> を自前で付与する必要はありません。
-                </p>
-                <p>
-                  スクリーンリーダーには「展開可能/折りたたみ可能」という状態が標準で伝わります。
-                  シンプルな実装で WAI-ARIA 相当の支援技術対応が得られるのが <code>&lt;details&gt;</code> の最大の強みです。
-                </p>
-              </div>
+        <details class="c-accordion__item">
+          <summary class="c-accordion__header">
+            <span class="c-accordion__title">返品と交換</span>
+            <span class="c-accordion__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="c-accordion__body">
+            <div class="c-accordion__content">
+              <p>
+                返品と交換を受け付ける条件と、手続きの手順をまとめています。商品の状態によっては対応できない場合があります。
+              </p>
             </div>
-          </details>
-        </div>
-        <!-- snippet:end -->
-      </section>
+          </div>
+        </details>
+      </div>
+      <!-- snippet:end -->
     </main>
   </body>
 </html>

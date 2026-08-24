@@ -16,38 +16,13 @@ body {
   line-height: 1.7;
 }
 
-code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 0.92em;
-  padding: 0.1em 0.35em;
-  background-color: #eef0f3;
-  border-radius: 4px;
-}
-
 /* ================================================
-   l-main / p-section: デモページのレイアウト
+   l-main: デモページのレイアウト
    ================================================ */
 .l-main {
   max-width: 720px;
   margin-inline: auto;
   padding: 40px 20px;
-}
-
-.p-section__title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 16px;
-}
-
-.p-section__text {
-  margin: 0 0 24px;
-  color: #555;
-}
-
-@media (min-width: 768px) {
-  .p-section__title {
-    font-size: 28px;
-  }
 }
 
 /* snippet:start */
@@ -89,6 +64,13 @@ code {
 
 .c-accordion__heading {
   margin: 0;
+  padding: var(--accordion-header-padding-y) var(--accordion-header-padding-x);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.c-accordion[data-accordion-ready] .c-accordion__heading {
+  padding: 0;
   font-size: inherit;
   font-weight: inherit;
 }
@@ -155,6 +137,10 @@ code {
 
 .c-accordion__body {
   background-color: var(--accordion-color-bg);
+}
+
+.js .c-accordion:not([data-accordion-ready]) .c-accordion__body {
+  display: none;
 }
 
 .c-accordion__content {

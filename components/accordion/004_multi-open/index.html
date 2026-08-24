@@ -1,178 +1,110 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="no-js">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>004_multi-open</title>
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで画面描画前に切り替わり、
+      閉じた初期状態のちらつき（FOUC）を防ぐ。
+      JS 無効環境ではこのスクリプトが走らず no-js のままになり、
+      CSS 側で本文が最初から開いた状態で表示される（コンテンツ消失を防ぐ）。
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <main class="l-main">
-      <section class="p-section">
-        <h1 class="p-section__title">004_multi-open</h1>
-        <p class="p-section__text">
-          複数項目を同時に開ける挙動はバニラJS実装の自然な振る舞いですが、項目数が増えると「全部見たい／全部畳みたい」というニーズが出ます。
-          本スニペットは JS で開閉する基本形をベースに、<strong>「すべて開く／すべて閉じる」一括操作ボタン</strong>を追加した実装です。
-          個別開閉と一括操作は <code>aria-expanded</code> を真実の源として共有し、状態が常に一致します。
-          一括操作後はスクリーンリーダーへ状態変化を通知し、全開／全閉時は対応するボタンを無効化して状態を視覚化します。
-        </p>
+      <!-- snippet:start -->
+      <script>
+        document.documentElement.classList.remove("no-js");
+        document.documentElement.classList.add("js");
+      </script>
 
-        <!-- snippet:start -->
-        <div class="c-accordion__bulk-controls" data-bulk-controls="c-accordion-multi-open">
-          <button
-            type="button"
-            class="c-accordion__bulk-button"
-            data-bulk-action="open"
-            aria-controls="c-accordion-multi-open"
-          >
-            すべて開く
-          </button>
-          <button
-            type="button"
-            class="c-accordion__bulk-button"
-            data-bulk-action="close"
-            aria-controls="c-accordion-multi-open"
-          >
-            すべて閉じる
-          </button>
-          <div
-            class="c-accordion__sr-status"
-            role="status"
-            aria-live="polite"
-            data-bulk-status
-          ></div>
-        </div>
+      <div class="c-accordion__bulk-controls" data-bulk-controls="c-accordion-multi-open">
+        <button
+          type="button"
+          class="c-accordion__bulk-button"
+          data-bulk-action="open"
+          aria-controls="c-accordion-multi-open"
+        >
+          すべて開く
+        </button>
+        <button
+          type="button"
+          class="c-accordion__bulk-button"
+          data-bulk-action="close"
+          aria-controls="c-accordion-multi-open"
+        >
+          すべて閉じる
+        </button>
+        <div
+          class="c-accordion__sr-status"
+          role="status"
+          aria-live="polite"
+          data-bulk-status
+        ></div>
+      </div>
 
-        <div class="c-accordion" data-accordion id="c-accordion-multi-open">
-          <div class="c-accordion__item">
-            <h2 class="c-accordion__heading">
-              <button
-                type="button"
-                class="c-accordion__header"
-                aria-expanded="false"
-                aria-controls="c-accordion-multi-panel-1"
-                id="c-accordion-multi-header-1"
-              >
-                <span class="c-accordion__title">複数同時オープン型はどんな場面で使う？</span>
-                <span class="c-accordion__icon" aria-hidden="true"></span>
-              </button>
-            </h2>
-            <div
-              class="c-accordion__body"
-              id="c-accordion-multi-panel-1"
-              hidden
-            >
-              <div class="c-accordion__content">
-                <p>
-                  各項目が独立した情報を持ち、ユーザーが複数項目を同時に参照したい場面に向いています。
-                  たとえばFAQで複数の質問を見比べたい・設定パネルで複数セクションを並行して編集したい等のユースケースです。
-                </p>
-                <p>
-                  逆に「読ませたい順序がある」「画面領域を1項目分しか確保できない」場合は排他制御型が向いています。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="c-accordion__item">
-            <h2 class="c-accordion__heading">
-              <button
-                type="button"
-                class="c-accordion__header"
-                aria-expanded="false"
-                aria-controls="c-accordion-multi-panel-2"
-                id="c-accordion-multi-header-2"
-              >
-                <span class="c-accordion__title">「すべて開く／すべて閉じる」ボタンは何のため？</span>
-                <span class="c-accordion__icon" aria-hidden="true"></span>
-              </button>
-            </h2>
-            <div
-              class="c-accordion__body"
-              id="c-accordion-multi-panel-2"
-              hidden
-            >
-              <div class="c-accordion__content">
-                <p>
-                  項目が10個・20個と増えると「順に開いていく」「個別に閉じていく」操作の手数が地味に重くなります。
-                  一括操作ボタンを置くと、ユーザーは「全体を一度に俯瞰したい」「読み終わったので畳みたい」というニーズに即応できます。
-                </p>
-                <p>
-                  本スニペットでは、現在の状態に応じてボタンを <code>disabled</code> 化します。
-                  全項目が閉じている時は「すべて閉じる」を、全項目が開いている時は「すべて開く」を無効化することで、
-                  「押しても何も起きないボタン」を視覚的・支援技術的に明示しています。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="c-accordion__item">
-            <h2 class="c-accordion__heading">
-              <button
-                type="button"
-                class="c-accordion__header"
-                aria-expanded="false"
-                aria-controls="c-accordion-multi-panel-3"
-                id="c-accordion-multi-header-3"
-              >
-                <span class="c-accordion__title">個別操作と一括操作の状態同期はどう担保している？</span>
-                <span class="c-accordion__icon" aria-hidden="true"></span>
-              </button>
-            </h2>
-            <div
-              class="c-accordion__body"
-              id="c-accordion-multi-panel-3"
-              hidden
-            >
-              <div class="c-accordion__content">
-                <p>
-                  個別ヘッダーのクリック・一括ボタンのクリックのいずれの経路でも、
-                  最終的に同じ <code>setItemState(header, open)</code> 関数を経由して
-                  <code>aria-expanded</code> と <code>hidden</code> を同時更新する設計にしています。
-                </p>
-                <p>
-                  操作後は <code>updateBulkButtonsState()</code> で全項目の状態を見直し、
-                  「すべて開く／すべて閉じる」ボタンの <code>disabled</code> 状態をDOMに反映します。
-                  これにより個別経由・一括経由のどちらで操作しても、画面上の状態が常に一致します。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="c-accordion__item">
-            <h2 class="c-accordion__heading">
-              <button
-                type="button"
-                class="c-accordion__header"
-                aria-expanded="false"
-                aria-controls="c-accordion-multi-panel-4"
-                id="c-accordion-multi-header-4"
-              >
-                <span class="c-accordion__title">スクリーンリーダーへの通知はどう実装している？</span>
-                <span class="c-accordion__icon" aria-hidden="true"></span>
-              </button>
-            </h2>
-            <div
-              class="c-accordion__body"
-              id="c-accordion-multi-panel-4"
-              hidden
-            >
-              <div class="c-accordion__content">
-                <p>
-                  個別ヘッダーの開閉は <code>aria-expanded</code> の切替で支援技術に状態が伝わるため、追加の通知は不要です。
-                </p>
-                <p>
-                  一方、一括操作はフォーカス位置（一括ボタン）と状態変化の起こる場所（個別項目）が離れているため、
-                  <code>role="status"</code> + <code>aria-live="polite"</code> を持つ視覚的に隠したライブリージョンに
-                  「すべて開きました／すべて閉じました」というテキストを差し込むことで、
-                  画面外で起きた変化をスクリーンリーダーに通知しています。
-                </p>
-              </div>
+      <div class="c-accordion" data-accordion id="c-accordion-multi-open">
+        <div class="c-accordion__item">
+          <h2 class="c-accordion__heading">
+            <span class="c-accordion__title">ご利用の流れ</span>
+          </h2>
+          <div class="c-accordion__body" id="c-accordion-multi-panel-1">
+            <div class="c-accordion__content">
+              <p>
+                お申し込みからご利用開始までの流れをまとめています。手順ごとに、必要なものと用意しておくとよい情報を記載します。
+              </p>
             </div>
           </div>
         </div>
-        <!-- snippet:end -->
-      </section>
+
+        <div class="c-accordion__item">
+          <h2 class="c-accordion__heading">
+            <span class="c-accordion__title">お支払い方法</span>
+          </h2>
+          <div class="c-accordion__body" id="c-accordion-multi-panel-2">
+            <div class="c-accordion__content">
+              <p>
+                ご利用いただけるお支払い方法と、支払いのタイミングをまとめています。手続きの締め切りは方法によって異なります。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-accordion__item">
+          <h2 class="c-accordion__heading">
+            <span class="c-accordion__title">配送と受け取り</span>
+          </h2>
+          <div class="c-accordion__body" id="c-accordion-multi-panel-3">
+            <div class="c-accordion__content">
+              <p>
+                お届けまでの目安と、受け取り方法の選び方をまとめています。日時の指定や再配達の手続きについても案内します。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-accordion__item">
+          <h2 class="c-accordion__heading">
+            <span class="c-accordion__title">返品と交換</span>
+          </h2>
+          <div class="c-accordion__body" id="c-accordion-multi-panel-4">
+            <div class="c-accordion__content">
+              <p>
+                返品と交換を受け付ける条件と、手続きの手順をまとめています。商品の状態によっては対応できない場合があります。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- snippet:end -->
     </main>
 
     <script src="./assets/js/script.js" defer></script>

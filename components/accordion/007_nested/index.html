@@ -1,256 +1,141 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="no-js">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>007_nested</title>
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで画面描画前に切り替わり、
+      閉じた初期状態のちらつき（FOUC）を防ぐ。
+      JS 無効環境ではこのスクリプトが走らず no-js のままになり、
+      CSS 側で本文が最初から開いた状態で表示される（コンテンツ消失を防ぐ）。
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <main class="l-main">
-      <section class="p-section">
-        <h1 class="p-section__title">007_nested</h1>
-        <p class="p-section__text">
-          アコーディオンの中にさらにアコーディオンを入れた <strong>入れ子（ネスト）アコーディオン</strong> の実装例です。
-          FAQ の親質問の中に、関連するサブ質問をたたんで配置するパターンを想定しています。
-          骨格は基本実装（<code>aria-expanded</code> + <code>hidden</code>）を継承しつつ、
-          親と子のクリックハンドラが二重発火しないよう <code>closest(".c-accordion")</code> ベースのスコープガードを入れています。
-          視覚的には子アコーディオンを <strong>インデント + 薄い背景色</strong> で親と区別しています。
-        </p>
+      <!-- snippet:start -->
+      <script>
+        document.documentElement.classList.remove("no-js");
+        document.documentElement.classList.add("js");
+      </script>
 
-        <!-- snippet:start -->
-        <div class="c-accordion" data-accordion id="c-accordion-nested-parent">
-          <div class="c-accordion__item">
-            <h2 class="c-accordion__heading">
-              <button
-                type="button"
-                class="c-accordion__header"
-                aria-expanded="false"
-                aria-controls="c-accordion-nested-parent-1-panel"
-                id="c-accordion-nested-parent-1-header"
-              >
-                <span class="c-accordion__title">アコーディオンの入れ子はどう作るのか？</span>
-                <span class="c-accordion__icon" aria-hidden="true"></span>
-              </button>
-            </h2>
-            <div
-              class="c-accordion__body"
-              id="c-accordion-nested-parent-1-panel"
-              hidden
-            >
-              <div class="c-accordion__content">
-                <p>
-                  親アコーディオンの本文 <code>.c-accordion__body</code> の内側に、もう1つ <code>.c-accordion</code> を入れるだけで作れます。
-                  以下のサブ質問は、親アコーディオンを開いた時にだけ表示される「ネスト子アコーディオン」です。
-                  親と子は独立した <code>data-accordion</code> root として扱われ、それぞれにクリックハンドラが仕掛けられます。
-                </p>
+      <div class="c-accordion" data-accordion id="c-accordion-nested-parent">
+        <div class="c-accordion__item">
+          <h2 class="c-accordion__heading">
+            <span class="c-accordion__title">ご利用の流れ</span>
+          </h2>
+          <div class="c-accordion__body" id="c-accordion-nested-parent-1-panel">
+            <div class="c-accordion__content">
+              <p>
+                ご利用の準備について、よくお問い合わせいただく点をまとめています。
+              </p>
 
-                <div class="c-accordion c-accordion--child" data-accordion id="c-accordion-nested-child-1">
-                  <div class="c-accordion__item">
-                    <h3 class="c-accordion__heading">
-                      <button
-                        type="button"
-                        class="c-accordion__header"
-                        aria-expanded="false"
-                        aria-controls="c-accordion-nested-child-1-1-panel"
-                        id="c-accordion-nested-child-1-1-header"
-                      >
-                        <span class="c-accordion__title">親と子で <code>data-accordion</code> の値は変える必要がある？</span>
-                        <span class="c-accordion__icon" aria-hidden="true"></span>
-                      </button>
-                    </h3>
-                    <div
-                      class="c-accordion__body"
-                      id="c-accordion-nested-child-1-1-panel"
-                      hidden
-                    >
-                      <div class="c-accordion__content">
-                        <p>
-                          変える必要はありません。親も子も <code>data-accordion</code> を <strong>値なしの共通属性</strong> として付けるだけで動きます。
-                          JS 側で各 <code>.c-accordion[data-accordion]</code> を独立した root として取得し、それぞれに個別のクリックハンドラを仕掛けるためです。
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="c-accordion__item">
-                    <h3 class="c-accordion__heading">
-                      <button
-                        type="button"
-                        class="c-accordion__header"
-                        aria-expanded="false"
-                        aria-controls="c-accordion-nested-child-1-2-panel"
-                        id="c-accordion-nested-child-1-2-header"
-                      >
-                        <span class="c-accordion__title">どこまでネストできる？</span>
-                        <span class="c-accordion__icon" aria-hidden="true"></span>
-                      </button>
-                    </h3>
-                    <div
-                      class="c-accordion__body"
-                      id="c-accordion-nested-child-1-2-panel"
-                      hidden
-                    >
-                      <div class="c-accordion__content">
-                        <p>
-                          技術的にはさらに深くもできますが、UI として読みやすいのは <strong>1段階まで</strong> です。
-                          2段以上の入れ子は視覚的な階層が伝わりにくく、操作経路も長くなるため、
-                          本実装も「親 → 子の1段階のみ」に絞っています。
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="c-accordion__item">
-                    <h3 class="c-accordion__heading">
-                      <button
-                        type="button"
-                        class="c-accordion__header"
-                        aria-expanded="false"
-                        aria-controls="c-accordion-nested-child-1-3-panel"
-                        id="c-accordion-nested-child-1-3-header"
-                      >
-                        <span class="c-accordion__title">子の状態は親を閉じても残る？</span>
-                        <span class="c-accordion__icon" aria-hidden="true"></span>
-                      </button>
-                    </h3>
-                    <div
-                      class="c-accordion__body"
-                      id="c-accordion-nested-child-1-3-panel"
-                      hidden
-                    >
-                      <div class="c-accordion__content">
-                        <p>
-                          残ります。親を閉じても子の <code>aria-expanded</code> は変更しないため、
-                          親を再度開いた時に子の前回状態（開いていた項目は開いたまま）が復元されます。
-                          「親を閉じたら子もすべて閉じる」リセット仕様にしたい場合は別途実装してください。
-                        </p>
-                      </div>
+              <div class="c-accordion c-accordion--child" data-accordion id="c-accordion-nested-child-1">
+                <div class="c-accordion__item">
+                  <h3 class="c-accordion__heading">
+                    <span class="c-accordion__title">お申し込みに必要なもの</span>
+                  </h3>
+                  <div class="c-accordion__body" id="c-accordion-nested-child-1-1-panel">
+                    <div class="c-accordion__content">
+                      <p>
+                        お申し込みの際に入力する情報と、あらかじめ用意しておくとよい書類をまとめています。
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="c-accordion__item">
-            <h2 class="c-accordion__heading">
-              <button
-                type="button"
-                class="c-accordion__header"
-                aria-expanded="false"
-                aria-controls="c-accordion-nested-parent-2-panel"
-                id="c-accordion-nested-parent-2-header"
-              >
-                <span class="c-accordion__title">親と子のスコープを分ける方法は？</span>
-                <span class="c-accordion__icon" aria-hidden="true"></span>
-              </button>
-            </h2>
-            <div
-              class="c-accordion__body"
-              id="c-accordion-nested-parent-2-panel"
-              hidden
-            >
-              <div class="c-accordion__content">
-                <p>
-                  クリックハンドラ内で、ヘッダーから最も近い <code>.c-accordion</code> が自分の root と一致するかを判定します。
-                  これにより、親 root のハンドラが子の <code>.c-accordion__header</code> を拾って二重発火する事故を防げます。
-                </p>
-
-                <div class="c-accordion c-accordion--child" data-accordion id="c-accordion-nested-child-2">
-                  <div class="c-accordion__item">
-                    <h3 class="c-accordion__heading">
-                      <button
-                        type="button"
-                        class="c-accordion__header"
-                        aria-expanded="false"
-                        aria-controls="c-accordion-nested-child-2-1-panel"
-                        id="c-accordion-nested-child-2-1-header"
-                      >
-                        <span class="c-accordion__title"><code>root.contains(header)</code> ではダメ？</span>
-                        <span class="c-accordion__icon" aria-hidden="true"></span>
-                      </button>
-                    </h3>
-                    <div
-                      class="c-accordion__body"
-                      id="c-accordion-nested-child-2-1-panel"
-                      hidden
-                    >
-                      <div class="c-accordion__content">
-                        <p>
-                          <code>root.contains(header)</code> は親 root が子の <code>.c-accordion__header</code> も <code>true</code> で拾ってしまうため、
-                          二重発火を防げません。<code>header.closest(".c-accordion") === root</code> で「ヘッダーが直属する root」を厳密に判定する必要があります。
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="c-accordion__item">
-                    <h3 class="c-accordion__heading">
-                      <button
-                        type="button"
-                        class="c-accordion__header"
-                        aria-expanded="false"
-                        aria-controls="c-accordion-nested-child-2-2-panel"
-                        id="c-accordion-nested-child-2-2-header"
-                      >
-                        <span class="c-accordion__title">イベントの伝播は止めないの？</span>
-                        <span class="c-accordion__icon" aria-hidden="true"></span>
-                      </button>
-                    </h3>
-                    <div
-                      class="c-accordion__body"
-                      id="c-accordion-nested-child-2-2-panel"
-                      hidden
-                    >
-                      <div class="c-accordion__content">
-                        <p>
-                          止めません。<code>event.stopPropagation()</code> は他の機能（モーダルの外側クリック判定など）に副作用を与えるため、
-                          スコープガード方式で「自分の管轄外なら何もしない」と振る舞う方が安全です。
-                          子 root の <code>addEventListener</code> 自体は独立しているため、子のクリックは子のハンドラだけで処理されます。
-                        </p>
-                      </div>
+                <div class="c-accordion__item">
+                  <h3 class="c-accordion__heading">
+                    <span class="c-accordion__title">利用開始までの日数</span>
+                  </h3>
+                  <div class="c-accordion__body" id="c-accordion-nested-child-1-2-panel">
+                    <div class="c-accordion__content">
+                      <p>
+                        お申し込みの内容を確認したうえで、ご利用開始のご案内をお送りします。
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="c-accordion__item">
-            <h2 class="c-accordion__heading">
-              <button
-                type="button"
-                class="c-accordion__header"
-                aria-expanded="false"
-                aria-controls="c-accordion-nested-parent-3-panel"
-                id="c-accordion-nested-parent-3-header"
-              >
-                <span class="c-accordion__title">キーボード操作は親子それぞれ独立する？</span>
-                <span class="c-accordion__icon" aria-hidden="true"></span>
-              </button>
-            </h2>
-            <div
-              class="c-accordion__body"
-              id="c-accordion-nested-parent-3-panel"
-              hidden
-            >
-              <div class="c-accordion__content">
-                <p>
-                  独立します。クリック対象に <code>&lt;button type="button"&gt;</code> を使っているため、Tab フォーカスは親ヘッダー → 子ヘッダーの順にネイティブな DOM 順で移動し、
-                  Enter / Space は各ボタンが個別に発火します。スコープガードは「親の click ハンドラから子を見ない」「子の click ハンドラから親を見ない」を実現するためのものなので、
-                  キーボード操作のフォーカス順序や発火タイミング自体には影響しません。
-                </p>
-                <p>
-                  なお、親項目を閉じると子のボタンは <code>hidden</code> 配下に入るため Tab フォーカスからも外れます。
-                  親を再度開けば自然に Tab 順序へ戻ります。
-                </p>
+                <div class="c-accordion__item">
+                  <h3 class="c-accordion__heading">
+                    <span class="c-accordion__title">登録内容の変更</span>
+                  </h3>
+                  <div class="c-accordion__body" id="c-accordion-nested-child-1-3-panel">
+                    <div class="c-accordion__content">
+                      <p>
+                        登録した情報は、いつでも管理画面から変更できます。
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- snippet:end -->
-      </section>
+
+        <div class="c-accordion__item">
+          <h2 class="c-accordion__heading">
+            <span class="c-accordion__title">お支払い方法</span>
+          </h2>
+          <div class="c-accordion__body" id="c-accordion-nested-parent-2-panel">
+            <div class="c-accordion__content">
+              <p>
+                支払いに関する手続きをまとめています。
+              </p>
+
+              <div class="c-accordion c-accordion--child" data-accordion id="c-accordion-nested-child-2">
+                <div class="c-accordion__item">
+                  <h3 class="c-accordion__heading">
+                    <span class="c-accordion__title">支払いのタイミング</span>
+                  </h3>
+                  <div class="c-accordion__body" id="c-accordion-nested-child-2-1-panel">
+                    <div class="c-accordion__content">
+                      <p>
+                        お支払いの締め切りは、選んだ方法によって異なります。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="c-accordion__item">
+                  <h3 class="c-accordion__heading">
+                    <span class="c-accordion__title">領収書の発行</span>
+                  </h3>
+                  <div class="c-accordion__body" id="c-accordion-nested-child-2-2-panel">
+                    <div class="c-accordion__content">
+                      <p>
+                        領収書は手続きの完了後に発行できます。宛名は変更できます。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-accordion__item">
+          <h2 class="c-accordion__heading">
+            <span class="c-accordion__title">配送と受け取り</span>
+          </h2>
+          <div class="c-accordion__body" id="c-accordion-nested-parent-3-panel">
+            <div class="c-accordion__content">
+              <p>
+                お届けまでの目安と、受け取り方法の選び方をまとめています。日時の指定や再配達の手続きについても案内します。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- snippet:end -->
     </main>
 
     <script src="./assets/js/script.js" defer></script>

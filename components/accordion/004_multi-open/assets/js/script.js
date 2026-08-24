@@ -5,7 +5,14 @@
  * 解説はこのファイルの冒頭に置き、範囲の中には書かない（貼った先にコメントを持ち込まないため）。
  *
  * 設計
+ * - HTML は「見出しと本文がそのまま読める」状態で書き、開閉のボタンは JS が組み立てる。
+ *   JS が動かない環境では本文がすべて読め、押しても何も起きないボタンも残らない。
+ * - 一括操作のボタンは HTML に置くが、CSS の既定で非表示にしてある。
+ *   JS が仕掛け終えたときだけ data-bulk-ready を付けて表示する。
+ *   これも「押しても何も起きないボタンを画面に残さない」の一部である。
  * - 個別の開閉は基本形と同じ。ルート要素へのイベント委譲・aria-expanded・hidden の3点を踏襲する。
+ * - 仕掛け終えたルート要素に data-accordion-ready を付ける。CSS はこれが付くまでの間だけ
+ *   本文を隠し、閉じた初期状態のちらつきを防ぐ（.js スコープ）。
  * - 一括操作の対象は data-bulk-controls="対象の id" で特定する。同じページに複数置いても取り違えない。
  * - 個別操作も一括操作も setItemState() を通す。aria-expanded と hidden が必ず同時に変わる。
  * - 全開・全閉では対応するボタンを disabled にする。押しても何も起きないボタンを画面に残さない。
@@ -23,6 +30,32 @@
   const accordionRoots = document.querySelectorAll(".c-accordion[data-accordion]");
 
   if (accordionRoots.length === 0) return;
+
+  function buildHeader(item) {
+    const heading = item.querySelector(":scope > .c-accordion__heading");
+    const panel = item.querySelector(":scope > .c-accordion__body");
+
+    if (!heading || !panel || !panel.id) return;
+    if (heading.querySelector(".c-accordion__header")) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "c-accordion__header";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", panel.id);
+
+    while (heading.firstChild) {
+      button.appendChild(heading.firstChild);
+    }
+
+    const icon = document.createElement("span");
+    icon.className = "c-accordion__icon";
+    icon.setAttribute("aria-hidden", "true");
+    button.appendChild(icon);
+
+    heading.appendChild(button);
+    panel.setAttribute("hidden", "");
+  }
 
   function setItemState(header, open) {
     const panelId = header.getAttribute("aria-controls");
@@ -75,11 +108,13 @@
 
   function announce(statusEl, message) {
     if (!statusEl) return;
-    const suffix = statusEl.textContent === message ? " " : "";
+    const suffix = statusEl.textContent === message ? " " : "";
     statusEl.textContent = message + suffix;
   }
 
   function bindAccordion(root) {
+    root.querySelectorAll(":scope > .c-accordion__item").forEach(buildHeader);
+
     const accordionId = root.id;
     const bulkRoot = accordionId
       ? document.querySelector(
@@ -98,6 +133,8 @@
 
       if (bulkRoot) updateBulkButtonsState(root, bulkRoot);
     });
+
+    root.setAttribute("data-accordion-ready", "");
 
     if (bulkRoot) {
       bulkRoot.addEventListener("click", function (event) {
@@ -124,6 +161,7 @@
       });
 
       updateBulkButtonsState(root, bulkRoot);
+      bulkRoot.setAttribute("data-bulk-ready", "");
     }
   }
 
