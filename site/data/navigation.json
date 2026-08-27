@@ -10,7 +10,8 @@
       "name": "基本のハンバーガー",
       "tags": ["JS必要"],
       "notes": [
-        "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。"
+        "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。",
+        "ハンバーガーボタンは JavaScript が組み立てる。先頭のスクリプトは開く前の状態が一瞬見えるのを防ぐためのもので、外しても開閉は動く。"
       ],
       "files": ["html", "css", "js"]
     },
@@ -20,7 +21,8 @@
       "tags": ["JS必要"],
       "notes": [
         "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。",
-        "開いた直後にフォーカスを移す 300ms は CSS の --slidedown-transition と同じ値である。片方だけ変えない。"
+        "開いた直後にフォーカスを移す 300ms は CSS の --slidedown-transition と同じ値である。片方だけ変えない。",
+        "ハンバーガーボタンは JavaScript が組み立てる。先頭のスクリプトは開く前の状態が一瞬見えるのを防ぐためのもので、外しても開閉は動く。"
       ],
       "files": ["html", "css", "js"]
     },
@@ -30,7 +32,8 @@
       "tags": ["JS必要"],
       "notes": [
         "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。",
-        "開いた直後にフォーカスを移す 300ms は CSS の --slidein-transition と同じ値である。片方だけ変えない。"
+        "開いた直後にフォーカスを移す 300ms は CSS の --slidein-transition と同じ値である。片方だけ変えない。",
+        "ハンバーガーボタンは JavaScript が組み立てる。先頭のスクリプトは開く前の状態が一瞬見えるのを防ぐためのもので、外しても開閉は動く。"
       ],
       "files": ["html", "css", "js"]
     },
@@ -41,7 +44,7 @@
       "notes": [
         "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。",
         "開いた直後にフォーカスを移す 300ms は CSS の --drawer-transition と同じ値である。片方だけ変えない。",
-        "オーバーレイは装飾のため aria-hidden を固定している。JavaScript から切り替えない。"
+        "ハンバーガーと閉じるボタンは JavaScript が組み立てる。先頭のスクリプトは開く前の状態が一瞬見えるのを防ぐためのもので、外しても開閉は動く。"
       ],
       "files": ["html", "css", "js"],
       "featured": true
@@ -53,7 +56,7 @@
       "notes": [
         "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。",
         "開いた直後にフォーカスを移す 300ms は CSS の --push-transition と同じ値である。片方だけ変えない。",
-        "ページの内容は c-push-wrapper の中に置く。掲載範囲に入っている main とサンプルの文章はデモ用のため、自分の内容へ差し替える。"
+        "ハンバーガーと閉じるボタンは JavaScript が組み立てる。ページの内容は c-push-wrapper の中に置く。掲載範囲に入っている main とサンプルの文章はデモ用のため、自分の内容へ差し替える。"
       ],
       "files": ["html", "css", "js"]
     },
@@ -63,7 +66,8 @@
       "tags": ["JS必要"],
       "notes": [
         "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。",
-        "開いた直後にフォーカスを移す 400ms は CSS の --fullscreen-transition と同じ値である。片方だけ変えない。"
+        "開いた直後にフォーカスを移す 400ms は CSS の --fullscreen-transition と同じ値である。片方だけ変えない。",
+        "ハンバーガーボタンは JavaScript が組み立てる。先頭のスクリプトは開く前の状態が一瞬見えるのを防ぐためのもので、外しても開閉は動く。"
       ],
       "files": ["html", "css", "js"]
     },
@@ -73,8 +77,8 @@
       "tags": ["JS必要"],
       "notes": [
         "切り替えの幅 768px は CSS の @media と JavaScript の matchMedia の両方にある。変えるときは両方直す。",
-        "開閉の待ち時間は JavaScript の4つの定数（400 / 500 / 300 / 500ms）で決まり、CSS の --expand-transition-bg（0.5s）・--expand-transition-nav（0.4s）と1対1では対応しない。CSS の時間を変えたら4つとも見直す。",
-        "768px 以上でも右下のボタンを出したままにしている。隠す場合は 768px 以上で display: none にする指定を足す。"
+        "開閉の待ち時間は JavaScript の4つの定数（400 / 500 / 300 / 500ms）で決まり、CSS の --expand-transition-bg（0.5s）・--expand-transition-nav（0.4s）と1対1では対応しない。CSS の時間を変えたら4つとも見直す。動きを減らす設定のときは4つとも0になる。",
+        "右下のボタンは JavaScript が組み立てる。768px 以上でも出したままにしているので、隠す場合は 768px 以上で display: none にする指定を足す。"
       ],
       "files": ["html", "css", "js"]
     }

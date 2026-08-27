@@ -8,7 +8,7 @@
  * - HTML は「見出しと本文がそのまま読める」状態で書き、開閉のボタンは JS が組み立てる。
  *   JS が動かない環境では本文がすべて読め、押しても何も起きないボタンも残らない。
  * - 個別の開閉は基本形と同じ。ルート要素へのイベント委譲・aria-expanded・hidden の3点を踏襲する。
- * - 仕掛け終えたルート要素に data-accordion-ready を付ける。CSS はこれが付くまでの間だけ
+ * - 仕掛け終えたルート要素に data-single-open-ready を付ける。CSS はこれが付くまでの間だけ
  *   本文を隠し、閉じた初期状態のちらつきを防ぐ（.js スコープ）。
  * - 排他制御は「対象以外を先に閉じてから、対象を1回だけトグルする」順で行う。
  *   対象自身を forEach の対象から外すため、閉じてから開き直す二重操作にならない。
@@ -23,7 +23,7 @@
 (function () {
   "use strict";
 
-  const accordionRoots = document.querySelectorAll(".c-accordion[data-accordion]");
+  const accordionRoots = document.querySelectorAll(".c-accordion[data-single-open]");
 
   if (accordionRoots.length === 0) return;
 
@@ -101,7 +101,7 @@
       toggleItem(header, root);
     });
 
-    root.setAttribute("data-accordion-ready", "");
+    root.setAttribute("data-single-open-ready", "");
   }
 
   accordionRoots.forEach(bindAccordion);

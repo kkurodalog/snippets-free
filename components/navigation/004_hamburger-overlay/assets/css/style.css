@@ -9,6 +9,12 @@
  * - ドロワーの中身が長いときのために overflow-y: auto を持たせる
  * - 閉じるボタンの × は疑似要素2本で描く。画像を使わない
  *
+ * ハンバーガーは × 印へ変形させない。開いている間はオーバーレイ（--z-overlay: 30）と
+ * ドロワー（--z-drawer: 40）がヘッダー（--z-header: 20）より前面にあり、ボタンは完全に隠れる。
+ * 閉じる手段はオーバーレイのクリック・ドロワー内の閉じるボタン・Escape の3つで、
+ * 変形はどれにも使われない。変形を残すと、ドロワーが消えていく 0.3 秒のあいだに
+ * 下から現れたボタンが × から三本線へ戻るところが見えてしまう。
+ *
  * このファイルの前半はデモページの体裁である。貼って使う範囲はマーカーの内側だけ。
  * ホバーの指定は any-hover: hover かつ pointer: fine のときだけ当てている
  * （タッチ操作で当たったままになるのを避けるため）。
@@ -152,22 +158,6 @@
   height: 2px;
   background-color: #333;
   border-radius: 2px;
-  transform-origin: center;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-}
-
-.c-hamburger.is-active .c-hamburger__line:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.c-hamburger.is-active .c-hamburger__line:nth-child(2) {
-  opacity: 0;
-}
-
-.c-hamburger.is-active .c-hamburger__line:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
 }
 
 .c-nav {
@@ -230,26 +220,40 @@
 }
 
 .c-drawer {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.js .c-drawer:not([data-hamburger-overlay-ready]) {
+  display: none;
+}
+
+.c-drawer[data-hamburger-overlay-ready] {
   position: fixed;
   top: 0;
   right: 0;
   z-index: var(--z-drawer);
   width: var(--drawer-width);
   height: 100%;
-  background-color: #fff;
+  border-bottom: none;
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
+  visibility: hidden;
   transform: translateX(100%);
-  transition: transform var(--drawer-transition);
+  transition:
+    transform var(--drawer-transition),
+    visibility var(--drawer-transition);
 
   overflow-y: auto;
 }
 
-.c-drawer.is-open {
+.c-drawer[data-hamburger-overlay-ready].is-open {
+  visibility: visible;
   transform: translateX(0);
 }
 
 @media (min-width: 768px) {
-  .c-drawer {
+  .c-drawer,
+  .c-drawer[data-hamburger-overlay-ready] {
     display: none;
   }
 }
@@ -336,6 +340,17 @@
   .c-drawer__link:hover {
     color: #0066cc;
     background-color: #f5f8ff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-header,
+  .c-header *,
+  .c-overlay,
+  .c-drawer,
+  .c-drawer[data-hamburger-overlay-ready],
+  .c-drawer * {
+    transition: none;
   }
 }
 /* snippet:end */

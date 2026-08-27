@@ -26,11 +26,11 @@
         document.documentElement.classList.add("js");
       </script>
 
-      <div class="c-accordion__bulk-controls" data-bulk-controls="c-accordion-multi-open">
+      <div class="c-accordion__bulk-controls" data-multi-open-bulk-controls="c-accordion-multi-open">
         <button
           type="button"
           class="c-accordion__bulk-button"
-          data-bulk-action="open"
+          data-multi-open-bulk-action="open"
           aria-controls="c-accordion-multi-open"
         >
           すべて開く
@@ -38,7 +38,7 @@
         <button
           type="button"
           class="c-accordion__bulk-button"
-          data-bulk-action="close"
+          data-multi-open-bulk-action="close"
           aria-controls="c-accordion-multi-open"
         >
           すべて閉じる
@@ -47,11 +47,11 @@
           class="c-accordion__sr-status"
           role="status"
           aria-live="polite"
-          data-bulk-status
+          data-multi-open-bulk-status
         ></div>
       </div>
 
-      <div class="c-accordion" data-accordion id="c-accordion-multi-open">
+      <div class="c-accordion" data-multi-open id="c-accordion-multi-open">
         <div class="c-accordion__item">
           <h2 class="c-accordion__heading">
             <span class="c-accordion__title">ご利用の流れ</span>

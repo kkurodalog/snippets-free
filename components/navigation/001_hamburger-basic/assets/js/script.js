@@ -2,14 +2,22 @@
  * 001_hamburger-basic
  * ハンバーガーボタンでナビゲーションを開閉する、いちばん短い形。
  *
+ * 設計
+ * - HTML は「ナビのリンクがそのまま読める」状態で書き、ハンバーガーボタンは JS が組み立てる。
+ *   JS が動かない環境ではリンクが全部読め、押しても何も起きないボタンも残らない。
+ * - 仕掛け終えたヘッダーに data-hamburger-basic-ready を付ける。閉じた見せ方（絶対配置と display: none）は
+ *   CSS 側でこの印の中だけに置いてある。
+ * - 掲載範囲の先頭にあるインラインスクリプトは、開く前の状態が一瞬見えるのを防ぐためのもの。
+ *
  * 動き
  * - ボタンに is-active、ナビに is-open を付け外しして状態を持つ
  * - aria-expanded と aria-hidden、ボタンの読み上げ名を同時に更新する
  * - ナビの外をクリック、または Escape で閉じ、フォーカスをボタンへ戻す
- * - matchMedia でブレークポイント（768px）をまたいだときに状態を戻す
  *
- * 状態の持ち方
- * - 開閉の真偽はボタンの is-active を見て決める。属性とクラスを別々に判定しない
+ * 画面幅と aria-hidden
+ * - 768px 以上ではナビが常に見えているため aria-hidden を外す。
+ *   ⚠️ matchMedia の change だけで外すと、最初から広い画面で開いたときに一度も外れない。
+ *   起動時にも同じ関数を通し、いまの画面幅で判断する。
  *
  * スクロールロック
  * - ナビが画面全体を覆わないため掛けない
@@ -19,10 +27,42 @@
 (function () {
   "use strict";
 
-  const hamburger = document.querySelector(".c-hamburger");
+  const header = document.querySelector(".c-header");
   const nav = document.querySelector(".c-nav");
 
-  if (!hamburger || !nav) return;
+  if (!header || !nav) return;
+
+  function buildHamburger(controlsId) {
+    const inner = header.querySelector(".c-header__inner");
+    if (!inner) return null;
+
+    const existing = inner.querySelector(".c-hamburger");
+    if (existing) return existing;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "c-hamburger";
+    button.setAttribute("aria-label", "メニューを開く");
+    button.setAttribute("aria-expanded", "false");
+    if (controlsId) {
+      button.setAttribute("aria-controls", controlsId);
+    }
+
+    for (let i = 0; i < 3; i += 1) {
+      const line = document.createElement("span");
+      line.className = "c-hamburger__line";
+      button.appendChild(line);
+    }
+
+    inner.insertBefore(button, nav);
+    return button;
+  }
+
+  const hamburger = buildHamburger(nav.id);
+
+  if (!hamburger) return;
+
+  const mediaQuery = window.matchMedia("(min-width: 768px)");
 
   function openMenu() {
     hamburger.classList.add("is-active");
@@ -49,6 +89,17 @@
     }
   }
 
+  function syncViewport() {
+    if (mediaQuery.matches) {
+      if (nav.classList.contains("is-open")) {
+        closeMenu();
+      }
+      nav.removeAttribute("aria-hidden");
+    } else if (!nav.classList.contains("is-open")) {
+      nav.setAttribute("aria-hidden", "true");
+    }
+  }
+
   hamburger.addEventListener("click", toggleMenu);
 
   document.addEventListener("click", function (e) {
@@ -68,16 +119,9 @@
     }
   });
 
-  const mediaQuery = window.matchMedia("(min-width: 768px)");
-  mediaQuery.addEventListener("change", function (e) {
-    if (e.matches) {
-      if (nav.classList.contains("is-open")) {
-        closeMenu();
-      }
-      nav.removeAttribute("aria-hidden");
-    } else {
-      nav.setAttribute("aria-hidden", "true");
-    }
-  });
+  mediaQuery.addEventListener("change", syncViewport);
+
+  syncViewport();
+  header.setAttribute("data-hamburger-basic-ready", "");
 })();
 /* snippet:end */

@@ -7,7 +7,7 @@
  * 設計
  * - HTML は「見出しと本文がそのまま読める」状態で書き、開閉のボタンは JS が組み立てる。
  *   JS が動かない環境では本文がすべて読め、押しても何も起きないボタンも残らない。
- * - 仕掛け終えたルート要素に data-accordion-ready を付ける。閉じた見た目と高さの指定は
+ * - 仕掛け終えたルート要素に data-animation-ready を付ける。閉じた見た目と高さの指定は
  *   この印を条件にしてある。実際に JS が動いた環境だけで畳まれ、画面と支援技術がずれない。
  *   描画より前に効かせたい隠蔽（ちらつき防止）の1本だけは .js スコープに置く。
  * - 高さは CSS の grid-template-rows: 0fr → 1fr で動かす。コンテンツの実寸を測らない。
@@ -26,7 +26,7 @@
 (function () {
   "use strict";
 
-  const accordionRoots = document.querySelectorAll(".c-accordion[data-accordion]");
+  const accordionRoots = document.querySelectorAll(".c-accordion[data-animation]");
 
   if (accordionRoots.length === 0) return;
 
@@ -118,7 +118,7 @@
       toggleItem(header);
     });
 
-    root.setAttribute("data-accordion-ready", "");
+    root.setAttribute("data-animation-ready", "");
   }
 
   accordionRoots.forEach(bindAccordion);

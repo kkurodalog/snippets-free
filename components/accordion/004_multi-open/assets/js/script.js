@@ -8,18 +8,18 @@
  * - HTML は「見出しと本文がそのまま読める」状態で書き、開閉のボタンは JS が組み立てる。
  *   JS が動かない環境では本文がすべて読め、押しても何も起きないボタンも残らない。
  * - 一括操作のボタンは HTML に置くが、CSS の既定で非表示にしてある。
- *   JS が仕掛け終えたときだけ data-bulk-ready を付けて表示する。
+ *   JS が仕掛け終えたときだけ data-multi-open-bulk-ready を付けて表示する。
  *   これも「押しても何も起きないボタンを画面に残さない」の一部である。
  * - 個別の開閉は基本形と同じ。ルート要素へのイベント委譲・aria-expanded・hidden の3点を踏襲する。
- * - 仕掛け終えたルート要素に data-accordion-ready を付ける。CSS はこれが付くまでの間だけ
+ * - 仕掛け終えたルート要素に data-multi-open-ready を付ける。CSS はこれが付くまでの間だけ
  *   本文を隠し、閉じた初期状態のちらつきを防ぐ（.js スコープ）。
- * - 一括操作の対象は data-bulk-controls="対象の id" で特定する。同じページに複数置いても取り違えない。
+ * - 一括操作の対象は data-multi-open-bulk-controls="対象の id" で特定する。同じページに複数置いても取り違えない。
  * - 個別操作も一括操作も setItemState() を通す。aria-expanded と hidden が必ず同時に変わる。
  * - 全開・全閉では対応するボタンを disabled にする。押しても何も起きないボタンを画面に残さない。
  * - 一括操作の結果は aria-live="polite" の領域へ書いて支援技術に伝える。
  *   同じ文字列を続けて書くと変化なしと見なされるため、同一のときだけ末尾に不可視の空白（U+00A0）を足す。
  * - 状態の通知先は一括コントロールの配下から引く。複数共存時に他方の通知領域へ書き込まないため。
- * - data-bulk-controls の値は英数字・ハイフン・アンダースコアだけを前提にする。
+ * - data-multi-open-bulk-controls の値は英数字・ハイフン・アンダースコアだけを前提にする。
  *   それ以外の文字を使うなら CSS.escape() を併用する。
  */
 
@@ -27,7 +27,7 @@
 (function () {
   "use strict";
 
-  const accordionRoots = document.querySelectorAll(".c-accordion[data-accordion]");
+  const accordionRoots = document.querySelectorAll(".c-accordion[data-multi-open]");
 
   if (accordionRoots.length === 0) return;
 
@@ -99,8 +99,8 @@
       return h.getAttribute("aria-expanded") !== "true";
     });
 
-    const openButton = bulkRoot.querySelector('[data-bulk-action="open"]');
-    const closeButton = bulkRoot.querySelector('[data-bulk-action="close"]');
+    const openButton = bulkRoot.querySelector('[data-multi-open-bulk-action="open"]');
+    const closeButton = bulkRoot.querySelector('[data-multi-open-bulk-action="close"]');
 
     if (openButton) openButton.disabled = allOpen;
     if (closeButton) closeButton.disabled = allClosed;
@@ -118,10 +118,10 @@
     const accordionId = root.id;
     const bulkRoot = accordionId
       ? document.querySelector(
-          '[data-bulk-controls="' + accordionId + '"]'
+          '[data-multi-open-bulk-controls="' + accordionId + '"]'
         )
       : null;
-    const statusEl = bulkRoot ? bulkRoot.querySelector("[data-bulk-status]") : null;
+    const statusEl = bulkRoot ? bulkRoot.querySelector("[data-multi-open-bulk-status]") : null;
 
     root.addEventListener("click", function (event) {
       const header = event.target.closest(".c-accordion__header");
@@ -134,15 +134,15 @@
       if (bulkRoot) updateBulkButtonsState(root, bulkRoot);
     });
 
-    root.setAttribute("data-accordion-ready", "");
+    root.setAttribute("data-multi-open-ready", "");
 
     if (bulkRoot) {
       bulkRoot.addEventListener("click", function (event) {
-        const button = event.target.closest("[data-bulk-action]");
+        const button = event.target.closest("[data-multi-open-bulk-action]");
         if (!button) return;
         if (button.disabled) return;
 
-        const action = button.getAttribute("data-bulk-action");
+        const action = button.getAttribute("data-multi-open-bulk-action");
         const headers = collectHeaders(root);
 
         if (action === "open") {
@@ -161,7 +161,7 @@
       });
 
       updateBulkButtonsState(root, bulkRoot);
-      bulkRoot.setAttribute("data-bulk-ready", "");
+      bulkRoot.setAttribute("data-multi-open-bulk-ready", "");
     }
   }
 

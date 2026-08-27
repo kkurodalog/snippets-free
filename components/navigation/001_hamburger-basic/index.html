@@ -1,31 +1,36 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="no-js">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>001_hamburger-basic</title>
+    <!--
+      JS が読み込まれる前に html の class を no-js → js へ書き換える。
+      head 内のインラインスクリプトで実行することで画面描画前に切り替わり、
+      閉じた初期状態のちらつき（FOUC）を防ぐ。
+      JS 無効環境ではこのスクリプトが走らず no-js のままになり、
+      CSS 側でナビゲーションのリンクが最初から読める状態になる（リンクの欠落を防ぐ）。
+    -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
     <link rel="stylesheet" href="../../common/css/reset.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <!-- snippet:start -->
+    <script>
+      document.documentElement.classList.remove("no-js");
+      document.documentElement.classList.add("js");
+    </script>
+
     <header class="c-header">
       <div class="c-header__inner">
         <a href="#" class="c-header__logo">LOGO</a>
 
-        <button
-          class="c-hamburger"
-          type="button"
-          aria-label="メニューを開く"
-          aria-expanded="false"
-          aria-controls="c-nav"
-        >
-          <span class="c-hamburger__line"></span>
-          <span class="c-hamburger__line"></span>
-          <span class="c-hamburger__line"></span>
-        </button>
-
-        <nav class="c-nav" id="c-nav" aria-label="グローバルナビゲーション" aria-hidden="true">
+        <nav class="c-nav" id="c-nav" aria-label="グローバルナビゲーション">
           <ul class="c-nav__list">
             <li class="c-nav__item"><a href="#" class="c-nav__link">TOP</a></li>
             <li class="c-nav__item"><a href="#" class="c-nav__link">ABOUT</a></li>
@@ -40,49 +45,42 @@
 
     <main class="l-container">
       <section class="l-inner">
-        <h1 class="p-snippet-title">001_hamburger-basic</h1>
+        <h2 class="p-snippet-title">サービスのご案内</h2>
         <div class="p-snippet-content">
-          <p>ハンバーガーボタンをクリックしてナビゲーションをトグル表示します。<br>768px以上でハンバーガー非表示・通常ナビ表示に切り替わります。</p>
+          <p>提供している内容と、利用を始めるまでに必要なものをまとめています。はじめての方は、この節から順に読み進めてください。用意しておくと手続きが早く進む書類も、あわせて記載しています。</p>
+          <p>案内の内容は変わることがあります。最新の状態は、それぞれの案内のページであらためて確かめてください。</p>
         </div>
       </section>
 
       <section class="l-inner">
-        <h2 class="p-snippet-title">セクション 1</h2>
+        <h2 class="p-snippet-title">ご利用の流れ</h2>
         <div class="p-snippet-content">
-          <p>スクロールしてヘッダーの動作を確認してください。ハンバーガーボタンをクリックすると、ナビゲーションメニューがトグル表示されます。</p>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <p>申し込みから利用開始までは、受付・内容の確認・開始の案内という順に進みます。段階ごとに必要な手続きと、目安になる期間を記載しています。</p>
+          <p>途中で内容を変えたいときは、次の段階へ進む前に連絡してください。進んだあとでも変えられますが、手続きが増えます。</p>
         </div>
       </section>
 
       <section class="l-inner">
-        <h2 class="p-snippet-title">セクション 2</h2>
+        <h2 class="p-snippet-title">お支払い方法</h2>
         <div class="p-snippet-content">
-          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          <p>支払いの方法はいくつかあり、締め切りの日は方法によって違います。選んだ方法に応じた案内は、申し込みを受け付けたあとにお送りします。</p>
+          <p>領収書が必要な場合は、支払いが済んだあとに発行できます。宛名の指定があるときは、あらかじめ知らせてください。</p>
         </div>
       </section>
 
       <section class="l-inner">
-        <h2 class="p-snippet-title">セクション 3</h2>
+        <h2 class="p-snippet-title">よくあるご質問</h2>
         <div class="p-snippet-content">
-          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-          <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem.</p>
+          <p>問い合わせの多い内容をまとめています。同じ疑問がここで解決することが多いため、連絡をいただく前に目を通してください。</p>
+          <p>ここに載っていない内容は、問い合わせの窓口で受け付けています。返答までの目安は、混み合う時期を除けば数日です。</p>
         </div>
       </section>
 
       <section class="l-inner">
-        <h2 class="p-snippet-title">セクション 4</h2>
+        <h2 class="p-snippet-title">お問い合わせ</h2>
         <div class="p-snippet-content">
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-        </div>
-      </section>
-
-      <section class="l-inner">
-        <h2 class="p-snippet-title">セクション 5</h2>
-        <div class="p-snippet-content">
-          <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-          <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+          <p>連絡の方法と、受け付けている時間をまとめています。急ぎの用件かどうかで、適した窓口が変わります。</p>
+          <p>いただいた内容は届いた順に確認しています。混み合っているときは、返答までに時間がかかることがあります。</p>
         </div>
       </section>
     </main>

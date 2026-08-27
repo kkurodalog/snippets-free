@@ -132,8 +132,11 @@ body {
 }
 
 .c-accordion__body {
-  display: none;
   background-color: var(--accordion-color-bg);
+}
+
+.c-accordion__toggle ~ .c-accordion__body {
+  display: none;
 }
 
 .c-accordion__toggle:checked ~ .c-accordion__body {

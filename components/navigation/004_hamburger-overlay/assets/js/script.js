@@ -2,6 +2,18 @@
  * 004_hamburger-overlay
  * 右から出るドロワーと、背面を暗くするオーバーレイの組み合わせ。
  *
+ * 設計
+ * - HTML は「ナビのリンクがそのまま読める」状態で書き、ハンバーガーボタンは JS が組み立てる。
+ *   JS が動かない環境ではリンクが全部読め、押しても何も起きないボタンも残らない。
+ * - 仕掛け終えたナビに data-hamburger-overlay-ready を付ける。閉じた見せ方（画面外への移動と
+ *   visibility: hidden）は CSS 側でこの印の中だけに置いてある。
+ * - 掲載範囲の先頭にあるインラインスクリプトは、開く前の状態が一瞬見えるのを防ぐためのもの。
+ *
+ * 画面幅と aria-hidden
+ * - 768px 以上ではナビが常に見えているため aria-hidden を外す。
+ *   起動時にも同じ関数を通し、いまの画面幅で判断する
+ *   （matchMedia の change だけに任せると、最初から広い画面で開いたときに一度も外れない）。
+ *
  * 動き
  * - ボタンに is-active、ドロワーに is-open、オーバーレイに is-visible を付け外しする
  * - aria-expanded と aria-hidden、ボタンの読み上げ名を同時に更新する
@@ -25,12 +37,67 @@
 (function () {
   "use strict";
 
-  const hamburger = document.querySelector(".c-hamburger");
+  const header = document.querySelector(".c-header");
   const drawer = document.querySelector(".c-drawer");
-  const drawerClose = document.querySelector(".c-drawer__close");
   const overlay = document.querySelector(".c-overlay");
 
-  if (!hamburger || !drawer || !overlay) return;
+  if (!header || !drawer || !overlay) return;
+
+  function buildHamburger(controlsId) {
+    const inner = header.querySelector(".c-header__inner");
+    if (!inner) return null;
+
+    const existing = inner.querySelector(".c-hamburger");
+    if (existing) return existing;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "c-hamburger";
+    button.setAttribute("aria-label", "メニューを開く");
+    button.setAttribute("aria-expanded", "false");
+    if (controlsId) {
+      button.setAttribute("aria-controls", controlsId);
+    }
+
+    for (let i = 0; i < 3; i += 1) {
+      const line = document.createElement("span");
+      line.className = "c-hamburger__line";
+      button.appendChild(line);
+    }
+
+    const inlineNav = inner.querySelector(".c-nav");
+    if (inlineNav) {
+      inner.insertBefore(button, inlineNav);
+    } else {
+      inner.appendChild(button);
+    }
+    return button;
+  }
+
+  function buildDrawerClose() {
+    const existing = drawer.querySelector(".c-drawer__close");
+    if (existing) return existing;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "c-drawer__close";
+    button.setAttribute("aria-label", "メニューを閉じる");
+
+    const icon = document.createElement("span");
+    icon.className = "c-drawer__close-icon";
+    icon.setAttribute("aria-hidden", "true");
+    button.appendChild(icon);
+
+    drawer.insertBefore(button, drawer.firstChild);
+    return button;
+  }
+
+  const hamburger = buildHamburger(drawer.id);
+
+  if (!hamburger) return;
+
+  const drawerClose = buildDrawerClose();
+  const mediaQuery = window.matchMedia("(min-width: 768px)");
 
   const FOCUSABLE_SELECTOR =
     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -123,16 +190,20 @@
     }
   });
 
-  const mediaQuery = window.matchMedia("(min-width: 768px)");
-  mediaQuery.addEventListener("change", function (e) {
-    if (e.matches) {
+  function syncViewport() {
+    if (mediaQuery.matches) {
       if (drawer.classList.contains("is-open")) {
         closeMenu();
       }
       drawer.removeAttribute("aria-hidden");
-    } else {
+    } else if (!drawer.classList.contains("is-open")) {
       drawer.setAttribute("aria-hidden", "true");
     }
-  });
+  }
+
+  mediaQuery.addEventListener("change", syncViewport);
+
+  syncViewport();
+  drawer.setAttribute("data-hamburger-overlay-ready", "");
 })();
 /* snippet:end */

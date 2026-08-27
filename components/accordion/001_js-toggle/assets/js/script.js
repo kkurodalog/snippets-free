@@ -7,11 +7,11 @@
  * 設計
  * - HTML は「見出しと本文がそのまま読める」状態で書き、開閉のボタンは JS が組み立てる。
  *   JS が動かない環境では本文がすべて読め、押しても何も起きないボタンも残らない。
- * - ルート要素 .c-accordion[data-accordion] にイベントを委譲する。項目が増えてもリスナーは増えない。
+ * - ルート要素 .c-accordion[data-js-toggle] にイベントを委譲する。項目が増えてもリスナーは増えない。
  * - 開閉状態は aria-expanded を唯一の源にし、見た目は CSS の [aria-expanded="true"] で切り替える。
  *   is-open のような別クラスを足さない。
  * - 本文の表示・非表示は hidden 属性で持つ。ボタンを組み立てた直後に JS が付ける。
- * - 仕掛け終えたルート要素に data-accordion-ready を付ける。CSS はこれが付くまでの間だけ
+ * - 仕掛け終えたルート要素に data-js-toggle-ready を付ける。CSS はこれが付くまでの間だけ
  *   本文を隠し、閉じた初期状態のちらつきを防ぐ（.js スコープ）。
  * - aria-controls の参照先は本文の id である。id の無い項目は組み立てを飛ばす。
  * - キーボード操作は <button> のネイティブ挙動に任せる（Enter / Space の処理を自前で書かない）。
@@ -23,7 +23,7 @@
 (function () {
   "use strict";
 
-  const accordionRoots = document.querySelectorAll(".c-accordion[data-accordion]");
+  const accordionRoots = document.querySelectorAll(".c-accordion[data-js-toggle]");
 
   if (accordionRoots.length === 0) return;
 
@@ -81,7 +81,7 @@
       toggleItem(header);
     });
 
-    root.setAttribute("data-accordion-ready", "");
+    root.setAttribute("data-js-toggle-ready", "");
   }
 
   accordionRoots.forEach(bindAccordion);

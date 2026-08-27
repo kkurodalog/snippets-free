@@ -8,6 +8,23 @@
  * - 動作中は isAnimating で入力を受け付けない。2段階の途中で割り込まれると
  *   背景とリンクの状態が食い違うため
  *
+ * 設計
+ * - HTML は「ナビのリンクがそのまま読める」状態で書き、右下のボタンは JS が組み立てる。
+ *   JS が動かない環境ではリンクが全部読め、押しても何も起きないボタンも残らない
+ *   （このパーツは 768px 以上でもボタンを出すため、PC でも死んだボタンが残らない形にした）。
+ * - 仕掛け終えたナビに data-hamburger-expand-corner-ready を付ける。閉じた見せ方（全画面への固定と
+ *   visibility: hidden）は CSS 側でこの印の中だけに置いてある。
+ * - 掲載範囲の先頭にあるインラインスクリプトは、開く前の状態が一瞬見えるのを防ぐためのもの。
+ *
+ * 画面幅と aria-hidden
+ * - 768px 以上ではヘッダーのナビが常に見えているため aria-hidden を外す。
+ *   起動時にも同じ関数を通し、いまの画面幅で判断する
+ *   （matchMedia の change だけに任せると、最初から広い画面で開いたときに一度も外れない）。
+ *
+ * 動きの軽減
+ * - prefers-reduced-motion: reduce のときは、待ち時間の定数を 0 にする。
+ *   CSS 側で transition を切っても、JS が時間を数えている間は何も起きない時間が残るため
+ *
  * 動き
  * - ボタンに is-active、背景に is-expanding / is-closing、ナビに is-open を付け外しする
  * - aria-expanded と aria-hidden、ボタンの読み上げ名を同時に更新する
@@ -23,6 +40,12 @@
  * - 4つの定数は --expand-transition-bg（0.5s）・--expand-transition-nav（0.4s）と
  *   1対1では対応しない。CSS の時間を変えたら4つとも見直す
  *
+ * フォーカスの捕捉範囲
+ * - 巡回の順番を DOM の並びに合わせる（ナビのリンク → 右下のボタン）。
+ *   ボタンはナビの直後に置かれるため、配列の先頭に置くと「ボタンから Tab を押したとき」だけ
+ *   捕捉が効かず、ヘッダーのロゴへ抜ける。ロゴは全画面ナビの下に完全に隠れており、
+ *   フォーカスの輪郭が1画素も出ない停止になる。
+ *
  * スクロールロック
  * - 画面全体を覆うため、開いている間は body のスクロールを止める
  */
@@ -31,11 +54,43 @@
 (function () {
   "use strict";
 
-  const fab = document.querySelector(".c-fab");
   const expandBg = document.querySelector(".c-expand-bg");
   const expandNav = document.querySelector(".c-expand-nav");
 
-  if (!fab || !expandBg || !expandNav) return;
+  if (!expandBg || !expandNav) return;
+
+  function buildFab(controlsId) {
+    const existing = document.querySelector(".c-fab");
+    if (existing) return existing;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "c-fab";
+    button.setAttribute("aria-label", "メニューを開く");
+    button.setAttribute("aria-expanded", "false");
+    if (controlsId) {
+      button.setAttribute("aria-controls", controlsId);
+    }
+
+    for (let i = 0; i < 3; i += 1) {
+      const line = document.createElement("span");
+      line.className = "c-fab__line";
+      button.appendChild(line);
+    }
+
+    expandNav.insertAdjacentElement("afterend", button);
+    return button;
+  }
+
+  const fab = buildFab(expandNav.id);
+
+  if (!fab) return;
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function wait(ms) {
+    return reducedMotion.matches ? 0 : ms;
+  }
 
   const FOCUSABLE_SELECTOR =
     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -71,11 +126,11 @@
       if (firstFocusable) {
         setTimeout(function () {
           firstFocusable.focus();
-        }, PHASE2_FOCUS_DELAY);
+        }, wait(PHASE2_FOCUS_DELAY));
       }
 
       isAnimating = false;
-    }, PHASE1_DURATION);
+    }, wait(PHASE1_DURATION));
   }
 
   function closeMenu() {
@@ -100,8 +155,8 @@
         expandBg.classList.remove("is-closing");
         expandNav.style.visibility = "";
         isAnimating = false;
-      }, CLOSE_BG_DURATION);
-    }, CLOSE_NAV_DURATION);
+      }, wait(CLOSE_BG_DURATION));
+    }, wait(CLOSE_NAV_DURATION));
   }
 
   function toggleMenu() {
@@ -118,7 +173,7 @@
     if (!expandNav.classList.contains("is-open")) return;
 
     const navFocusable = Array.from(expandNav.querySelectorAll(FOCUSABLE_SELECTOR));
-    const focusableElements = [fab].concat(navFocusable);
+    const focusableElements = navFocusable.concat(fab);
     if (focusableElements.length === 0) return;
 
     const firstElement = focusableElements[0];
@@ -144,7 +199,7 @@
       closeMenu();
       setTimeout(function () {
         fab.focus();
-      }, CLOSE_NAV_DURATION + CLOSE_BG_DURATION);
+      }, wait(CLOSE_NAV_DURATION + CLOSE_BG_DURATION));
       return;
     }
     if (e.key === "Tab") {
@@ -153,8 +208,9 @@
   });
 
   const mediaQuery = window.matchMedia("(min-width: 768px)");
-  mediaQuery.addEventListener("change", function (e) {
-    if (e.matches) {
+
+  function syncViewport() {
+    if (mediaQuery.matches) {
       if (expandNav.classList.contains("is-open")) {
         isAnimating = false;
         fab.classList.remove("is-active");
@@ -163,14 +219,18 @@
 
         fab.setAttribute("aria-expanded", "false");
         fab.setAttribute("aria-label", "メニューを開く");
-        expandNav.setAttribute("aria-hidden", "true");
 
         document.body.style.overflow = "";
       }
       expandNav.removeAttribute("aria-hidden");
-    } else {
+    } else if (!expandNav.classList.contains("is-open")) {
       expandNav.setAttribute("aria-hidden", "true");
     }
-  });
+  }
+
+  mediaQuery.addEventListener("change", syncViewport);
+
+  syncViewport();
+  expandNav.setAttribute("data-hamburger-expand-corner-ready", "");
 })();
 /* snippet:end */

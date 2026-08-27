@@ -69,7 +69,7 @@ body {
   font-weight: 600;
 }
 
-.c-accordion[data-accordion-ready] .c-accordion__heading {
+.c-accordion[data-js-toggle-ready] .c-accordion__heading {
   padding: 0;
   font-size: inherit;
   font-weight: inherit;
@@ -139,7 +139,7 @@ body {
   background-color: var(--accordion-color-bg);
 }
 
-.js .c-accordion:not([data-accordion-ready]) .c-accordion__body {
+.js .c-accordion[data-js-toggle]:not([data-js-toggle-ready]) .c-accordion__body {
   display: none;
 }
 

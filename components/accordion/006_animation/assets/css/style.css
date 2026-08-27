@@ -72,7 +72,7 @@ body {
   font-weight: 600;
 }
 
-.c-accordion[data-accordion-ready] .c-accordion__heading {
+.c-accordion[data-animation-ready] .c-accordion__heading {
   padding: 0;
   font-size: inherit;
   font-weight: inherit;
@@ -139,45 +139,51 @@ body {
 }
 
 .c-accordion__body {
+  background-color: var(--accordion-color-bg);
+}
+
+.c-accordion[data-animation] .c-accordion__body {
   display: grid;
   grid-template-rows: 1fr;
-  background-color: var(--accordion-color-bg);
   transition: grid-template-rows var(--accordion-anim-duration) var(--accordion-anim-easing);
 }
 
-.c-accordion__body[hidden] {
+.c-accordion[data-animation] .c-accordion__body[hidden] {
   display: none;
 }
 
-.c-accordion[data-accordion-ready] .c-accordion__body {
+.c-accordion[data-animation-ready] .c-accordion__body {
   grid-template-rows: 0fr;
 }
 
-.js .c-accordion:not([data-accordion-ready]) .c-accordion__body {
+.js .c-accordion[data-animation]:not([data-animation-ready]) .c-accordion__body {
   display: none;
 }
 
-.c-accordion[data-accordion-ready] .c-accordion__item:has(.c-accordion__header[aria-expanded="true"]) > .c-accordion__body {
+.c-accordion[data-animation-ready] .c-accordion__item:has(.c-accordion__header[aria-expanded="true"]) > .c-accordion__body {
   grid-template-rows: 1fr;
 }
 
 .c-accordion__content {
-  min-height: 0;
-  overflow: hidden;
   padding: var(--accordion-body-padding-y) var(--accordion-body-padding-x);
   color: var(--accordion-color-text);
   border-top: 1px solid var(--accordion-color-border);
+}
+
+.c-accordion[data-animation] .c-accordion__content {
+  min-height: 0;
+  overflow: hidden;
   transition:
     padding-block var(--accordion-anim-duration) var(--accordion-anim-easing),
     border-top-width var(--accordion-anim-duration) var(--accordion-anim-easing);
 }
 
-.c-accordion[data-accordion-ready] .c-accordion__content {
+.c-accordion[data-animation-ready] .c-accordion__content {
   padding-block: 0;
   border-top-width: 0;
 }
 
-.c-accordion[data-accordion-ready] .c-accordion__item:has(.c-accordion__header[aria-expanded="true"]) > .c-accordion__body .c-accordion__content {
+.c-accordion[data-animation-ready] .c-accordion__item:has(.c-accordion__header[aria-expanded="true"]) > .c-accordion__body .c-accordion__content {
   padding-block: var(--accordion-body-padding-y);
   border-top-width: 1px;
 }
@@ -202,7 +208,9 @@ body {
   .c-accordion__header,
   .c-accordion__icon,
   .c-accordion__body,
-  .c-accordion__content {
+  .c-accordion__content,
+  .c-accordion[data-animation] .c-accordion__body,
+  .c-accordion[data-animation] .c-accordion__content {
     transition: none;
   }
 }

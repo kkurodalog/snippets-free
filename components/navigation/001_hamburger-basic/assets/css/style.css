@@ -3,8 +3,14 @@
  * ナビゲーションをヘッダーの下に開く、いちばん短い形。
  *
  * 決めごと
+ * - 素の状態（JS なし）では、ナビのリンクがヘッダーの中にそのまま並ぶ。
+ *   リンクが読めない状態を作らないため、隠す指定は JS が動く環境だけに限定する
+ * - 隠し方のスコープは2つに分ける。
+ *   .js                       … 描画前に効かせたいもの（ちらつき防止）
+ *   .c-header[data-hamburger-basic-ready] … JS が仕掛け終えた印。閉じた見せ方はこちらに置く
+ *   後者にしておくと、インラインスクリプトだけが失われた環境でも
+ *   「閉じたと伝わるのに画面には出たまま」が起きない
  * - 768px 以上ではハンバーガーを隠し、ナビを横並びに戻す
- * - 閉じている間は display: none。開くと is-open で表示に切り替わる
  * - ハンバーガーの3本線は、1本目と3本目を回転、2本目を透明にして × にする
  *
  * このファイルの前半はデモページの体裁である。貼って使う範囲はマーカーの内側だけ。
@@ -67,28 +73,32 @@
 }
 
 .c-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-header);
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.c-header[data-hamburger-basic-ready] {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
 }
 
 .c-header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   max-width: calc(1200px + 20px * 2);
   margin-inline: auto;
   padding-inline: 20px;
-  height: var(--header-height-sp);
+  min-height: var(--header-height-sp);
 }
 
 @media (min-width: 768px) {
   .c-header__inner {
     padding-inline: 40px;
-    height: var(--header-height-pc);
+    min-height: var(--header-height-pc);
   }
 }
 
@@ -154,18 +164,33 @@
 }
 
 .c-nav {
+  width: 100%;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
+.js .c-header:not([data-hamburger-basic-ready]) .c-nav {
+  display: none;
+}
+
+.c-header[data-hamburger-basic-ready] .c-nav {
   display: none;
   position: absolute;
   top: var(--header-height-sp);
   left: 0;
   width: 100%;
-  background-color: #fff;
+  border-top: none;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
 }
 
+.c-header[data-hamburger-basic-ready] .c-nav.is-open {
+  display: block;
+}
+
 @media (min-width: 768px) {
-  .c-nav {
+  .c-nav,
+  .c-header[data-hamburger-basic-ready] .c-nav {
     display: block;
     position: static;
     width: auto;
@@ -173,10 +198,6 @@
     border: none;
     box-shadow: none;
   }
-}
-
-.c-nav.is-open {
-  display: block;
 }
 
 .c-nav__list {
@@ -227,6 +248,13 @@
   .c-nav__link {
     padding: 0;
     font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-header,
+  .c-header * {
+    transition: none;
   }
 }
 /* snippet:end */
