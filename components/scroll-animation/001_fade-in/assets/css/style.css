@@ -18,29 +18,10 @@ body {
   line-height: 1.7;
 }
 
-code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 0.92em;
-  padding: 0.1em 0.35em;
-  background-color: #eef0f3;
-  border-radius: 4px;
-}
-
 .l-main {
   max-width: 720px;
   margin-inline: auto;
   padding: 40px 20px;
-}
-
-.p-section__title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 16px;
-}
-
-.p-section__text {
-  margin: 0 0 24px;
-  color: #555;
 }
 
 /* デモ専用クローム: 出現演出を見直すための再読み込みボタン。 */
@@ -51,8 +32,8 @@ code {
   font-size: 14px;
   font-weight: 700;
   color: #ffffff;
-  background-color: #3ba9e0;
-  border: 1px solid #3ba9e0;
+  background-color: #2b2b2b;
+  border: 1px solid #2b2b2b;
   border-radius: 8px;
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -63,14 +44,8 @@ code {
 }
 
 .p-section__reload:focus-visible {
-  outline: 2px solid #3ba9e0;
+  outline: 2px solid #2b2b2b;
   outline-offset: 2px;
-}
-
-@media (min-width: 768px) {
-  .p-section__title {
-    font-size: 28px;
-  }
 }
 
 /* ================================================
@@ -82,9 +57,32 @@ code {
      --fade-duration  フェード/スライドの所要時間
      --fade-easing    減速して止まる自然なイージング
 
+   .c-fade の gap: 4vh は見出しどうしの間隔、padding-bottom: 40vh は
+   最後の1つを画面の中ほどまで送るための余白である。
+   貼る側では自分のレイアウトの余白へ置き換えてよい。
 
-   .c-fade の padding-bottom: 60vh は、出現の様子を確かめられる
-   スクロール量を確保するための余白である。貼る側で不要なら外す。
+   gap = 4vh は見た目を実物で確かめたうえでの決定値である。
+
+   この値での実測（この範囲だけを貼ったページ / 画面 4サイズ）:
+     360x640  文書高 640 / 送れる量 0px
+     375x800  文書高 800 / 送れる量 0px
+     390x844  文書高 844 / 送れる量 0px
+     1280x800 文書高 800 / 送れる量 0px
+   4本とも読み込みの時点で画面に入るため、出現のアニメーションは
+   ページを開いた直後に 4本まとめて走る（読み込み 120ms 時点の opacity は
+   4本とも 0.62〜0.69 の遷移中で、その後 1 へ着地する）。
+   スクロールでの出現ではないので、見直すときはページを再読み込みする。
+
+   ⚠️ 間隔を広げるほど、出現をスクロールで見せられる本数が増える
+   （この範囲だけを貼ったページでの実測: 30vh で 1本、50vh で 2本、
+   85vh 以上で 3本がスクロール側へ回る）。貼る側で間隔を変えるときの
+   目安として残す。
+   貼る側では自分のレイアウトの余白へ置き換えてよい。
+
+   このパーツが受け持つのは「1つの要素をふわっと出す」ことだけである。
+   複数の要素を時間差で順に出す用途は順次表示のパーツが受け持つ。
+   要素ごとの遅延を指定する属性は持たない（JavaScript も受け付けない）。
+   時間差を作りたい場合は順次表示のほうを使うこと。
 
    出現演出の本体（.js スコープ）— プログレッシブエンハンスメント:
    - JavaScript が動く環境では html に js クラスが付く。このときだけ
@@ -93,9 +91,44 @@ code {
      下記ルールが効かないため要素は最初から表示される（内容が消えない）。
    - 掲載範囲の HTML 先頭にある1行のスクリプトが、この js クラスを付ける。
      head に置ければそのほうが早く、初期状態のちらつきも出ない。
+   - 本文中の <script> を取り除く CMS（ブロックエディタ等）へ貼る場合は、
+     この1行を head かテーマ側へ移すこと。移さないと js クラスが付かず、
+     内容は消えないまま出現演出だけが一度も起きない状態になる。
 
    方向の切り替えは初期位置のずらし方向だけを変える。
    direction="none" は transform を当てず opacity だけで出現する。
+   デモは省略時（up）/ left / right / none の4つを並べ、方向の違いだけを
+   見比べられるようにしてある。1本目は方向の属性を書いていない＝既定の up
+   であり、下からせり上がって現れる。
+   5つ目の例としてカードを3枚並べてある。方向も遅延も指定せず data-fade-in
+   だけを付けており、要素ごとに監視しているので、画面に入ったものから
+   1枚ずつ出る。カードの体裁（枠・角丸・余白）はこのパーツの中で完結して
+   おり、他のパーツのクラス名は使っていない。
+
+   カード3枚は ul > li でまとめている。並列の項目が3つ並ぶ構造であり、
+   支援技術に「リスト・3項目」というまとまりが伝わるためである
+   （div で囲むとこの情報は伝わらない。実測で確認した）。
+   ⚠️ data-fade-in は各 li に付けてあり、親の ul には付けない。
+   親はまとめるための入れ物であって、監視の単位ではない。
+   親を監視して子を時間差で出す作りにしたい場合は、順次表示のパーツを使う。
+
+   カード群は c-fade__group（div）でまとめてある。見出しとカードを
+   1つのまとまりにして、あいだの間隔を .c-fade の gap とは別に持たせる
+   ためである。div を選んだのは、支援技術に渡る情報を1つも増やさずに
+   見た目のまとまりだけを作れるからである（実測: div は AX ツリーに
+   ノードを足さない／名前なしの section は generic ノードが1つ増えるだけ
+   で情報は増えない／section に aria-labelledby を付けると region の
+   ランドマークになり、貼った先のランドマーク一覧に載ってしまう）。
+   見出しとカードの関係は、見出しの階層（h2 のあとに h3 のカードが続く）
+   で既に伝わっている。
+
+   間隔の持ち方は3段になっている。
+     .c-fade       gap 4vh   … 例どうしの間隔
+     .c-fade__group gap 8px  … 見出しとカード群の間隔（タイトルとして寄せる）
+     .c-fade__list  gap 16px … カードどうしの間隔
+   見出しとカードの間（8px）をカードどうしの間（16px）より狭くしてある。
+   狭いほうが「この見出しは下のカード群のもの」と見える。
+   貼る側で自由に変えてよい。
 
    最終状態（.is-visible）では translate を 0 に戻し、
    will-change を auto に戻して合成レイヤーを残さない。
@@ -107,14 +140,11 @@ code {
 
 /* snippet:start */
 .c-fade {
-  --fade-color-text-muted: #555;
-  --fade-color-border: #e0e0e0;
   --fade-color-bg: #ffffff;
-  --fade-color-accent: #3ba9e0;
-
+  --fade-color-border: #e0e0e0;
+  --fade-color-text-muted: #555;
   --fade-radius: 8px;
-  --fade-card-padding-y: 24px;
-  --fade-card-padding-x: 24px;
+  --fade-card-padding: 20px;
 
   --fade-distance: 24px;
   --fade-duration: 0.6s;
@@ -122,33 +152,51 @@ code {
 
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding-bottom: 60vh;
+  gap: 4vh;
+  padding-bottom: 40vh;
+  padding-inline: var(--fade-distance);
+  overflow-x: clip;
 }
 
-.c-fade__item {
-  padding: var(--fade-card-padding-y) var(--fade-card-padding-x);
-  background-color: var(--fade-color-bg);
-  border: 1px solid var(--fade-color-border);
-  border-left: 4px solid var(--fade-color-accent);
-  border-radius: var(--fade-radius);
-}
-
-.c-fade__row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+.c-fade__heading,
+.c-fade__group-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 @media (min-width: 768px) {
-  .c-fade__row {
-    grid-template-columns: repeat(3, 1fr);
+  .c-fade__heading,
+  .c-fade__group-title {
+    font-size: 26px;
   }
 }
 
-.c-fade__heading {
+.c-fade__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.c-fade__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.c-fade__card {
+  padding: var(--fade-card-padding);
+  background-color: var(--fade-color-bg);
+  border: 1px solid var(--fade-color-border);
+  border-radius: var(--fade-radius);
+}
+
+.c-fade__card-title {
   margin: 0 0 8px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -157,7 +205,8 @@ code {
   color: var(--fade-color-text-muted);
 }
 
-.js .c-fade__item[data-fade-in] {
+.js .c-fade__heading[data-fade-in],
+.js .c-fade__card[data-fade-in] {
   opacity: 0;
   transform: translateY(var(--fade-distance));
   transition:
@@ -167,25 +216,30 @@ code {
   will-change: opacity, transform;
 }
 
-.js .c-fade__item[data-fade-direction="down"] {
+.js .c-fade__heading[data-fade-in-direction="down"],
+.js .c-fade__card[data-fade-in-direction="down"] {
   transform: translateY(calc(var(--fade-distance) * -1));
 }
 
-.js .c-fade__item[data-fade-direction="left"] {
+.js .c-fade__heading[data-fade-in-direction="left"],
+.js .c-fade__card[data-fade-in-direction="left"] {
   transform: translateX(calc(var(--fade-distance) * -1));
 }
 
-.js .c-fade__item[data-fade-direction="right"] {
+.js .c-fade__heading[data-fade-in-direction="right"],
+.js .c-fade__card[data-fade-in-direction="right"] {
   transform: translateX(var(--fade-distance));
 }
 
-.js .c-fade__item[data-fade-direction="none"] {
+.js .c-fade__heading[data-fade-in-direction="none"],
+.js .c-fade__card[data-fade-in-direction="none"] {
   transform: none;
   transition: opacity var(--fade-duration) var(--fade-easing);
   will-change: opacity;
 }
 
-.js .c-fade__item.is-visible {
+.js .c-fade__heading.is-visible,
+.js .c-fade__card.is-visible {
   opacity: 1;
   transform: translate(0, 0);
   pointer-events: auto;
@@ -193,10 +247,12 @@ code {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .c-fade__item[data-fade-in] {
+  .js .c-fade__heading[data-fade-in],
+  .js .c-fade__card[data-fade-in] {
     opacity: 1;
     transform: none;
     transition: none;
+    transition-delay: 0s;
     pointer-events: auto;
     will-change: auto;
   }

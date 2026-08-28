@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>002_stagger</title>
+    <title>順番に遅れて出る｜スクロール演出</title>
 
     <!--
       JS が読み込まれる前に html の class を no-js → js へ書き換える。
@@ -22,8 +22,6 @@
   <body>
     <main class="l-main">
       <section class="p-section">
-        <h1 class="p-section__title">002_stagger</h1>
-
         <!-- デモ専用クローム: 出現演出を見直すための再読み込みボタン（スニペット範囲外） -->
         <button
           type="button"
@@ -33,15 +31,6 @@
           ページを再読み込み
         </button>
 
-        <p class="p-section__text">
-          フェードインの応用で、グループ内の子要素を <strong>少しずつ遅らせて順番に</strong>
-          出現させる実装です。各要素に遅延値を手書きする代わりに、
-          <strong>親要素に属性を付けるだけ</strong>で、子要素の遅延を JS が連番計算して自動配分します。
-          グループ全体がビューポートに入ったタイミングを検知し、子を 0ms・step・step×2…
-          と時間差で表示します。一度表示したら監視は解除します（ワンショット表示）。
-          OS の「視差効果を減らす」設定が有効な場合は、アニメーションを無効化して即時表示します。
-        </p>
-
         <!-- snippet:start -->
         <script>
           document.documentElement.classList.remove("no-js");
@@ -49,101 +38,85 @@
         </script>
 
         <div class="c-stagger">
-          <h2 class="c-stagger__group-title">既定ステップで順番に出るカード一覧</h2>
+          <h2 class="c-stagger__group-title">縦に並べて上から順に出す</h2>
           <ul class="c-stagger__list" data-stagger>
-            <li class="c-stagger__item" data-fade-in>
+            <li class="c-stagger__item" data-stagger-in>
               <span class="c-stagger__num">1</span>
-              <p class="c-stagger__text">
-                親の <code>data-stagger</code> だけで、配下の子が順番に出現します。
-                この 1 番目は遅延なし（0ms）で表示されます。
-              </p>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </li>
-            <li class="c-stagger__item" data-fade-in>
+            <li class="c-stagger__item" data-stagger-in>
               <span class="c-stagger__num">2</span>
-              <p class="c-stagger__text">
-                2 番目は既定ステップ分（120ms）遅れて出現します。
-                子に遅延値を書かなくても、JS が連番で配ります。
-              </p>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </li>
-            <li class="c-stagger__item" data-fade-in>
+            <li class="c-stagger__item" data-stagger-in>
               <span class="c-stagger__num">3</span>
-              <p class="c-stagger__text">
-                3 番目はさらに遅れて（240ms）出現。要素を増やすだけで
-                連続感のある演出になります。
-              </p>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </li>
-            <li class="c-stagger__item" data-fade-in>
+            <li class="c-stagger__item" data-stagger-in>
               <span class="c-stagger__num">4</span>
-              <p class="c-stagger__text">
-                4 番目（360ms）。遅延の増分は <code>data-stagger-step</code> で
-                まとめて調整でき、子側の修正は不要です。
-              </p>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </li>
           </ul>
 
-          <h2 class="c-stagger__group-title">ステップを広げて左から流すリスト</h2>
+          <h2 class="c-stagger__group-title">左からスライドさせて順に出す</h2>
           <ul
             class="c-stagger__list"
             data-stagger
             data-stagger-step="250"
-            data-fade-direction="left"
+            data-stagger-direction="left"
           >
-            <li class="c-stagger__item" data-fade-in>
+            <li class="c-stagger__item" data-stagger-in>
               <span class="c-stagger__num">1</span>
-              <p class="c-stagger__text">
-                <code>data-stagger-step="250"</code> で遅延差を広げると、
-                1 枚ずつ流れるような「間（ま）」のある演出になります。
-              </p>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </li>
-            <li class="c-stagger__item" data-fade-in>
+            <li class="c-stagger__item" data-stagger-in>
               <span class="c-stagger__num">2</span>
-              <p class="c-stagger__text">
-                方向は親の <code>data-fade-direction="left"</code> で
-                グループ全体にまとめて指定。左からのスライドインに切り替わります。
-              </p>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </li>
-            <li class="c-stagger__item" data-fade-in>
+            <li class="c-stagger__item" data-stagger-in>
               <span class="c-stagger__num">3</span>
-              <p class="c-stagger__text">
-                ステップと方向はグループ単位で変えられるため、同じ仕組みで
-                テンポも見た目も作り分けられます。
-              </p>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </li>
           </ul>
 
-          <h2 class="c-stagger__group-title">グリッドで順次フェードするカード</h2>
+          <h2 class="c-stagger__group-title">格子に並べて順に出す</h2>
           <div
             class="c-stagger__grid"
             data-stagger
             data-stagger-step="90"
-            data-fade-direction="none"
+            data-stagger-direction="none"
           >
-            <article class="c-stagger__card" data-fade-in>
-              <h3 class="c-stagger__card-title">カード A</h3>
-              <p class="c-stagger__text">
-                <code>data-fade-direction="none"</code> は位置を動かさず
-                <code>opacity</code> だけで現れる純フェード。順次の「間」だけで魅せます。
-              </p>
+            <article class="c-stagger__card" data-stagger-in>
+              <h3 class="c-stagger__card-title">見出しが入ります</h3>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </article>
-            <article class="c-stagger__card" data-fade-in>
-              <h3 class="c-stagger__card-title">カード B</h3>
-              <p class="c-stagger__text">
-                グリッドでも仕組みは同じ。DOM の並び順に沿って 0 / 90 / 180… ms と
-                遅延が増えていきます。
-              </p>
+            <article class="c-stagger__card" data-stagger-in>
+              <h3 class="c-stagger__card-title">見出しが入ります</h3>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </article>
-            <article class="c-stagger__card" data-fade-in>
-              <h3 class="c-stagger__card-title">カード C</h3>
-              <p class="c-stagger__text">
-                ステップ 90ms と短めにすると、テンポよく畳みかけるように出現します。
-              </p>
+            <article class="c-stagger__card" data-stagger-in>
+              <h3 class="c-stagger__card-title">見出しが入ります</h3>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </article>
-            <article class="c-stagger__card" data-fade-in>
-              <h3 class="c-stagger__card-title">カード D</h3>
-              <p class="c-stagger__text">
-                一度表示したら監視を解除するため、上下に何度スクロールしても
-                再アニメーションはしません（ワンショット表示）。
-              </p>
+            <article class="c-stagger__card" data-stagger-in>
+              <h3 class="c-stagger__card-title">見出しが入ります</h3>
+              <p class="c-stagger__text">テキストが入ります。</p>
+            </article>
+          </div>
+
+          <h2 class="c-stagger__group-title">横に並べて左から順に出す</h2>
+          <div class="c-stagger__row" data-stagger data-stagger-step="140">
+            <article class="c-stagger__card" data-stagger-in>
+              <h3 class="c-stagger__card-title">見出しが入ります</h3>
+              <p class="c-stagger__text">テキストが入ります。</p>
+            </article>
+            <article class="c-stagger__card" data-stagger-in>
+              <h3 class="c-stagger__card-title">見出しが入ります</h3>
+              <p class="c-stagger__text">テキストが入ります。</p>
+            </article>
+            <article class="c-stagger__card" data-stagger-in>
+              <h3 class="c-stagger__card-title">見出しが入ります</h3>
+              <p class="c-stagger__text">テキストが入ります。</p>
             </article>
           </div>
         </div>

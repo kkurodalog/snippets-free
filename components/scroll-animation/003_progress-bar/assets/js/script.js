@@ -4,19 +4,21 @@
  * バーを左から右へ伸ばすスクロール進捗バー。
  *
  * 設計方針:
- * - 第一実装は CSS の animation-timeline: scroll()。対応ブラウザでは
- *   この JavaScript は何もしない（CSS だけでスクロールに連動する）。
- * - この JavaScript は animation-timeline 非対応ブラウザ（Safari / Firefox 等）
- *   向けの「フォールバック」専任である。読了率を計算し、CSS カスタム
- *   プロパティ --progress-value（0〜1）へ書き込む。CSS 側がそれを
- *   scaleX に反映する。
+ * - 見た目の第一実装は CSS の animation-timeline: scroll()。対応ブラウザでは
+ *   バーの動きを CSS だけで作る（JavaScript は transform に触らない）。
+ * - この JavaScript は2つの仕事を持つ。(1) animation-timeline 非対応ブラウザ
+ *   （Safari / Firefox 等）向けのフォールバックとして、読了率を計算し CSS
+ *   カスタムプロパティ --progress-value（0〜1）へ書き込む。CSS 側がそれを
+ *   scaleX に反映する。(2) 対応・非対応にかかわらず aria-valuenow を更新する。
  *
  * 二重駆動の防止:
  * - CSS.supports('animation-timeline', 'scroll()') が true の環境では、
- *   CSS が進捗を担うため scroll リスナーを一切張らない。
+ *   CSS が進捗を担うため --progress-value を書き込まない。
  *   判定キーは CSS の @supports と完全に一致させる。片方だけ変えると
  *   CSS と JavaScript が同時にバーを動かす二重駆動が起きる。
  * - CSS.supports 自体が無い極めて古い環境では JS フォールバックへ進む。
+ * - scroll リスナー自体は両方の環境で張る。aria-valuenow はどちらの
+ *   経路でも更新しなければならないためである（下記アクセシビリティ）。
  *
  * 計算:
  * - 進捗率 = scrollTop / (scrollHeight - clientHeight)。
@@ -46,22 +48,23 @@
  * - prefers-reduced-motion: reduce のときは、CSS 側で補間 transition を切る。
  *   JavaScript は読了率の値を更新するだけである（追従はユーザー操作に直結
  *   する動きのため維持し、滑走するような余計な補間だけを止める）。
- * - aria-valuenow の更新は、この JS フォールバック経路でのみ行う。
+ * - role="progressbar" を名乗る以上、aria-valuenow は実際の読了率を返さ
+ *   なければならない（WCAG 4.1.2 Name, Role, Value）。CSS だけで動く環境
+ *   でも支援技術には値が要るため、aria-valuenow の更新は両方の経路で行う。
+ *   見た目を動かす --progress-value だけを、CSS が担う環境では書かない。
  */
 
 /* snippet:start */
 (function () {
   "use strict";
 
-  const progress = document.querySelector("[data-scroll-progress]");
+  const progress = document.querySelector("[data-progress-bar]");
   if (!progress) return;
 
   const cssDriven =
     typeof window.CSS !== "undefined" &&
     typeof window.CSS.supports === "function" &&
     window.CSS.supports("animation-timeline", "scroll()");
-
-  if (cssDriven) return;
 
   const root = document.documentElement;
 
@@ -82,7 +85,7 @@
 
   function update() {
     const ratio = getProgress();
-    progress.style.setProperty("--progress-value", String(ratio));
+    if (!cssDriven) progress.style.setProperty("--progress-value", String(ratio));
     progress.setAttribute("aria-valuenow", String(Math.round(ratio * 100)));
     ticking = false;
   }

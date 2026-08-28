@@ -18,29 +18,10 @@ body {
   line-height: 1.7;
 }
 
-code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 0.92em;
-  padding: 0.1em 0.35em;
-  background-color: #eef0f3;
-  border-radius: 4px;
-}
-
 .l-main {
   max-width: 720px;
   margin-inline: auto;
   padding: 40px 20px;
-}
-
-.p-section__title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 16px;
-}
-
-.p-section__text {
-  margin: 0 0 24px;
-  color: #555;
 }
 
 /* デモ専用クローム: 出現演出を見直すための再読み込みボタン。 */
@@ -51,8 +32,8 @@ code {
   font-size: 14px;
   font-weight: 700;
   color: #ffffff;
-  background-color: #1fbfa8;
-  border: 1px solid #1fbfa8;
+  background-color: #2b2b2b;
+  border: 1px solid #2b2b2b;
   border-radius: 8px;
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -63,14 +44,8 @@ code {
 }
 
 .p-section__reload:focus-visible {
-  outline: 2px solid #1fbfa8;
+  outline: 2px solid #2b2b2b;
   outline-offset: 2px;
-}
-
-@media (min-width: 768px) {
-  .p-section__title {
-    font-size: 28px;
-  }
 }
 
 /* ================================================
@@ -78,11 +53,10 @@ code {
 
    トークンはパーツのルート要素 .c-stagger に置く。
    :root に置くと、貼った先の最上位を書き換えてしまう。
-     --fade-distance  初期位置のずらし量（スライド距離）
-     --fade-duration  フェード/スライドの所要時間
-     --fade-easing    減速して止まる自然なイージング
+     --stagger-distance  初期位置のずらし量（スライド距離）
+     --stagger-duration  フェード/スライドの所要時間
+     --stagger-easing    減速して止まる自然なイージング
    順次表示の遅延差は HTML 側の属性で渡すため CSS には現れない。
-
 
    .c-stagger の padding-bottom: 60vh は、出現の様子を確かめられる
    スクロール量を確保するための余白である。貼る側で不要なら外す。
@@ -94,39 +68,54 @@ code {
      下記ルールが効かないため要素は最初から表示される（内容が消えない）。
    - 掲載範囲の HTML 先頭にある1行のスクリプトが、この js クラスを付ける。
      head に置ければそのほうが早く、初期状態のちらつきも出ない。
+   - 本文中の <script> を取り除く CMS（ブロックエディタ等）へ貼る場合は、
+     この1行を head かテーマ側へ移すこと。移さないと js クラスが付かず、
+     内容は消えないまま出現演出だけが一度も起きない状態になる。
 
    方向の指定は、親グループ・子要素のどちらに付いても効くよう
    2段のセレクタで書く。要素「自身」に方向を付けるパターンは
-   出現対象（data-fade-in）であるときだけに絞る。素の属性セレクタだと、
+   出現対象（data-stagger-in）であるときだけに絞る。素の属性セレクタだと、
    方向を親コンテナに付けた場合にその親自身までマッチする。親は出現対象
    ではない（is-visible が付かない）ため translate が戻らず、
    コンテナごと固定でずれる。
 
-   最終状態のセレクタは [data-fade-in].is-visible で要素フックを残し、
-   詳細度を (0,3,0) に保つ。方向の子孫セレクタ（.js [dir] [data-fade-in]
-   = 0,3,0）と同点になり、ソース順で後方の本ルールが勝つため、
-   left/right/down では translate(0,0) が、none では will-change: auto が
-   確実に最終勝ちする。
+   出現演出の規則はすべて .c-stagger の内側へ絞ってある。属性セレクタ
+   だけで書くと、同じページに貼った別のパーツの要素にも当たりうる。
+
+   グループの並べ方は3種類ある。縦のリスト（.c-stagger__list）、
+   折り返す格子（.c-stagger__grid）、横一列（.c-stagger__row）である。
+   どれも親に data-stagger を付けるだけで、子の遅延は JavaScript が
+   連番で配る。子に個別の遅延を書く必要はない。
+   .c-stagger__row の子は flex: 1 1 0 と min-width: 0 で等幅に潰れるため、
+   狭い画面でも横に並んだまま、はみ出しを作らない。
+
+   最終状態のセレクタは [data-stagger-in].is-visible で要素フックを残し、
+   詳細度を (0,4,0) に保つ。方向の子孫セレクタ（.js .c-stagger [dir]
+   [data-stagger-in] = 0,4,0）と同点になり、ソース順で後方の本ルールが
+   勝つため、left/right/down では translate(0,0) が、none では
+   will-change: auto が確実に最終勝ちする。
 
    prefers-reduced-motion: reduce では、フェードも順次の遅延も行わず
-   即時に最終状態（表示）で見せる。
+   即時に最終状態（表示）で見せる。打ち消しのセレクタは方向指定の規則と
+   同じ (0,4,0) の形まで並べる。低い詳細度で書くと、方向を指定した要素に
+   transition が残る。
    ================================================ */
 
 /* snippet:start */
 .c-stagger {
-  --fade-color-text: #2b2b2b;
-  --fade-color-text-muted: #555;
-  --fade-color-border: #e0e0e0;
-  --fade-color-bg: #ffffff;
-  --fade-color-accent: #1fbfa8;
+  --stagger-color-text: #2b2b2b;
+  --stagger-color-text-muted: #555;
+  --stagger-color-border: #e0e0e0;
+  --stagger-color-bg: #ffffff;
+  --stagger-color-accent: #2b2b2b;
 
-  --fade-radius: 8px;
-  --fade-card-padding-y: 20px;
-  --fade-card-padding-x: 20px;
+  --stagger-radius: 8px;
+  --stagger-card-padding-y: 20px;
+  --stagger-card-padding-x: 20px;
 
-  --fade-distance: 24px;
-  --fade-duration: 0.6s;
-  --fade-easing: cubic-bezier(0.16, 1, 0.3, 1);
+  --stagger-distance: 24px;
+  --stagger-duration: 0.6s;
+  --stagger-easing: cubic-bezier(0.16, 1, 0.3, 1);
 
   display: flex;
   flex-direction: column;
@@ -138,7 +127,7 @@ code {
   margin: 32px 0 4px;
   font-size: 16px;
   font-weight: 700;
-  color: var(--fade-color-text);
+  color: var(--stagger-color-text);
 }
 
 .c-stagger__group-title:first-child {
@@ -166,13 +155,22 @@ code {
   }
 }
 
+.c-stagger__row {
+  display: flex;
+  gap: 12px;
+}
+
+.c-stagger__row > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .c-stagger__item,
 .c-stagger__card {
-  padding: var(--fade-card-padding-y) var(--fade-card-padding-x);
-  background-color: var(--fade-color-bg);
-  border: 1px solid var(--fade-color-border);
-  border-left: 4px solid var(--fade-color-accent);
-  border-radius: var(--fade-radius);
+  padding: var(--stagger-card-padding-y) var(--stagger-card-padding-x);
+  background-color: var(--stagger-color-bg);
+  border: 1px solid var(--stagger-color-border);
+  border-radius: var(--stagger-radius);
 }
 
 .c-stagger__item {
@@ -190,8 +188,8 @@ code {
   justify-content: center;
   font-size: 14px;
   font-weight: 700;
-  color: var(--fade-color-bg);
-  background-color: var(--fade-color-accent);
+  color: var(--stagger-color-bg);
+  background-color: var(--stagger-color-accent);
   border-radius: 50%;
 }
 
@@ -203,42 +201,42 @@ code {
 
 .c-stagger__text {
   margin: 0;
-  color: var(--fade-color-text-muted);
+  color: var(--stagger-color-text-muted);
 }
 
-.js [data-fade-in] {
+.js .c-stagger [data-stagger-in] {
   opacity: 0;
-  transform: translateY(var(--fade-distance));
+  transform: translateY(var(--stagger-distance));
   transition:
-    opacity var(--fade-duration) var(--fade-easing),
-    transform var(--fade-duration) var(--fade-easing);
+    opacity var(--stagger-duration) var(--stagger-easing),
+    transform var(--stagger-duration) var(--stagger-easing);
   pointer-events: none;
   will-change: opacity, transform;
 }
 
-.js [data-fade-in][data-fade-direction="down"],
-.js [data-fade-direction="down"] [data-fade-in] {
-  transform: translateY(calc(var(--fade-distance) * -1));
+.js .c-stagger [data-stagger-in][data-stagger-direction="down"],
+.js .c-stagger [data-stagger-direction="down"] [data-stagger-in] {
+  transform: translateY(calc(var(--stagger-distance) * -1));
 }
 
-.js [data-fade-in][data-fade-direction="left"],
-.js [data-fade-direction="left"] [data-fade-in] {
-  transform: translateX(calc(var(--fade-distance) * -1));
+.js .c-stagger [data-stagger-in][data-stagger-direction="left"],
+.js .c-stagger [data-stagger-direction="left"] [data-stagger-in] {
+  transform: translateX(calc(var(--stagger-distance) * -1));
 }
 
-.js [data-fade-in][data-fade-direction="right"],
-.js [data-fade-direction="right"] [data-fade-in] {
-  transform: translateX(var(--fade-distance));
+.js .c-stagger [data-stagger-in][data-stagger-direction="right"],
+.js .c-stagger [data-stagger-direction="right"] [data-stagger-in] {
+  transform: translateX(var(--stagger-distance));
 }
 
-.js [data-fade-in][data-fade-direction="none"],
-.js [data-fade-direction="none"] [data-fade-in] {
+.js .c-stagger [data-stagger-in][data-stagger-direction="none"],
+.js .c-stagger [data-stagger-direction="none"] [data-stagger-in] {
   transform: none;
-  transition: opacity var(--fade-duration) var(--fade-easing);
+  transition: opacity var(--stagger-duration) var(--stagger-easing);
   will-change: opacity;
 }
 
-.js [data-fade-in].is-visible {
+.js .c-stagger [data-stagger-in].is-visible {
   opacity: 1;
   transform: translate(0, 0);
   pointer-events: auto;
@@ -246,10 +244,13 @@ code {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js [data-fade-in] {
+  .js .c-stagger [data-stagger-in],
+  .js .c-stagger [data-stagger-in][data-stagger-direction],
+  .js .c-stagger [data-stagger-direction] [data-stagger-in] {
     opacity: 1;
     transform: none;
     transition: none;
+    transition-delay: 0s;
     pointer-events: auto;
     will-change: auto;
   }

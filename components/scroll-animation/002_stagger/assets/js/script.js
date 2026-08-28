@@ -5,7 +5,7 @@
  *
  * 設計方針:
  * - 監視対象は data-stagger 属性を持つ「親（グループ）」要素。グループが
- *   ビューポートに入った瞬間を 1 回検知し、配下の出現対象（data-fade-in）へ
+ *   ビューポートに入った瞬間を 1 回検知し、配下の出現対象（data-stagger-in）へ
  *   遅延を連番で配って順番に表示する。
  * - 遅延は各子に手書きせず、親の data-stagger-step（ms）から index × step で
  *   自動計算する。子の枚数が変わっても、親のステップ値だけで調整できる。
@@ -20,8 +20,8 @@
  * - data-stagger        順次表示グループであることを示す親のフック属性。
  * - data-stagger-step   子と子の間の遅延差（ms）。省略・不正なら既定 120ms。
  *                       例 100 なら 1番目 0ms / 2番目 100ms / 3番目 200ms…。
- * - data-fade-in        出現対象であることを示す子のフック属性。
- * - data-fade-direction 出現方向（up / down / left / right / none）。省略時は up。
+ * - data-stagger-in        出現対象であることを示す子のフック属性。
+ * - data-stagger-direction 出現方向（up / down / left / right / none）。省略時は up。
  *                       親（data-stagger）に付けると配下の子へ既定方向として効く。
  *
  * 既定ステップ 120ms は、順次表示として「順番に出ている」と認識でき、
@@ -55,7 +55,7 @@
     const result = [];
     for (let i = 0; i < group.children.length; i++) {
       const child = group.children[i];
-      if (child.hasAttribute("data-fade-in")) {
+      if (child.hasAttribute("data-stagger-in")) {
         result.push(child);
       }
     }

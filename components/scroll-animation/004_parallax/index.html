@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>004_parallax</title>
+    <title>奥行きのある視差｜スクロール演出</title>
 
     <!--
       JS が読み込まれる前に html の class を no-js → js へ書き換える。
@@ -28,8 +28,6 @@
   <body>
     <main class="l-main">
       <section class="p-intro">
-        <h1 class="p-intro__title">004_parallax</h1>
-
         <!-- デモ専用クローム: 視差の動きを最初から見直すための再読み込みボタン（スニペット範囲外） -->
         <button
           type="button"
@@ -39,52 +37,28 @@
           ページを再読み込み
         </button>
 
-        <p class="p-intro__text">
-          背景レイヤーと前景コンテンツに<strong>スクロール速度の差</strong>を
-          つけることで、奥行き（視差）を感じさせる実装です。このデモでは
-          <strong>3 種類のパターン</strong>を並べています ——
-          <strong>(1) CSS の図形だけで作る視差</strong>、
-          <strong>(2) 1 枚の画像を背景に動かす視差</strong>、
-          <strong>(3) 複数レイヤーを別々の速度で動かす多層視差</strong>です。
-          対応ブラウザでは <code>animation-timeline: view()</code> によって、
-          各レイヤーがビューポートを通過する進捗に連動して動きます
-          （<strong>JS なし・CSS だけ</strong>）。この機能に未対応のブラウザ
-          では、<code>scroll</code> イベントと
-          <code>requestAnimationFrame</code> を使った軽量な JS が同じ
-          <code>translateY</code> を計算してレイヤーを動かします
-          （フォールバック）。OS の「視差効果を減らす」設定が有効な場合は、
-          視差を完全に無効化して通常の表示にします。下方向にスクロールして
-          奥行きを確認してください。
-        </p>
+        <h2 class="p-intro__title">
+          下にスクロールすると背景が前景より遅れて動く
+        </h2>
       </section>
 
       <!-- snippet:start -->
+      <h2 class="c-parallax__title">図形だけで作る視差</h2>
+
       <section class="c-parallax c-parallax--a">
         <div class="c-parallax__bg" data-parallax aria-hidden="true">
           <span class="c-parallax__shape c-parallax__shape--1"></span>
           <span class="c-parallax__shape c-parallax__shape--2"></span>
         </div>
-        <div class="c-parallax__fg">
-          <h2 class="c-parallax__heading">パターン 1: 図形だけの視差</h2>
-          <p class="c-parallax__lead">
-            画像を一切使わず、<strong>CSS のグラデーションと半透明の円</strong>
-            だけで作った視差です。背景の図形が前景の見出しよりゆっくり動くこと
-            で「奥」にあるように感じられます。素材がなくても視差は作れます。
-          </p>
-        </div>
       </section>
+
+      <h2 class="c-parallax__title">背景画像を動かす視差</h2>
 
       <section class="c-parallax c-parallax--b">
         <div class="c-parallax__bg" data-parallax aria-hidden="true"></div>
-        <div class="c-parallax__fg">
-          <h2 class="c-parallax__heading">パターン 2: 画像背景の視差</h2>
-          <p class="c-parallax__lead">
-            <strong>1 枚の画像</strong>を背景に敷き、それを丸ごと視差で
-            ゆっくり動かすパターンです。前景のテキストは通常の速度で流れる
-            ため、画像との間に視差が生まれます。
-          </p>
-        </div>
       </section>
+
+      <h2 class="c-parallax__title">複数の層を別々の速度で動かす視差</h2>
 
       <section class="c-parallax c-parallax--c">
         <div
@@ -100,26 +74,9 @@
           <span class="c-parallax__shape c-parallax__shape--4"></span>
           <span class="c-parallax__shape c-parallax__shape--5"></span>
         </div>
-        <div class="c-parallax__fg">
-          <h2 class="c-parallax__heading">パターン 3: 多層の視差</h2>
-          <p class="c-parallax__lead">
-            <strong>複数のレイヤーを違う速度で動かして</strong>奥行きを出す
-            パターンです。遠景の画像はゆっくり、手前の図形は速く動きます。
-            「遠いものほどゆっくり動く」ことで段階的な立体感が生まれます。
-          </p>
-        </div>
       </section>
       <!-- snippet:end -->
 
-      <section class="p-outro">
-        <p class="p-outro__text">
-          ここがページの終端です。図形だけの視差・画像背景の視差・多層の視差の
-          3 パターンで、背景が前景より遅れて動いていたことを確認できたでしょうか。
-          特に多層パターンでは、遠景の画像と手前の図形が別々の速度で動いて
-          いました。十分なスクロール量を確保するため、各セクションは縦に長く
-          取っています。
-        </p>
-      </section>
     </main>
 
     <script src="./assets/js/script.js" defer></script>

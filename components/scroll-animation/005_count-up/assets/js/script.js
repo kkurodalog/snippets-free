@@ -20,11 +20,11 @@
  *
  * 属性:
  * - data-count-up       監視対象であることを示すフック属性。
- * - data-count-to       目標値（必須）。0 以上の有限数を指定する。
- * - data-count-duration カウント時間（ms）。省略・不正なら既定 2000ms。
- * - data-count-suffix   接尾辞（+ / % / 人 / 件 など）。省略可。
- * - data-count-decimals 小数桁数。省略・不正なら 0。
- * - data-count-easing   "linear" で等速に切り替え可。省略時は easeOutQuad。
+ * - data-count-up-to       目標値（必須）。0 以上の有限数を指定する。
+ * - data-count-up-duration カウント時間（ms）。省略・不正なら既定 2000ms。
+ * - data-count-up-suffix   接尾辞（+ / % / 人 / 件 など）。省略可。
+ * - data-count-up-decimals 小数桁数。省略・不正なら 0。
+ * - data-count-up-easing   "linear" で等速に切り替え可。省略時は easeOutQuad。
  *
  * 観測オプション:
  * - threshold 0.15 は、要素の 15% が画面に入った時点で発火する値である。
@@ -68,23 +68,23 @@
   }
 
   function readConfig(el) {
-    const to = Number(el.dataset.countTo);
+    const to = Number(el.dataset.countUpTo);
     if (!(Number.isFinite(to) && to >= 0)) return null;
 
-    const rawDuration = Number(el.dataset.countDuration);
+    const rawDuration = Number(el.dataset.countUpDuration);
     const duration =
       Number.isFinite(rawDuration) && rawDuration >= 0
         ? rawDuration
         : DEFAULT_DURATION;
 
-    const rawDecimals = Number(el.dataset.countDecimals);
+    const rawDecimals = Number(el.dataset.countUpDecimals);
     const decimals =
       Number.isFinite(rawDecimals) && rawDecimals >= 0
         ? Math.floor(rawDecimals)
         : 0;
 
-    const suffix = el.dataset.countSuffix || "";
-    const linear = el.dataset.countEasing === "linear";
+    const suffix = el.dataset.countUpSuffix || "";
+    const linear = el.dataset.countUpEasing === "linear";
 
     return { to: to, duration: duration, suffix: suffix, decimals: decimals, linear: linear };
   }

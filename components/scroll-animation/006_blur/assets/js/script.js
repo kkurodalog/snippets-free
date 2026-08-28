@@ -51,7 +51,7 @@
 (function () {
   "use strict";
 
-  const overlay = document.querySelector("[data-scroll-blur]");
+  const overlay = document.querySelector("[data-blur]");
   if (!overlay) return;
 
   const reduceMotion =

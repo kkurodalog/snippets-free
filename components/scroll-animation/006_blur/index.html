@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>006_blur</title>
+    <title>スクロールでぼかす｜スクロール演出</title>
 
     <!--
       JS が読み込まれる前に html の class を no-js → js へ書き換える。
@@ -29,8 +29,6 @@
   <body>
     <main class="l-main">
       <section class="p-intro">
-        <h1 class="p-intro__title">006_blur</h1>
-
         <!-- デモ専用クローム: ぼかしの動きを最初から見直すための再読み込みボタン（スニペット範囲外） -->
         <button
           type="button"
@@ -40,28 +38,27 @@
           ページを再読み込み
         </button>
 
-        <p class="p-intro__text">
-          画面に固定した背景画像が、<strong>スクロール量に連動して
-          徐々にぼけていく</strong>実装です。
-        </p>
+        <h2 class="p-intro__title">
+          下にスクロールすると背景が少しずつぼける
+        </h2>
       </section>
 
       <!-- snippet:start -->
       <section class="c-blur">
         <div class="c-blur__bg" aria-hidden="true"></div>
-        <div class="c-blur__overlay" data-scroll-blur aria-hidden="true"></div>
+        <div class="c-blur__overlay" data-blur aria-hidden="true"></div>
       </section>
       <!-- snippet:end -->
 
       <!--
-        第2セクション: ビューポート進入でフェードインする見出し。
-        背景がぼけきった先に現れる見せ場。出現演出は別系統の
-        data-fade-in / .is-visible で制御する（ぼかしとは独立）。
+        第2セクション（デモ用 / スニペット範囲外）: ビューポート進入で
+        フェードインする見出し。背景がぼけきった先に現れる見せ場。
+        出現演出はぼかしとは別系統の data-fade-in / .is-visible で制御する。
       -->
       <section class="p-reveal">
         <hgroup class="p-reveal__group">
-          <h2 class="p-reveal__title" data-fade-in>背景をぼかすスクロール演出</h2>
-          <p class="p-reveal__sub" data-fade-in>Scroll blur effect</p>
+          <h2 class="p-reveal__title" data-fade-in>タイトル</h2>
+          <p class="p-reveal__sub" data-fade-in>サブタイトル</p>
         </hgroup>
       </section>
     </main>
